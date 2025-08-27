@@ -50,8 +50,8 @@ body {
 
 .avatar {
     position: relative;
-    width: 2rem;
-    height: 2rem;
+    width: 32px;
+    height: 32px;
 }
 
 .avatar-img {
@@ -75,6 +75,7 @@ body {
     justify-content: center;
     font-weight: 600;
     font-size: 0.875rem;
+    opacity: 0;
 }
 
 .name {

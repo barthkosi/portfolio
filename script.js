@@ -40,16 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add click handler for CTA button
-    const ctaButton = document.querySelector('.cta-button');
-    if (ctaButton) {
-        ctaButton.addEventListener('click', function() {
-            // You can add your booking logic here
-            // For example, open a modal, redirect to a booking page, etc.
-            alert('Thank you for your interest! This would open your booking system.');
-        });
-    }
-
     // Add scroll-based animations
     const observerOptions = {
         threshold: 0.1,
