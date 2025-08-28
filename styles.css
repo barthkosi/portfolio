@@ -193,6 +193,8 @@ body {
     border-radius: 1rem;
     background-color: #1a1a1a;
     transition: opacity 0.3s ease;
+    vertical-align: top;
+    display: block;
 }
 
 .portfolio-image[loading="lazy"] {
