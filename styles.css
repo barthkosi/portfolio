@@ -204,6 +204,16 @@ body {
     height: auto;
     object-fit: contain;
     border-radius: 1rem;
+    background-color: #1a1a1a;
+    transition: opacity 0.3s ease;
+}
+
+.portfolio-image[loading="lazy"] {
+    opacity: 0;
+}
+
+.portfolio-image[loading="lazy"].loaded {
+    opacity: 1;
 }
 
 /* Responsive design */

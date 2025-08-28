@@ -15,30 +15,33 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add loading animation for portfolio images
+    // Add loading animation for portfolio images with error handling
     const portfolioImages = document.querySelectorAll('.portfolio-image');
     portfolioImages.forEach(img => {
+        // Handle successful load
         img.addEventListener('load', function() {
+            this.classList.add('loaded');
             this.style.opacity = '1';
         });
         
-        // Set initial opacity for smooth loading
+        // Handle load errors
+        img.addEventListener('error', function() {
+            console.warn('Failed to load image:', this.src);
+            // Retry loading after a short delay
+            setTimeout(() => {
+                const originalSrc = this.src;
+                this.src = '';
+                this.src = originalSrc;
+            }, 1000);
+        });
+        
+        // Set initial state
         img.style.opacity = '0';
         img.style.transition = 'opacity 0.3s ease';
     });
 
-    // Add hover effects for portfolio items
+    // Portfolio items without hover effects
     const portfolioItems = document.querySelectorAll('.portfolio-item');
-    portfolioItems.forEach(item => {
-        item.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.02)';
-            this.style.transition = 'transform 0.2s ease';
-        });
-        
-        item.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-        });
-    });
 
     // Add scroll-based animations
     const observerOptions = {
