@@ -3,24 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>barthkosi</title>
-    <meta name="description" content="Design for the Soul of Your Startup">
+    <title>barthkosi - Design for the Soul of Your Startup</title>
+    <meta name="description" content="Design for the Soul of Your Startup - Portfolio of barthkosi">
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://res.cloudinary.com/barthkosi/image/upload/c_scale,w_32,h_32/v1756581450/Favicon_tryzqp.png">
     
     <!-- Open Graph - This creates the previews you see in iMessage, WhatsApp, etc. -->
-    <meta property="og:title" content="barthkosi">
-    <meta property="og:description" content="Design for the Soul of Your Startup">
+    <meta property="og:title" content="barthkosi - Design for the Soul of Your Startup">
+    <meta property="og:description" content="Design for the Soul of Your Startup - Portfolio of barthkosi">
     <meta property="og:image" content="https://res.cloudinary.com/barthkosi/image/upload/v1756252976/Cover_wwoftf.png">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://barthkosi.com">
     
     <!-- Twitter Card - This ensures Twitter shows the proper preview image -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="barthkosi">
-    <meta name="twitter:description" content="Design for the Soul of Your Startup">
+    <meta name="twitter:title" content="barthkosi - Design for the Soul of Your Startup">
+    <meta name="twitter:description" content="Design for the Soul of Your Startup - Portfolio of barthkosi">
     <meta name="twitter:image" content="https://res.cloudinary.com/barthkosi/image/upload/v1756252976/Cover_wwoftf.png">
     <meta name="twitter:image:alt" content="barthkosi portfolio cover">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "barthkosi",
+      "jobTitle": "Designer",
+      "description": "Design for the Soul of Your Startup",
+      "url": "https://barthkosi.com",
+      "sameAs": [
+        "https://cal.com/barthkosi/intro"
+      ]
+    }
+    </script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,12 +45,19 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <div class="container">
-        <aside class="sidebar">
-            <div class="sidebar-content">
+        <header class="sidebar" role="banner">
+            <nav class="sidebar-content" role="navigation" aria-label="Main navigation">
                 <div class="profile-section">
                     <div class="avatar">
-                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756256279/pfp_adpfyf.png" alt="Barth" class="avatar-img" loading="eager" decoding="async">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756256279/pfp_adpfyf.png" 
+                             alt="Profile picture of Barth" 
+                             class="avatar-img" 
+                             loading="eager" 
+                             decoding="async">
                     </div>
                     <div class="name">Barth</div>
                 </div>
@@ -46,50 +69,90 @@
                             I work with founders who know the best products feel alive.
                         </p>
                     </div>
-                    <button class="cta-button" onclick="window.open('https://cal.com/barthkosi/intro', '_blank')">
+                    <button class="cta-button" 
+                            onclick="window.open('https://cal.com/barthkosi/intro', '_blank')"
+                            aria-label="Book an intro call with Barth">
                         Book an Intro Call
                     </button>
                 </div>
-            </div>
+            </nav>
 
-            <footer class="footer">
+            <footer class="footer" role="contentinfo">
                 <p class="footer-text">
                     From early-stage concepts to established brands, my work has helped projects find their voice and create emotional connections that have driven brand loyalty and meaningful engagement.
                 </p>
                 <p class="copyright">© barthkosi</p>
             </footer>
-        </aside>
+        </header>
 
-        <main class="main-content">
+        <main id="main-content" class="main-content" role="main">
+            <section class="portfolio-section" aria-label="Portfolio showcase">
             <div class="portfolio-grid">
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756281622/bookworms_f3dtzz.png" alt="Portfolio item 1" class="portfolio-image" loading="lazy" decoding="async">
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756281622/bookworms_f3dtzz.png" 
+                             alt="Bookworms project showcase" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756360174/bookworm_-_cover_kc0pcr.png" 
+                             alt="Bookworm cover design" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756281199/bookworm_-_logo_cover_lftbmz.png" 
+                             alt="Bookworm logo and cover design" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756360899/atoms_-_1_hawwrh.png" 
+                             alt="Atoms design system part 1" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756360900/atoms_-_2_nu2b6z.png" 
+                             alt="Atoms design system part 2" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756360901/atoms_-_3_memhte.png" 
+                             alt="Atoms design system part 3" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756281200/polarcam_bmcbvy.png" 
+                             alt="Polarcam project showcase" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756359979/file_cover_-_1_l75xvi.png" 
+                             alt="File management interface design" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
+                    <article class="portfolio-item">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756359953/cover_lnaewc.png" 
+                             alt="Portfolio cover design" 
+                             class="portfolio-image" 
+                             loading="lazy" 
+                             decoding="async">
+                    </article>
                 </div>
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756360174/bookworm_-_cover_kc0pcr.png" alt="Portfolio item 2" class="portfolio-image" loading="lazy" decoding="async">
-                </div>
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756281199/bookworm_-_logo_cover_lftbmz.png" alt="Portfolio item 3" class="portfolio-image" loading="lazy" decoding="async">
-                </div>
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756360899/atoms_-_1_hawwrh.png" alt="Portfolio item 4" class="portfolio-image" loading="lazy" decoding="async">
-                </div>
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756360900/atoms_-_2_nu2b6z.png" alt="Portfolio item 5" class="portfolio-image" loading="lazy" decoding="async">
-                </div>
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756360901/atoms_-_3_memhte.png" alt="Portfolio item 6" class="portfolio-image" loading="lazy" decoding="async">
-                </div>
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756281200/polarcam_bmcbvy.png" alt="Portfolio item 7" class="portfolio-image" loading="lazy" decoding="async">
-                </div>
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756359979/file_cover_-_1_l75xvi.png" alt="Portfolio item 8" class="portfolio-image" loading="lazy" decoding="async">
-                </div>
-                <div class="portfolio-item">
-                    <img src="https://res.cloudinary.com/barthkosi/image/upload/v1756359953/cover_lnaewc.png" alt="Portfolio item 9" class="portfolio-image" loading="lazy" decoding="async">
-                </div>
-            </div>
+            </section>
         </main>
     </div>
 
