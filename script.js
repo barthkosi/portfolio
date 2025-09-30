@@ -198,6 +198,83 @@ class PerformanceMonitor {
 }
 
 // ========================================
+// ANALYTICS TRACKING
+// ========================================
+class AnalyticsTracker {
+  constructor() {
+    this.init();
+  }
+  
+  init() {
+    // Track CTA button clicks
+    this.trackCTA();
+    // Track portfolio image views
+    this.trackPortfolioViews();
+    // Track scroll depth
+    this.trackScrollDepth();
+  }
+  
+  trackCTA() {
+    const ctaButton = document.querySelector('.cta-button');
+    if (ctaButton && typeof gtag !== 'undefined') {
+      ctaButton.addEventListener('click', () => {
+        gtag('event', 'cta_click', {
+          'event_category': 'engagement',
+          'event_label': 'book_intro_call',
+          'value': 1
+        });
+      });
+    }
+  }
+  
+  trackPortfolioViews() {
+    const portfolioImages = document.querySelectorAll('.portfolio-image');
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && typeof gtag !== 'undefined') {
+          gtag('event', 'portfolio_image_view', {
+            'event_category': 'engagement',
+            'event_label': entry.target.alt || 'portfolio_image',
+            'value': 1
+          });
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    portfolioImages.forEach(img => imageObserver.observe(img));
+  }
+  
+  trackScrollDepth() {
+    let maxScroll = 0;
+    const scrollDepthThresholds = [25, 50, 75, 90, 100];
+    const trackedDepths = new Set();
+    
+    const trackScrollDepth = throttle(() => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercent = Math.round((scrollTop / docHeight) * 100);
+      
+      if (scrollPercent > maxScroll) {
+        maxScroll = scrollPercent;
+        
+        scrollDepthThresholds.forEach(threshold => {
+          if (scrollPercent >= threshold && !trackedDepths.has(threshold) && typeof gtag !== 'undefined') {
+            trackedDepths.add(threshold);
+            gtag('event', 'scroll_depth', {
+              'event_category': 'engagement',
+              'event_label': `${threshold}%`,
+              'value': threshold
+            });
+          }
+        });
+      }
+    }, 100);
+    
+    window.addEventListener('scroll', trackScrollDepth);
+  }
+}
+
+// ========================================
 // MAIN APPLICATION
 // ========================================
 class PortfolioApp {
@@ -219,6 +296,7 @@ class PortfolioApp {
     this.imageLoader = new ImageLoader('.portfolio-image');
     this.scrollAnimations = new ScrollAnimations();
     this.smoothScroll = new SmoothScroll();
+    this.analytics = new AnalyticsTracker();
     
     // Initialize performance monitoring in development
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -227,8 +305,8 @@ class PortfolioApp {
     
     // Add loaded class to body
     window.addEventListener('load', () => {
-    document.body.classList.add('loaded');
-});
+      document.body.classList.add('loaded');
+    });
     
     // Handle page visibility changes
     document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
