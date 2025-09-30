@@ -41,12 +41,15 @@ class ImageLoader {
     this.images.forEach((img, index) => {
       this.setupImage(img, index);
     });
+    this.ensureImagesVisible(); // Add fallback
   }
   
   setupImage(img, index) {
-        // Set initial state
-        img.style.opacity = '0';
-        img.style.transition = 'opacity 0.3s ease';
+    // Only set opacity to 0 if it has loading="lazy"
+    if (img.getAttribute('loading') === 'lazy') {
+      img.style.opacity = '0';
+      img.style.transition = 'opacity 0.3s ease';
+    }
     
     // Add index for staggered animation
     img.dataset.index = index;
@@ -64,6 +67,18 @@ class ImageLoader {
     // Add staggered animation delay
     const index = parseInt(img.dataset.index);
     img.style.animationDelay = `${index * 0.1}s`;
+  }
+  
+  // Fallback: ensure all images are visible after a timeout
+  ensureImagesVisible() {
+    setTimeout(() => {
+      this.images.forEach(img => {
+        if (img.style.opacity === '0' || img.style.opacity === '') {
+          img.style.opacity = '1';
+          img.classList.add('loaded');
+        }
+      });
+    }, 2000); // 2 second fallback
   }
   
   handleError(img) {

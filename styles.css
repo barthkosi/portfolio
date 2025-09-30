@@ -258,6 +258,7 @@ body {
     vertical-align: top;
     display: block;
     will-change: opacity, transform;
+    opacity: 1; /* Make images visible by default */
 }
 
 .portfolio-image[loading="lazy"] {
