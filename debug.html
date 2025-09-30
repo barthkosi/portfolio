@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Image Test</title>
+    <style>
+        body {
+            background: #0d0d0d;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .test-image {
+            width: 300px;
+            height: auto;
+            border: 2px solid red;
+            margin: 20px 0;
+            display: block;
+        }
+        .debug-info {
+            background: #333;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Debug Test</h1>
+    
+    <div class="debug-info">
+        <h3>Test 1: Direct image (no lazy loading)</h3>
+        <img src="https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756281622/bookworms_f3dtzz.png" 
+             alt="Test 1" 
+             class="test-image">
+    </div>
+    
+    <div class="debug-info">
+        <h3>Test 2: With lazy loading</h3>
+        <img src="https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756281622/bookworms_f3dtzz.png" 
+             alt="Test 2" 
+             class="test-image"
+             loading="lazy">
+    </div>
+    
+    <div class="debug-info">
+        <h3>Test 3: With explicit styles</h3>
+        <img src="https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756281622/bookworms_f3dtzz.png" 
+             alt="Test 3" 
+             class="test-image"
+             loading="lazy"
+             style="opacity: 1 !important; display: block !important;">
+    </div>
+    
+    <div class="debug-info">
+        <h3>Debug Info:</h3>
+        <div id="debug-output"></div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('img');
+            const debugOutput = document.getElementById('debug-output');
+            
+            images.forEach((img, index) => {
+                const info = document.createElement('div');
+                info.innerHTML = `
+                    <strong>Image ${index + 1}:</strong><br>
+                    - Natural width: ${img.naturalWidth}<br>
+                    - Natural height: ${img.naturalHeight}<br>
+                    - Computed opacity: ${getComputedStyle(img).opacity}<br>
+                    - Computed display: ${getComputedStyle(img).display}<br>
+                    - Computed visibility: ${getComputedStyle(img).visibility}<br>
+                    - Loaded: ${img.complete}<br>
+                    <br>
+                `;
+                debugOutput.appendChild(info);
+                
+                img.addEventListener('load', () => {
+                    console.log(`Image ${index + 1} loaded successfully`);
+                    info.innerHTML += `<span style="color: green;">✓ Loaded successfully</span><br>`;
+                });
+                
+                img.addEventListener('error', () => {
+                    console.log(`Image ${index + 1} failed to load`);
+                    info.innerHTML += `<span style="color: red;">✗ Failed to load</span><br>`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
