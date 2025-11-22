@@ -36,8 +36,6 @@ class ImageLoader {
     this.totalImages = this.images.length;
     this.currentIndex = 0;
     this.animationDuration = 800; // Duration of fade-in animation in ms
-    this.initialLoadCount = 2; // Number of images to load immediately
-    this.observer = null;
     this.init();
   }
   
@@ -47,11 +45,8 @@ class ImageLoader {
       this.setupImage(img, index);
     });
     
-    // Load first 2 images sequentially with stagger
-    this.loadInitialImages();
-    
-    // Set up IntersectionObserver for remaining images
-    this.setupLazyLoading();
+    // Start loading images sequentially
+    this.loadNextImage();
   }
   
   setupImage(img, index) {
@@ -62,92 +57,43 @@ class ImageLoader {
     portfolioItem.style.transform = 'translateY(30px)';
     portfolioItem.style.transition = 'none'; // No transition initially
     
-    // Store index and mark as not loaded yet
+    // Store index
     portfolioItem.dataset.index = index;
-    portfolioItem.dataset.loaded = 'false';
     img.dataset.index = index;
     
     // Initially hide the image
     img.style.opacity = '0';
   }
   
-  loadInitialImages() {
-    // Load first 2 images sequentially
-    if (this.currentIndex < this.initialLoadCount && this.currentIndex < this.totalImages) {
-      this.loadImage(this.currentIndex, true);
-    }
-  }
-  
-  setupLazyLoading() {
-    // Only observe images after the initial load count
-    if (this.totalImages <= this.initialLoadCount) {
-      return;
+  loadNextImage() {
+    if (this.currentIndex >= this.totalImages) {
+      return; // All images processed
     }
     
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px 0px 100px 0px', // Trigger when 100px from bottom of viewport
-      threshold: 0.1
-    };
-    
-    this.observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const portfolioItem = entry.target;
-          const index = parseInt(portfolioItem.dataset.index);
-          
-          // Only load if it's after the initial images and not already loaded
-          if (index >= this.initialLoadCount && portfolioItem.dataset.loaded === 'false') {
-            portfolioItem.dataset.loaded = 'true';
-            this.loadImage(index, false);
-            this.observer.unobserve(portfolioItem);
-          }
-        }
-      });
-    }, observerOptions);
-    
-    // Observe all portfolio items after the initial load count
-    this.images.slice(this.initialLoadCount).forEach(img => {
-      const portfolioItem = img.closest('.portfolio-item');
-      if (portfolioItem) {
-        this.observer.observe(portfolioItem);
-      }
-    });
-  }
-  
-  loadImage(index, isSequential) {
-    if (index >= this.totalImages) {
-      return;
-    }
-    
-    const img = this.images[index];
+    const img = this.images[this.currentIndex];
     const portfolioItem = img.closest('.portfolio-item');
-    
-    if (!img || !portfolioItem) {
-      return;
-    }
     
     // Set up load event listener
     const handleLoad = () => {
-      this.handleImageLoaded(img, portfolioItem, isSequential);
+      this.handleImageLoaded(img, portfolioItem);
     };
     
-    // If image is already loaded (cached), trigger after small delay
+    // If image is already loaded (cached), trigger after small delay for sequential appearance
     if (img.complete && img.naturalHeight !== 0) {
       setTimeout(() => {
         handleLoad();
-      }, isSequential ? 50 : 0);
+      }, 50);
     } else {
       // Wait for image to load
       img.addEventListener('load', handleLoad, { once: true });
       img.addEventListener('error', () => {
         // Even on error, show the item
-        this.handleImageLoaded(img, portfolioItem, isSequential);
+        this.handleImageLoaded(img, portfolioItem);
       }, { once: true });
     }
   }
   
-  handleImageLoaded(img, portfolioItem, isSequential) {
+  handleImageLoaded(img, portfolioItem) {
     // Add transition for smooth animation
     portfolioItem.style.transition = `opacity ${this.animationDuration}ms ease-out, transform ${this.animationDuration}ms ease-out`;
     
@@ -166,16 +112,12 @@ class ImageLoader {
     img.classList.add('loaded');
     
     this.loadedCount++;
+    this.currentIndex++;
     
-    // If sequential loading, load next initial image after animation completes
-    if (isSequential) {
-      this.currentIndex++;
-      if (this.currentIndex < this.initialLoadCount && this.currentIndex < this.totalImages) {
-        setTimeout(() => {
-          this.loadImage(this.currentIndex, true);
-        }, this.animationDuration);
-      }
-    }
+    // Wait for animation to complete before loading next image
+    setTimeout(() => {
+      this.loadNextImage();
+    }, this.animationDuration);
   }
   
   handleError(img) {
@@ -183,11 +125,7 @@ class ImageLoader {
     const portfolioItem = img.closest('.portfolio-item');
     
     // Still show the item even if image fails
-    if (portfolioItem) {
-      const index = parseInt(portfolioItem.dataset.index);
-      const isSequential = index < this.initialLoadCount;
-      this.handleImageLoaded(img, portfolioItem, isSequential);
-    }
+    this.handleImageLoaded(img, portfolioItem);
   }
 }
 
