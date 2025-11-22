@@ -245,7 +245,7 @@ body {
     border-radius: var(--radius-md);
     padding: var(--spacing-sm);
     width: 100%;
-    /* contain: layout style paint; */ /* Temporarily disable contain */
+    will-change: opacity, transform;
 }
 
 .portfolio-image {
@@ -254,20 +254,9 @@ body {
     object-fit: contain;
     border-radius: var(--radius-sm);
     background-color: var(--color-bg-tertiary);
-    transition: opacity var(--transition-normal);
     vertical-align: top;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important; /* Force images to be visible */
-}
-
-/* Temporarily disable lazy loading opacity changes */
-.portfolio-image[loading="lazy"] {
-    opacity: 1 !important;
-}
-
-.portfolio-image[loading="lazy"].loaded {
-    opacity: 1 !important;
+    display: block;
+    visibility: visible;
 }
 
 /* ========================================
@@ -393,21 +382,8 @@ body {
 /* ========================================
    ANIMATIONS & LOADING STATES
 ======================================== */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.portfolio-item {
-    animation: fadeInUp var(--transition-slow) ease forwards;
-}
-
-.loaded .portfolio-item {
-    animation-delay: calc(var(--item-index, 0) * 0.1s);
+/* Portfolio items start hidden and are animated via JavaScript */
+.portfolio-item.loaded {
+    opacity: 1;
+    transform: translateY(0);
 }

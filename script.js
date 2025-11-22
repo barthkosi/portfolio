@@ -31,65 +31,163 @@ const throttle = (func, limit) => {
 // ========================================
 class ImageLoader {
   constructor(selector) {
-    this.images = document.querySelectorAll(selector);
+    this.images = Array.from(document.querySelectorAll(selector));
     this.loadedCount = 0;
     this.totalImages = this.images.length;
+    this.currentIndex = 0;
+    this.animationDuration = 800; // Duration of fade-in animation in ms
+    this.initialLoadCount = 2; // Number of images to load immediately
+    this.observer = null;
     this.init();
   }
   
   init() {
+    // Set up all images with initial hidden state
     this.images.forEach((img, index) => {
       this.setupImage(img, index);
     });
-    this.ensureImagesVisible(); // Add fallback
+    
+    // Load first 2 images sequentially with stagger
+    this.loadInitialImages();
+    
+    // Set up IntersectionObserver for remaining images
+    this.setupLazyLoading();
   }
   
   setupImage(img, index) {
-    // Only set opacity to 0 if it has loading="lazy"
-    if (img.getAttribute('loading') === 'lazy') {
-      img.style.opacity = '0';
-      img.style.transition = 'opacity 0.3s ease';
-    }
+    const portfolioItem = img.closest('.portfolio-item');
     
-    // Add index for staggered animation
+    // Set initial hidden state with transform from bottom
+    portfolioItem.style.opacity = '0';
+    portfolioItem.style.transform = 'translateY(30px)';
+    portfolioItem.style.transition = 'none'; // No transition initially
+    
+    // Store index and mark as not loaded yet
+    portfolioItem.dataset.index = index;
+    portfolioItem.dataset.loaded = 'false';
     img.dataset.index = index;
     
-    // Event listeners
-    img.addEventListener('load', () => this.handleLoad(img));
-    img.addEventListener('error', () => this.handleError(img));
+    // Initially hide the image
+    img.style.opacity = '0';
   }
   
-  handleLoad(img) {
-    img.classList.add('loaded');
-    img.style.opacity = '1';
-    this.loadedCount++;
+  loadInitialImages() {
+    // Load first 2 images sequentially
+    if (this.currentIndex < this.initialLoadCount && this.currentIndex < this.totalImages) {
+      this.loadImage(this.currentIndex, true);
+    }
+  }
+  
+  setupLazyLoading() {
+    // Only observe images after the initial load count
+    if (this.totalImages <= this.initialLoadCount) {
+      return;
+    }
     
-    // Add staggered animation delay
-    const index = parseInt(img.dataset.index);
-    img.style.animationDelay = `${index * 0.1}s`;
-  }
-  
-  // Fallback: ensure all images are visible after a timeout
-  ensureImagesVisible() {
-    setTimeout(() => {
-      this.images.forEach(img => {
-        if (img.style.opacity === '0' || img.style.opacity === '') {
-          img.style.opacity = '1';
-          img.classList.add('loaded');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px 100px 0px', // Trigger when 100px from bottom of viewport
+      threshold: 0.1
+    };
+    
+    this.observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const portfolioItem = entry.target;
+          const index = parseInt(portfolioItem.dataset.index);
+          
+          // Only load if it's after the initial images and not already loaded
+          if (index >= this.initialLoadCount && portfolioItem.dataset.loaded === 'false') {
+            portfolioItem.dataset.loaded = 'true';
+            this.loadImage(index, false);
+            this.observer.unobserve(portfolioItem);
+          }
         }
       });
-    }, 2000); // 2 second fallback
+    }, observerOptions);
+    
+    // Observe all portfolio items after the initial load count
+    this.images.slice(this.initialLoadCount).forEach(img => {
+      const portfolioItem = img.closest('.portfolio-item');
+      if (portfolioItem) {
+        this.observer.observe(portfolioItem);
+      }
+    });
+  }
+  
+  loadImage(index, isSequential) {
+    if (index >= this.totalImages) {
+      return;
+    }
+    
+    const img = this.images[index];
+    const portfolioItem = img.closest('.portfolio-item');
+    
+    if (!img || !portfolioItem) {
+      return;
+    }
+    
+    // Set up load event listener
+    const handleLoad = () => {
+      this.handleImageLoaded(img, portfolioItem, isSequential);
+    };
+    
+    // If image is already loaded (cached), trigger after small delay
+    if (img.complete && img.naturalHeight !== 0) {
+      setTimeout(() => {
+        handleLoad();
+      }, isSequential ? 50 : 0);
+    } else {
+      // Wait for image to load
+      img.addEventListener('load', handleLoad, { once: true });
+      img.addEventListener('error', () => {
+        // Even on error, show the item
+        this.handleImageLoaded(img, portfolioItem, isSequential);
+      }, { once: true });
+    }
+  }
+  
+  handleImageLoaded(img, portfolioItem, isSequential) {
+    // Add transition for smooth animation
+    portfolioItem.style.transition = `opacity ${this.animationDuration}ms ease-out, transform ${this.animationDuration}ms ease-out`;
+    
+    // Trigger fade-in from bottom animation
+    requestAnimationFrame(() => {
+      portfolioItem.style.opacity = '1';
+      portfolioItem.style.transform = 'translateY(0)';
+    });
+    
+    // Show the image
+    img.style.opacity = '1';
+    img.style.transition = `opacity ${this.animationDuration}ms ease-out`;
+    
+    // Mark as loaded
+    portfolioItem.classList.add('loaded');
+    img.classList.add('loaded');
+    
+    this.loadedCount++;
+    
+    // If sequential loading, load next initial image after animation completes
+    if (isSequential) {
+      this.currentIndex++;
+      if (this.currentIndex < this.initialLoadCount && this.currentIndex < this.totalImages) {
+        setTimeout(() => {
+          this.loadImage(this.currentIndex, true);
+        }, this.animationDuration);
+      }
+    }
   }
   
   handleError(img) {
     console.warn('Failed to load image:', img.src);
+    const portfolioItem = img.closest('.portfolio-item');
     
-    // Retry loading after a short delay
-    setTimeout(() => {
-      const originalSrc = img.src;
-      img.src = '';
-      img.src = originalSrc;
-    }, 1000);
+    // Still show the item even if image fails
+    if (portfolioItem) {
+      const index = parseInt(portfolioItem.dataset.index);
+      const isSequential = index < this.initialLoadCount;
+      this.handleImageLoaded(img, portfolioItem, isSequential);
+    }
   }
 }
 
@@ -309,7 +407,8 @@ class PortfolioApp {
   setup() {
     // Initialize components
     this.imageLoader = new ImageLoader('.portfolio-image');
-    this.scrollAnimations = new ScrollAnimations();
+    // ScrollAnimations disabled - using sequential image loading instead
+    // this.scrollAnimations = new ScrollAnimations();
     this.smoothScroll = new SmoothScroll();
     this.analytics = new AnalyticsTracker();
     
