@@ -13,7 +13,7 @@
   --color-text-accent: #171717;
   
   /* Typography */
-  --font-primary: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-primary: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-secondary: 'Inter', sans-serif;
   
   /* Spacing */
@@ -202,7 +202,7 @@ body {
     letter-spacing: -0.3px;
     cursor: pointer;
     transition: background-color var(--transition-fast);
-    font-family: var(--font-secondary);
+    font-family: var(--font-primary);
     width: fit-content;
 }
 
