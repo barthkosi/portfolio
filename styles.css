@@ -251,21 +251,6 @@ body {
     padding: var(--spacing-sm);
     width: 100%;
     will-change: opacity, transform;
-    min-height: 200px; /* Ensure visibility before load */
-    /* Default state is visible to ensure content shows if JS fails */
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-}
-
-.portfolio-item.fade-init {
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-.portfolio-item.loaded {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 .portfolio-image {
