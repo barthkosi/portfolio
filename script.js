@@ -102,8 +102,8 @@ class AnimationController {
     this.items = document.querySelectorAll(selector);
     this.observerOptions = {
       root: null,
-      rootMargin: '0px 0px -50px 0px', // Trigger slightly before bottom
-      threshold: 0.1
+      rootMargin: '0px', // Trigger as soon as it enters viewport
+      threshold: 0.05
     };
     this.init();
   }
@@ -130,7 +130,19 @@ class AnimationController {
     }, this.observerOptions);
 
     // 3. Start Observing
-    this.items.forEach(item => observer.observe(item));
+    this.items.forEach(item => {
+        observer.observe(item);
+        
+        // Fallback: If not visible after 1s, force show
+        // This prevents items from staying hidden if Observer fails or logic is wrong
+        setTimeout(() => {
+            if (getComputedStyle(item).opacity === '0') {
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+                item.classList.add('loaded');
+            }
+        }, 1000);
+    });
   }
 
   animateItem(item) {

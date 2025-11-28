@@ -251,6 +251,7 @@ body {
     padding: var(--spacing-sm);
     width: 100%;
     will-change: opacity, transform;
+    min-height: 200px; /* Ensure visibility before load */
 }
 
 .portfolio-image {
