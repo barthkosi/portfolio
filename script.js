@@ -15,6 +15,86 @@ const throttle = (func, limit) => {
 };
 
 // ========================================
+// DATA
+// ========================================
+const PORTFOLIO_ITEMS = [
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto,fl_immutable_cache/v1756281622/bookworms_f3dtzz.png",
+        alt: "Bookworms project showcase",
+        width: 1920,
+        height: 1080
+    },
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756360174/bookworm_-_cover_kc0pcr.png",
+        alt: "Bookworm cover design",
+        width: 1920,
+        height: 1080
+    },
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756281199/bookworm_-_logo_cover_lftbmz.png",
+        alt: "Bookworm logo and cover design",
+        width: 1920,
+        height: 1080
+    },
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756360899/atoms_-_1_hawwrh.png",
+        alt: "Atoms design system part 1"
+    },
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756360900/atoms_-_2_nu2b6z.png",
+        alt: "Atoms design system part 2"
+    },
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756360901/atoms_-_3_memhte.png",
+        alt: "Atoms design system part 3"
+    },
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756281200/polarcam_bmcbvy.png",
+        alt: "Polarcam project showcase"
+    },
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756359979/file_cover_-_1_l75xvi.png",
+        alt: "File management interface design"
+    },
+    {
+        src: "https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756359953/cover_lnaewc.png",
+        alt: "Portfolio cover design"
+    }
+];
+
+// ========================================
+// PORTFOLIO RENDERER
+// ========================================
+class PortfolioRenderer {
+    constructor(containerSelector, items) {
+        this.container = document.querySelector(containerSelector);
+        this.items = items;
+    }
+
+    render() {
+        if (!this.container) return;
+
+        this.container.innerHTML = this.items.map(item => this.createCard(item)).join('');
+    }
+
+    createCard(item) {
+        const widthAttr = item.width ? `width="${item.width}"` : '';
+        const heightAttr = item.height ? `height="${item.height}"` : '';
+        
+        return `
+            <article class="portfolio-item">
+                <img src="${item.src}" 
+                     alt="${item.alt}" 
+                     class="portfolio-image" 
+                     ${widthAttr}
+                     ${heightAttr}
+                     decoding="async">
+            </article>
+        `;
+    }
+}
+
+// ========================================
 // SIMPLIFIED ANIMATION CONTROLLER
 // ========================================
 class AnimationController {
@@ -167,6 +247,10 @@ class PortfolioApp {
   }
   
   setup() {
+    // 0. Render Portfolio Items
+    this.portfolioRenderer = new PortfolioRenderer('.portfolio-grid', PORTFOLIO_ITEMS);
+    this.portfolioRenderer.render();
+
     // 1. Initialize Smooth Scroll
     this.smoothScroll = new SmoothScroll();
     
