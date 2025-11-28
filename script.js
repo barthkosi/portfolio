@@ -67,14 +67,24 @@ const PORTFOLIO_ITEMS = [
 // ========================================
 class PortfolioRenderer {
     constructor(containerSelector, items) {
-        this.container = document.querySelector(containerSelector);
+        this.containerSelector = containerSelector;
         this.items = items;
     }
 
     render() {
-        if (!this.container) return;
+        const container = document.querySelector(this.containerSelector);
+        if (!container) {
+            console.error(`PortfolioRenderer: Container not found (${this.containerSelector})`);
+            return;
+        }
+        
+        if (!this.items || !this.items.length) {
+             console.warn('PortfolioRenderer: No items to render');
+             return;
+        }
 
-        this.container.innerHTML = this.items.map(item => this.createCard(item)).join('');
+        container.innerHTML = this.items.map(item => this.createCard(item)).join('');
+        console.log(`PortfolioRenderer: Rendered ${this.items.length} items`);
     }
 
     createCard(item) {
@@ -100,6 +110,11 @@ class PortfolioRenderer {
 class AnimationController {
   constructor(selector) {
     this.items = document.querySelectorAll(selector);
+    if (this.items.length === 0) {
+        console.warn('AnimationController: No items found to animate');
+        return;
+    }
+    
     this.observerOptions = {
       root: null,
       rootMargin: '0px', // Trigger as soon as it enters viewport
@@ -109,14 +124,21 @@ class AnimationController {
   }
 
   init() {
-    // 1. Set Initial State
-    // We do this in JS to ensure if JS fails, CSS might still show content (if setup that way)
-    // or simply to prepare the animation start values.
+    // 1. Set Initial State using CSS class (progressive enhancement)
+    // If JS fails after this point, items might stay hidden unless we are careful.
+    // That's why we rely on CSS default being visible, and JS adding the hide class.
     this.items.forEach((item, index) => {
-      item.style.opacity = '0';
-      item.style.transform = 'translateY(20px)';
-      item.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-      item.dataset.index = index; // Keep track of original order
+      item.classList.add('fade-init');
+      item.dataset.index = index;
+      
+      // Failsafe: If animation doesn't trigger within 1.5s, force show
+      // This handles cases where IntersectionObserver might fail or get stuck
+      setTimeout(() => {
+         if (item.classList.contains('fade-init')) {
+             item.classList.remove('fade-init');
+             item.classList.add('loaded');
+         }
+      }, 1500);
     });
 
     // 2. Create the Observer
@@ -130,41 +152,18 @@ class AnimationController {
     }, this.observerOptions);
 
     // 3. Start Observing
-    this.items.forEach(item => {
-        observer.observe(item);
-        
-        // Fallback: If not visible after 1s, force show
-        // This prevents items from staying hidden if Observer fails or logic is wrong
-        setTimeout(() => {
-            if (getComputedStyle(item).opacity === '0') {
-                item.style.opacity = '1';
-                item.style.transform = 'translateY(0)';
-                item.classList.add('loaded');
-            }
-        }, 1000);
-    });
+    this.items.forEach(item => observer.observe(item));
   }
 
   animateItem(item) {
-    // Calculate a dynamic delay based on the item's visual position
-    // This creates a "wave" effect for items currently on screen
-    // We use a simple modulo to reset delay for long scrolling lists
-    // so user doesn't wait 10 seconds for the 100th item.
-    
-    // We try to find how many items are currently visible to stagger them relative to each other
     const index = parseInt(item.dataset.index || 0);
     const delayStep = 100; // ms
-    
-    // Simple stagger logic: 
-    // If multiple items trigger at once, they will naturally have different indices.
-    // We cap the stagger at 5 items (500ms) to prevent long delays.
     const staggerIndex = index % 5; 
     const delay = staggerIndex * delayStep;
 
     setTimeout(() => {
       requestAnimationFrame(() => {
-        item.style.opacity = '1';
-        item.style.transform = 'translateY(0)';
+        item.classList.remove('fade-init');
         item.classList.add('loaded');
       });
     }, delay);
