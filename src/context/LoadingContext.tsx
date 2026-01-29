@@ -4,6 +4,8 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 import LoadingScreen from "@/components/LoadingScreen";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
 import heroMarqueeData from "@/data/heroMarquee.json";
+import booksData from "@/data/books.json";
+import illustrationsData from "@/data/illustrations.json";
 import { usePathname } from 'next/navigation';
 
 interface LoadingContextType {
@@ -63,6 +65,8 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     // Only preload hero marquee images on the home page
     const preloadImages = [
         ...(isHomePage ? heroMarqueeData.map(item => item.image) : []),
+        ...(pathname === '/reading-list' ? booksData.map(item => item.image) : []),
+        ...(pathname === '/illustrations' ? illustrationsData.map(item => item.image) : []),
         "/globe.svg" // Add other critical static assets here
     ];
 
