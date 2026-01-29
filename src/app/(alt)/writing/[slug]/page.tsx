@@ -35,5 +35,15 @@ export default async function WritingPostPage({ params }: { params: Promise<{ sl
 
     const otherPosts = allPosts.filter(p => p.slug !== slug).slice(0, 3);
 
-    return <PostContent post={post} otherPosts={otherPosts} type="writing" />;
+    const currentIndex = allPosts.findIndex(p => p.slug === slug);
+    const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+    const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+
+    return <PostContent
+        post={post}
+        otherPosts={otherPosts}
+        type="writing"
+        prevPost={prevPost ? { slug: prevPost.slug, title: prevPost.title } : null}
+        nextPost={nextPost ? { slug: nextPost.slug, title: nextPost.title } : null}
+    />;
 }

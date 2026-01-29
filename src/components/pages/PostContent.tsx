@@ -25,13 +25,17 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
     );
 };
 
+import Link from 'next/link';
+
 interface PostContentProps {
     post: ContentItem;
     otherPosts: ContentItem[];
     type: ContentType;
+    prevPost?: { slug: string; title: string } | null;
+    nextPost?: { slug: string; title: string } | null;
 }
 
-export default function PostContent({ post, otherPosts, type }: PostContentProps) {
+export default function PostContent({ post, otherPosts, type, prevPost, nextPost }: PostContentProps) {
     if (!post) return null;
 
     return (
@@ -124,10 +128,28 @@ export default function PostContent({ post, otherPosts, type }: PostContentProps
                 </article>
 
                 <div className="w-full flex justify-between items-center pt-4 md:pt-6 border-t border-[var(--border-primary)]">
-                    {/* Navigation logic would go here if we had full list context, skipping Next/Prev for simplicity or implementing later if critical. 
-                        The original code computed next/prev from allPosts state. We can pass next/prev slugs from server if needed.
-                        For now, preserving "More {type}" below.
-                    */}
+                    {prevPost ? (
+                        <Link
+                            href={`/${type}/${prevPost.slug}`}
+                            className="flex flex-row label-m text-[var(--content-primary)] hover:text-[var(--content-secondary)] transition-colors"
+                        >
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fillRule="evenodd" clipRule="evenodd" d="M11.7803 14.7803C12.0732 14.4874 12.0732 14.0126 11.7803 13.7197L8.06066 10L11.7803 6.28033C12.0732 5.98744 12.0732 5.51256 11.7803 5.21967C11.4874 4.92678 11.0126 4.92678 10.7197 5.21967L6.46967 9.46967C6.32902 9.61032 6.25 9.80109 6.25 10C6.25 10.1989 6.32902 10.3897 6.46967 10.5303L10.7197 14.7803C11.0126 15.0732 11.4874 15.0732 11.7803 14.7803Z" fill="currentColor" />
+                            </svg>
+                            Previous
+                        </Link>
+                    ) : <span />}
+                    {nextPost ? (
+                        <Link
+                            href={`/${type}/${nextPost.slug}`}
+                            className="flex flex-row label-m text-[var(--content-primary)] hover:text-[var(--content-secondary)] transition-colors"
+                        >
+                            Next
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fillRule="evenodd" clipRule="evenodd" d="M8.21967 14.7803C7.92678 14.4874 7.92678 14.0126 8.21967 13.7197L11.9393 10L8.21967 6.28033C7.92678 5.98744 7.92678 5.51256 8.21967 5.21967C8.51256 4.92678 8.98744 4.92678 9.28033 5.21967L13.5303 9.46967C13.671 9.61032 13.75 9.80109 13.75 10C13.75 10.1989 13.671 10.3897 13.5303 10.5303L9.28033 14.7803C8.98744 15.0732 8.51256 15.0732 8.21967 14.7803Z" fill="currentColor" />
+                            </svg>
+                        </Link>
+                    ) : <span />}
                 </div>
 
                 {otherPosts.length > 0 && (
