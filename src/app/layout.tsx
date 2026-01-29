@@ -3,6 +3,7 @@ import { Instrument_Sans, Manrope, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { LoadingProvider } from "@/context/LoadingContext";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 // Configure fonts
 const instrumentSans = Instrument_Sans({
@@ -41,13 +42,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${instrumentSans.variable} ${manrope.variable} ${sourceSerif4.variable}`} suppressHydrationWarning>
-      <body className="antialiased bg-[var(--background-primary)] text-[var(--content-primary)]">
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
         <LoadingProvider>
           <SmoothScrollProvider>
             {children}
           </SmoothScrollProvider>
         </LoadingProvider>
-      </body>
+      </ThemeProvider>
     </html>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 
 interface LoadingContextType {
     isLoading: boolean;
@@ -24,43 +24,52 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
         setIsContentReady(false);
     }, []);
 
-    const addBlocker = useCallback((key: string) => {
-        setActiveBlockers(prev => {
-            const newSet = new Set(prev);
-            newSet.add(key);
-            return newSet;
-        });
-    }, []);
+}, []);
 
-    const removeBlocker = useCallback((key: string) => {
-        setActiveBlockers(prev => {
-            const newSet = new Set(prev);
-            newSet.delete(key);
-            return newSet;
-        });
-    }, []);
+const addBlocker = useCallback((key: string) => {
+    setActiveBlockers(prev => {
+        const newSet = new Set(prev);
+        newSet.add(key);
+        return newSet;
+    });
+}, []);
 
-    const completeLoading = useCallback(() => {
-        setIsLoading(false);
-        // Delay before content animations can start
-        setTimeout(() => {
-            setIsContentReady(true);
-        }, 300);
-    }, []);
+// Check if we can complete loading whenever blockers change
+useEffect(() => {
+    if (isLoading && activeBlockers.size === 0) {
+        completeLoading();
+    }
+}, [activeBlockers, isLoading, completeLoading]);
 
-    return (
-        <LoadingContext.Provider value={{
-            isLoading,
-            isContentReady,
-            completeLoading,
-            startLoading,
-            addBlocker,
-            removeBlocker,
-            isBlocked: activeBlockers.size > 0
-        }}>
-            {children}
-        </LoadingContext.Provider>
-    );
+const removeBlocker = useCallback((key: string) => {
+    setActiveBlockers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(key);
+        return newSet;
+    });
+}, []);
+
+const completeLoading = useCallback(() => {
+    setIsLoading(false);
+    // Delay before content animations can start
+    setTimeout(() => {
+        setIsContentReady(true);
+    }, 300);
+}, []);
+
+return (
+    <LoadingContext.Provider value={{
+        isLoading,
+        isContentReady,
+        completeLoading,
+        startLoading,
+        addBlocker,
+        removeBlocker,
+        isBlocked: activeBlockers.size > 0
+    }}>
+        {children}
+    </LoadingContext.Provider>
+);
 }
 
 export function useLoading() {
