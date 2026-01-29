@@ -1,0 +1,130 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, Variants } from "motion/react";
+import InfoBlock from "@/components/InfoBlock";
+import Card from "@/components/Card";
+import Filter from "@/components/Filter";
+import { ContentItem } from "@/lib/content";
+import { Motion, springBouncy } from "@/lib/transitions";
+
+interface ExplorationsContentProps {
+    initialExplorations: ContentItem[];
+    allTags: string[];
+}
+
+export default function ExplorationsContent({ initialExplorations, allTags }: ExplorationsContentProps) {
+    const [explorations] = useState<ContentItem[]>(initialExplorations);
+    const [filteredExplorations, setFilteredExplorations] = useState<ContentItem[]>(initialExplorations);
+    const [tags] = useState<string[]>(allTags);
+    const [activeTag, setActiveTag] = useState<string | null>(null);
+    const [introFinished, setIntroFinished] = useState(false);
+    const [showCards, setShowCards] = useState(false);
+
+    useEffect(() => {
+        if (activeTag) {
+            setFilteredExplorations(explorations.filter(e => e.tags?.includes(activeTag)));
+        } else {
+            setFilteredExplorations(explorations);
+        }
+    }, [activeTag, explorations]);
+
+    const containerVariants: Variants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.2 },
+        },
+    };
+
+    const cardVariants: Variants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: springBouncy
+        },
+    };
+
+    return (
+        <div className="flex flex-col lg:flex-row w-full gap-7 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
+            <InfoBlock
+                title="Explorations"
+                number={explorations.length}
+                description="Personal experiments and creative explorations, from concept designs to visual studies."
+                onComplete={() => setIntroFinished(true)}
+            />
+
+            <div className="w-full flex flex-col">
+                <Filter
+                    tags={tags}
+                    activeTag={activeTag}
+                    onTagSelect={setActiveTag}
+                    animate={introFinished}
+                    onAnimationComplete={() => setShowCards(true)}
+                />
+
+                {explorations.length > 0 && (
+                    <motion.div
+                        className="w-full flex flex-col gap-4"
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate={introFinished && showCards ? "visible" : "hidden"}
+                    >
+                        {Object.entries(
+                            filteredExplorations.reduce((acc, exploration) => {
+                                const year = exploration.date ? `${exploration.date.substring(2, 4)}'` : "Unknown";
+                                if (!acc[year]) acc[year] = [];
+                                acc[year].push(exploration);
+                                return acc;
+                            }, {} as Record<string, typeof explorations>)
+                        )
+                            .sort((a, b) => b[0].localeCompare(a[0])) // Sort years descending
+                            .map(([year, yearExplorations]) => (
+                                <div key={year} className="w-full flex flex-col md:flex-row gap-4 relative">
+                                    {/* Desktop Year Label */}
+                                    <div className="md:w-[0px] shrink-0 z-[2]">
+                                        <span className="h3 text-[var(--content-primary)] sticky top-[134px] hidden md:block">
+                                            {year}
+                                        </span>
+                                    </div>
+
+                                    <div className="w-full flex flex-col gap-4">
+                                        {/* Mobile Year Label */}
+                                        <div className="md:hidden pb-2 select-none">
+                                            <span className="h3 text-[var(--content-primary)]">{year}</span>
+                                        </div>
+
+                                        {yearExplorations.map((exploration) => (
+                                            <motion.div key={exploration.slug} variants={cardVariants}>
+                                                <Card
+                                                    image={exploration.coverImage || ""}
+                                                    title={exploration.title}
+                                                    description={exploration.description}
+                                                    link={`/explorations/${exploration.slug}`}
+                                                    tags={exploration.tags}
+                                                    variant="list"
+                                                    aspectRatio="aspect-video"
+                                                />
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                    </motion.div>
+                )}
+
+                {explorations.length === 0 && (
+                    <Motion
+                        type="fadeUpBouncy"
+                        className="flex flex-col my-auto items-center w-full gap-7"
+                        initial="initial"
+                        animate={introFinished ? "animate" : "initial"}
+                    >
+                        <h5 className="my-auto h-full text-[var(--content-primary)]">Explorations are coming soon!</h5>
+                    </Motion>
+                )}
+            </div>
+        </div>
+    );
+}
