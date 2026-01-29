@@ -34,13 +34,13 @@ export const metadata: Metadata = {
     icon: [
       {
         media: '(prefers-color-scheme: light)',
-        url: 'http://res.cloudinary.com/barthkosi/image/upload/favicon-light.png',
-        href: 'http://res.cloudinary.com/barthkosi/image/upload/favicon-light.png',
+        url: 'https://res.cloudinary.com/barthkosi/image/upload/favicon-light.png',
+        href: 'https://res.cloudinary.com/barthkosi/image/upload/favicon-light.png',
       },
       {
         media: '(prefers-color-scheme: dark)',
-        url: 'http://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png',
-        href: 'http://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png',
+        url: 'https://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png',
+        href: 'https://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png',
       }
     ],
   },

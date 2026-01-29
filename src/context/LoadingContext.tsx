@@ -68,8 +68,8 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
         ...(pathname === '/reading-list' ? booksData.map(item => item.image) : []),
         ...(pathname === '/illustrations' ? illustrationsData.map(item => item.image) : []),
         // Preload favicons
-        "http://res.cloudinary.com/barthkosi/image/upload/favicon-light.png",
-        "http://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png"
+        "https://res.cloudinary.com/barthkosi/image/upload/favicon-light.png",
+        "https://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png"
     ];
 
     const { progress, isComplete: isResourcesLoaded } = useImagePreloader(preloadImages);
@@ -88,18 +88,20 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
             setIsLoading(false);
             setIsContentReady(true);
         } else {
-            // For non-post pages, we might want to trigger loading
-            // But usually navigation handles this or we want partial loading
-            // If users navigate FROM a post page TO home, we might want to show loading
-            // But for now, let's respect the initial state logic mostly
+            // Trigger loading for non-post pages
+            setIsLoading(true);
+            setIsContentReady(false);
         }
     }, [pathname, isPostPage]);
 
     // Check if we can complete loading whenever blockers change or resources are loaded
     useEffect(() => {
         if (isLoading && activeBlockers.size === 0 && isResourcesLoaded) {
-            // We wait for the LoadingScreen onComplete callback to actually trigger completeLoading
-            // But we can use this effect to ensure we are ready state-wise
+            // If resources are legally loaded (even effectively instantly), we can proceed
+            // The LoadingScreen component itself usually handles the minimum display time
+            // causing the onComplete to fire, which then calls completeLoading.
+            // So we don't need to force completeLoading here usually, but we need to ensure
+            // the Logic flows correctly if the preloader finishes instantly.
         }
     }, [activeBlockers, isLoading, isResourcesLoaded]);
 
