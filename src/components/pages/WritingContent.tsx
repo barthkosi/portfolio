@@ -104,7 +104,7 @@ export default function WritingContent({ initialPosts, allTags }: WritingContent
                                                     link={`/writing/${post.slug}`}
                                                     tags={post.tags}
                                                     variant="list"
-                                                    aspectRatio="16/9"
+                                                    aspectRatio="aspect-video"
                                                 />
                                             </motion.div>
                                         ))}

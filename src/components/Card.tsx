@@ -3,7 +3,6 @@
 import { springBase } from "@/lib/transitions"
 import { motion } from "motion/react"
 import Link from "next/link"
-import { MediaWrapper } from "./MediaWrapper"
 
 type CardProps = {
     image: string
@@ -22,21 +21,21 @@ export default function Card({
     link,
     tags,
     variant = "default",
-    aspectRatio = "16/9"
+    aspectRatio = "aspect-video"
 }: CardProps) {
     // Default Card Content
     const DefaultContent = (
         <>
             <div className="flex flex-col gap-2">
                 <div className="w-full p-2 rounded-[var(--radius-lg)] bg-[var(--background-secondary)]">
-                    <MediaWrapper aspectRatio={aspectRatio} fixedAspectRatio={aspectRatio !== "auto"} className="rounded-xl">
+                    <div className={`relative w-full ${aspectRatio === "auto" ? "" : aspectRatio} overflow-hidden rounded-xl`}>
                         <img
                             src={image}
                             alt={title || ""}
                             className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover`}
                             loading="lazy"
                         />
-                    </MediaWrapper>
+                    </div>
                 </div>
 
                 {(title || description) && (

@@ -43,7 +43,7 @@ const BookCard = ({
             title={data.title}
             description={data.author}
             link={data.link}
-            aspectRatio="2/3"
+            aspectRatio="auto"
         />
     </motion.div>
 );
