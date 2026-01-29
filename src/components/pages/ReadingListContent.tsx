@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Masonry, RenderComponentProps } from "masonic";
 import { springBouncy } from "@/lib/transitions";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import InfoBlock from "@/components/InfoBlock";
 import Card from "@/components/Card";
 import books from "@/data/books.json";
@@ -57,12 +57,20 @@ export default function ReadingListContent() {
 
     const bookCount = books.length;
 
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const renderCard = useCallback(
         (props: RenderComponentProps<BookItem>) => (
             <BookCard {...props} isVisible={areBooksVisible} />
         ),
         [areBooksVisible]
     );
+
+
 
     return (
         <div className="flex flex-col lg:flex-row w-full gap-7 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
@@ -74,14 +82,16 @@ export default function ReadingListContent() {
             />
 
             <div className="w-full">
-                <Masonry
-                    key={`${columnCount}-${gutter}`}
-                    items={shuffledBooks}
-                    columnGutter={gutter}
-                    columnCount={columnCount}
-                    overscanBy={5}
-                    render={renderCard}
-                />
+                {mounted && (
+                    <Masonry
+                        key={`${columnCount}-${gutter}`}
+                        items={shuffledBooks}
+                        columnGutter={gutter}
+                        columnCount={columnCount}
+                        overscanBy={5}
+                        render={renderCard}
+                    />
+                )}
             </div>
         </div>
     );
