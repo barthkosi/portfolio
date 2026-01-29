@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import Link from 'next/link';
+import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import React from 'react';
 import Card from '@/components/Card';
@@ -37,8 +37,8 @@ export default function PostContent({ post, otherPosts, type }: PostContentProps
     return (
         <main className="flex flex-col">
             {post.bannerImage && (
-                <div className="w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px]">
-                    <img src={post.bannerImage} alt={post.title} className="w-full aspect-[16/9] lg:aspect-[1500/300] object-cover" />
+                <div className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/9] lg:aspect-[1500/300]">
+                    <Image src={post.bannerImage} alt={post.title} fill className="object-cover" sizes="100vw" priority />
                 </div>
             )}
 
@@ -75,7 +75,7 @@ export default function PostContent({ post, otherPosts, type }: PostContentProps
                             p: (props) => <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
                             a: (props) => <a className="blog-text mb-4 lg:mb-6 text-[var(--content-link)] hover:text-[var(--content-link-hover)] transition-colors" {...props} />,
                             img: (props) => {
-                                const src = props.src || '';
+                                const src = String(props.src || '');
                                 // Detect video file extensions
                                 if (src.match(/\.(mp4|webm|mov)(\?.*)?$/i)) {
                                     return (
