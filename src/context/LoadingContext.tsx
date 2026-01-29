@@ -4,6 +4,7 @@ import { createContext, useContext, useState, ReactNode, useCallback, useEffect 
 import LoadingScreen from "@/components/LoadingScreen";
 import { useImagePreloader } from "@/hooks/useImagePreloader";
 import heroMarqueeData from "@/data/heroMarquee.json";
+import { usePathname } from 'next/navigation';
 
 interface LoadingContextType {
     isLoading: boolean;
@@ -18,14 +19,29 @@ interface LoadingContextType {
 const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export function LoadingProvider({ children }: { children: ReactNode }) {
-    const [isLoading, setIsLoading] = useState(true);
-    const [isContentReady, setIsContentReady] = useState(false);
+    const pathname = usePathname();
+
+    // Determine if we should show the loading screen based on the path
+    // We want to skip it for individual post pages
+    const isPostPage = pathname?.startsWith('/writing/') ||
+        pathname?.startsWith('/work/') ||
+        pathname?.startsWith('/explorations/');
+
+    // Also check if it's the home page for specific preloading
+    const isHomePage = pathname === '/';
+
+    // Initialize loading state based on route
+    const [isLoading, setIsLoading] = useState(!isPostPage);
+    const [isContentReady, setIsContentReady] = useState(isPostPage);
     const [activeBlockers, setActiveBlockers] = useState<Set<string>>(new Set());
 
     const startLoading = useCallback(() => {
-        setIsLoading(true);
-        setIsContentReady(false);
-    }, []);
+        // Don't start loading if we are on a post page
+        if (!isPostPage) {
+            setIsLoading(true);
+            setIsContentReady(false);
+        }
+    }, [isPostPage]);
 
     const addBlocker = useCallback((key: string) => {
         setActiveBlockers(prev => {
@@ -44,8 +60,9 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
     }, []);
 
     // List of critical images to preload
+    // Only preload hero marquee images on the home page
     const preloadImages = [
-        ...heroMarqueeData.map(item => item.image),
+        ...(isHomePage ? heroMarqueeData.map(item => item.image) : []),
         "/globe.svg" // Add other critical static assets here
     ];
 
@@ -58,6 +75,19 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
             setIsContentReady(true);
         }, 500); // Increased slightly to match LoadingScreen exit
     }, []);
+
+    // Reset loading state when pathname changes
+    useEffect(() => {
+        if (isPostPage) {
+            setIsLoading(false);
+            setIsContentReady(true);
+        } else {
+            // For non-post pages, we might want to trigger loading
+            // But usually navigation handles this or we want partial loading
+            // If users navigate FROM a post page TO home, we might want to show loading
+            // But for now, let's respect the initial state logic mostly
+        }
+    }, [pathname, isPostPage]);
 
     // Check if we can complete loading whenever blockers change or resources are loaded
     useEffect(() => {
