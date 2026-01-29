@@ -25,6 +25,7 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
     );
 };
 
+import Button from '@/components/Button';
 import Link from 'next/link';
 
 interface PostContentProps {
@@ -61,14 +62,12 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                             ))}
                         </div>
                         {post.buttonText && post.buttonLink && (
-                            <a
+                            <Button
                                 href={post.buttonLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="label-m px-4 py-2 rounded-xl bg-[var(--background-secondary)] text-[var(--content-primary)] hover:bg-[var(--background-tertiary)] transition-colors"
+                                openInNewTab                              
                             >
                                 {post.buttonText}
-                            </a>
+                            </Button>
                         )}
                     </div>
                 </div>
