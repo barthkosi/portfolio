@@ -104,7 +104,7 @@ export default function ExplorationsContent({ initialExplorations, allTags }: Ex
                                                     link={`/explorations/${exploration.slug}`}
                                                     tags={exploration.tags}
                                                     variant="list"
-                                                    aspectRatio="aspect-video"
+                                                    aspectRatio="16/9"
                                                 />
                                             </motion.div>
                                         ))}

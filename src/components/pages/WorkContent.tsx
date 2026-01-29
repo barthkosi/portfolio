@@ -104,7 +104,7 @@ export default function WorkContent({ initialProjects, allTags }: WorkContentPro
                                                     link={`/work/${project.slug}`}
                                                     tags={project.tags}
                                                     variant="list"
-                                                    aspectRatio="aspect-video"
+                                                    aspectRatio="16/9"
                                                 />
                                             </motion.div>
                                         ))}

@@ -24,7 +24,7 @@ const IllustrationCard = ({
         animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
         transition={{ ...springBouncy, delay: index * 0.05 }}
     >
-        <Card image={data.image} aspectRatio="auto" />
+        <Card image={data.image} aspectRatio="2/3" />
     </motion.div>
 );
 

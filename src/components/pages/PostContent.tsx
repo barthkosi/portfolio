@@ -7,25 +7,8 @@ import React from 'react';
 import Card from '@/components/Card';
 import { ContentItem, ContentType } from '@/lib/content';
 
-const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.ReactNode, aspectRatio?: string, type?: 'image' | 'video' }) => {
-    const [isLoaded, setIsLoaded] = useState(false);
-
-    return (
-        <span
-            className={`block relative overflow-hidden rounded-[12px] w-full lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px] bg-[var(--background-secondary)] transition-all duration-300 ${!isLoaded ? 'shimmer-loading' : ''}`}
-            style={{ aspectRatio: isLoaded ? 'auto' : aspectRatio }}
-        >
-            <span className={`block w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
-                {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, {
-                    onLoad: () => setIsLoaded(true),
-                    onLoadedData: () => setIsLoaded(true),
-                }) : children}
-            </span>
-        </span>
-    );
-};
-
 import Link from 'next/link';
+import { MediaWrapper } from '@/components/MediaWrapper';
 
 interface PostContentProps {
     post: ContentItem;
@@ -83,7 +66,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                 // Detect video file extensions
                                 if (src.match(/\.(mp4|webm|mov)(\?.*)?$/i)) {
                                     return (
-                                        <MediaWrapper aspectRatio="16/9" type="video">
+                                        <MediaWrapper aspectRatio="16/9" type="video" className="lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]">
                                             <video
                                                 src={src}
                                                 className="w-full h-auto block"
@@ -98,7 +81,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                 // Detect Cloudinary video player embeds
                                 if (src.includes('player.cloudinary.com/embed')) {
                                     return (
-                                        <MediaWrapper aspectRatio="16/9" type="video">
+                                        <MediaWrapper aspectRatio="16/9" type="video" className="lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]">
                                             <iframe
                                                 src={src}
                                                 className="w-full aspect-video block"
@@ -109,7 +92,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                     );
                                 }
                                 return (
-                                    <MediaWrapper aspectRatio="3/2" type="image">
+                                    <MediaWrapper aspectRatio="3/2" type="image" className="lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]">
                                         <img className="w-full h-auto block" {...props} alt={props.alt || ""} />
                                     </MediaWrapper>
                                 );
@@ -164,13 +147,13 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                     description={p.description}
                                     link={`/${type}/${p.slug}`}
                                     variant="list"
-                                    aspectRatio="aspect-video"
+                                    aspectRatio="16/9"
                                 />
                             ))}
                         </div>
                     </div>
                 )}
             </div>
-        </main>
+        </main >
     );
 }
