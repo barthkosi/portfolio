@@ -11,17 +11,17 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
     const [isLoaded, setIsLoaded] = useState(false);
 
     return (
-        <div
-            className={`relative overflow-hidden rounded-[12px] w-full lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px] bg-[var(--background-secondary)] transition-all duration-300 ${!isLoaded ? 'shimmer-loading' : ''}`}
+        <span
+            className={`block relative overflow-hidden rounded-[12px] w-full lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px] bg-[var(--background-secondary)] transition-all duration-300 ${!isLoaded ? 'shimmer-loading' : ''}`}
             style={{ aspectRatio: isLoaded ? 'auto' : aspectRatio }}
         >
-            <div className={`w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
+            <span className={`block w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
                 {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, {
                     onLoad: () => setIsLoaded(true),
                     onLoadedData: () => setIsLoaded(true),
                 }) : children}
-            </div>
-        </div>
+            </span>
+        </span>
     );
 };
 

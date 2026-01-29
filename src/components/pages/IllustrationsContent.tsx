@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Masonry, RenderComponentProps } from "masonic";
 import { springBouncy } from "@/lib/transitions";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import InfoBlock from "@/components/InfoBlock";
 import Card from "@/components/Card";
 import illustrations from "@/data/illustrations.json";
@@ -32,12 +32,20 @@ export default function IllustrationsContent() {
     const [areImagesVisible, setAreImagesVisible] = useState(false);
     const { columnCount, gutter } = useResponsiveLayout();
 
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const renderCard = useCallback(
         (props: RenderComponentProps<IllustrationItem>) => (
             <IllustrationCard {...props} isVisible={areImagesVisible} />
         ),
         [areImagesVisible]
     );
+
+    if (!mounted) return null;
 
     return (
         <div className="flex flex-col w-full gap-7 lg:gap-8 h-auto items-center justify-center">
@@ -51,14 +59,16 @@ export default function IllustrationsContent() {
                 />
             </div>
             <div className="w-full">
-                <Masonry
-                    key={`${columnCount}-${gutter}`}
-                    items={illustrations}
-                    columnGutter={gutter}
-                    columnCount={columnCount}
-                    overscanBy={5}
-                    render={renderCard}
-                />
+                {mounted && (
+                    <Masonry
+                        key={`${columnCount}-${gutter}`}
+                        items={illustrations}
+                        columnGutter={gutter}
+                        columnCount={columnCount}
+                        overscanBy={5}
+                        render={renderCard}
+                    />
+                )}
             </div>
         </div>
     );
