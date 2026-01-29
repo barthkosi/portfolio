@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         title: `barthkosi - ${post.title.toLowerCase()}`,
         description: post.description,
         openGraph: {
-            images: [post.bannerImage || post.coverImage || ""]
+            images: [post.coverImage || post.bannerImage || ""]
         }
     };
 }
