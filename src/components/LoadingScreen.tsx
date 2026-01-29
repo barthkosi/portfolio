@@ -1,45 +1,31 @@
-"use client";
-
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface LoadingScreenProps {
-    progress: number;
-    onComplete: () => void;
+    onComplete?: () => void;
+    progress: number; // Kept for prop compatibility
 }
 
-export default function LoadingScreen({ progress, onComplete }: LoadingScreenProps) {
-    const [isExiting, setIsExiting] = useState(false);
-
+export default function LoadingScreen({ onComplete, progress }: LoadingScreenProps) {
+    // Trigger onComplete when progress hits 100
     useEffect(() => {
-        if (progress >= 100 && !isExiting) {
-            setIsExiting(true);
-            const timer = setTimeout(() => {
-                onComplete();
-            }, 500);
+        if (progress >= 100) {
+            const timer = setTimeout(() => onComplete?.(), 500);
             return () => clearTimeout(timer);
         }
-    }, [progress, isExiting, onComplete]);
+    }, [progress, onComplete]);
 
     return (
         <motion.div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--background-primary)]"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: isExiting ? 0 : 1 }}
-            transition={{ duration: 0.5 }}
+            className="fixed inset-0 z-[9999] flex items-end justify-start bg-[var(--background-primary)]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
         >
-            <div className="flex flex-col items-center gap-4">
-                <div className="w-48 h-1 bg-[var(--background-secondary)] rounded-full overflow-hidden">
-                    <motion.div
-                        className="h-full bg-[var(--content-primary)]"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                    />
-                </div>
-                <div className="label-s text-[var(--content-tertiary)]">
-                    {Math.round(progress)}%
-                </div>
+            <div className="flex flex-col items-center gap-4 p-4 md:p-8">
+                <span className="display text-[var(--content-primary)] animate-pulse">
+                    loading...
+                </span>
             </div>
         </motion.div>
     );

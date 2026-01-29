@@ -1,6 +1,9 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
+import LoadingScreen from "@/components/LoadingScreen";
+import { useImagePreloader } from "@/hooks/useImagePreloader";
+import heroMarqueeData from "@/data/heroMarquee.json";
 
 interface LoadingContextType {
     isLoading: boolean;
@@ -40,20 +43,29 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
         });
     }, []);
 
+    // List of critical images to preload
+    const preloadImages = [
+        ...heroMarqueeData.map(item => item.image),
+        "/globe.svg" // Add other critical static assets here
+    ];
+
+    const { progress, isComplete: isResourcesLoaded } = useImagePreloader(preloadImages);
+
     const completeLoading = useCallback(() => {
         setIsLoading(false);
         // Delay before content animations can start
         setTimeout(() => {
             setIsContentReady(true);
-        }, 300);
+        }, 500); // Increased slightly to match LoadingScreen exit
     }, []);
 
-    // Check if we can complete loading whenever blockers change
+    // Check if we can complete loading whenever blockers change or resources are loaded
     useEffect(() => {
-        if (isLoading && activeBlockers.size === 0) {
-            completeLoading();
+        if (isLoading && activeBlockers.size === 0 && isResourcesLoaded) {
+            // We wait for the LoadingScreen onComplete callback to actually trigger completeLoading
+            // But we can use this effect to ensure we are ready state-wise
         }
-    }, [activeBlockers, isLoading, completeLoading]);
+    }, [activeBlockers, isLoading, isResourcesLoaded]);
 
     return (
         <LoadingContext.Provider value={{
@@ -65,7 +77,19 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
             removeBlocker,
             isBlocked: activeBlockers.size > 0
         }}>
-            {children}
+            {isLoading && (
+                <LoadingScreen
+                    progress={progress}
+                    onComplete={() => {
+                        if (activeBlockers.size === 0) {
+                            completeLoading();
+                        }
+                    }}
+                />
+            )}
+            <div className={isLoading ? "opacity-0" : "opacity-100 transition-opacity duration-500"}>
+                {children}
+            </div>
         </LoadingContext.Provider>
     );
 }

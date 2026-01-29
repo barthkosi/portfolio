@@ -165,7 +165,7 @@ export default function Nav() {
                                     <a href="https://cosmos.so/barthkosi/" target="_blank" rel="noopener noreferrer" className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1">
                                         Cosmos
                                     </a>
-                                    <a href="http://www.linkedin.com/in/barthkosi/" target="_blank" rel="noopener noreferrer" className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1">
+                                    <a href="https://www.linkedin.com/in/barthkosi/" target="_blank" rel="noopener noreferrer" className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1">
                                         LinkedIn
                                     </a>
                                     <a href="https://github.com/barthkosi/" target="_blank" rel="noopener noreferrer" className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1">
@@ -344,7 +344,7 @@ export default function Nav() {
                                     visible: anim.fadeDownBouncyBouncy.visible,
                                 }}
                             >
-                                <a href="http://www.linkedin.com/in/barthkosi/" target="_blank" rel="noopener noreferrer">
+                                <a href="https://www.linkedin.com/in/barthkosi/" target="_blank" rel="noopener noreferrer">
                                     LinkedIn
                                 </a>
                             </motion.div>

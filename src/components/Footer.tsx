@@ -53,7 +53,7 @@ export default function Footer() {
                     Cosmos
                 </a>
                 <a
-                    href="http://www.linkedin.com/in/barthkosi/"
+                    href="https://www.linkedin.com/in/barthkosi/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-[var(--content-primary)] transition-colors"
