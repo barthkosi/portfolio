@@ -31,7 +31,18 @@ export const metadata: Metadata = {
   title: "Bartholomew Kosi",
   description: "Product Designer & Frontend Developer",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      {
+        media: '(prefers-color-scheme: light)',
+        url: 'http://res.cloudinary.com/barthkosi/image/upload/favicon-light.png',
+        href: 'http://res.cloudinary.com/barthkosi/image/upload/favicon-light.png',
+      },
+      {
+        media: '(prefers-color-scheme: dark)',
+        url: 'http://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png',
+        href: 'http://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png',
+      }
+    ],
   },
 };
 

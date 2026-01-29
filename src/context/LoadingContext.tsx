@@ -67,7 +67,9 @@ export function LoadingProvider({ children }: { children: ReactNode }) {
         ...(isHomePage ? heroMarqueeData.map(item => item.image) : []),
         ...(pathname === '/reading-list' ? booksData.map(item => item.image) : []),
         ...(pathname === '/illustrations' ? illustrationsData.map(item => item.image) : []),
-        "/globe.svg" // Add other critical static assets here
+        // Preload favicons
+        "http://res.cloudinary.com/barthkosi/image/upload/favicon-light.png",
+        "http://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png"
     ];
 
     const { progress, isComplete: isResourcesLoaded } = useImagePreloader(preloadImages);
