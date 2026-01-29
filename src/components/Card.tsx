@@ -29,7 +29,7 @@ export default function Card({
         <>
             <div className="flex flex-col gap-2">
                 <div className="w-full p-2 rounded-[var(--radius-lg)] bg-[var(--background-secondary)]">
-                    <MediaWrapper aspectRatio={aspectRatio} className="rounded-xl">
+                    <MediaWrapper aspectRatio={aspectRatio} fixedAspectRatio={aspectRatio !== "auto"} className="rounded-xl">
                         <img
                             src={image}
                             alt={title || ""}
