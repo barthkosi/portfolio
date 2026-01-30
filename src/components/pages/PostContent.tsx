@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import React from 'react';
-import Card from '@/components/Card';
+import Card from '@/components/interface/Card';
 import { ContentItem, ContentType } from '@/lib/content';
 
 const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.ReactNode, aspectRatio?: string, type?: 'image' | 'video' }) => {
@@ -25,7 +25,7 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
     );
 };
 
-import Button from '@/components/Button';
+import Button from '@/components/interface/Button';
 import Link from 'next/link';
 
 interface PostContentProps {
@@ -64,7 +64,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                         {post.buttonText && post.buttonLink && (
                             <Button
                                 href={post.buttonLink}
-                                openInNewTab                              
+                                openInNewTab
                             >
                                 {post.buttonText}
                             </Button>
