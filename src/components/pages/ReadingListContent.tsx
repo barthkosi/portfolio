@@ -4,8 +4,8 @@ import { motion } from "motion/react";
 import { Masonry, RenderComponentProps } from "masonic";
 import { springBouncy } from "@/lib/transitions";
 import { useState, useMemo, useCallback, useEffect } from "react";
-import InfoBlock from "@/components/InfoBlock";
-import Card from "@/components/Card";
+import InfoBlock from "@/components/interface/InfoBlock";
+import Card from "@/components/interface/Card";
 import books from "@/data/books.json";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
 

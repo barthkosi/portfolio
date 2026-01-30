@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
-import Card from "@/components/Card";
+import Card from "@/components/interface/Card";
 import archive from "@/data/archive.json";
 import { useLoading } from "@/context/LoadingContext";
 

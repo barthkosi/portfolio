@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, Variants } from "motion/react";
-import InfoBlock from "@/components/InfoBlock";
-import Card from "@/components/Card";
-import Filter from "@/components/Filter";
+import InfoBlock from "@/components/interface/InfoBlock";
+import Card from "@/components/interface/Card";
+import Filter from "@/components/interface/Filter";
 import { ContentItem } from "@/lib/content";
 import { Motion, springBouncy } from "@/lib/transitions";
 

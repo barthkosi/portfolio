@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 import { motion, Variants } from "motion/react";
-import Button from "@/components/Button";
+import Button from "@/components/interface/Button";
 import Marquee from "react-fast-marquee";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useLoading } from "@/context/LoadingContext";
-import ProjectShowcase from "@/components/ProjectShowcase";
-import ExtrasSection, { ExtraItem } from "@/components/ExtrasSection";
+import ProjectShowcase from "@/components/interface/ProjectShowcase";
+import ExtrasSection, { ExtraItem } from "@/components/interface/ExtrasSection";
 import { Motion, anim } from "@/lib/transitions";
 import heroMarquee from "@/data/heroMarquee.json";
 

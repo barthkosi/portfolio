@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
-import Button from "@/components/Button";
+import Button from "@/components/interface/Button";
 import { anim, physics } from "@/lib/transitions";
 import { useLoading } from "@/context/LoadingContext";
 
