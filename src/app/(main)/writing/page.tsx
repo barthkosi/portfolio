@@ -5,6 +5,13 @@ import WritingContent from "@/components/pages/WritingContent";
 export const metadata: Metadata = {
     title: "barthkosi - writing",
     description: "My internal monologues externalized, covering everything from tech to the messy human condition.",
+    openGraph: {
+        images: [
+            {
+                url: "https://res.cloudinary.com/barthkosi/image/upload/v3-writing-og.webp",
+            },
+        ],
+    },
 };
 
 export default async function WritingPage() {

@@ -5,6 +5,13 @@ import WorkContent from "@/components/pages/WorkContent";
 export const metadata: Metadata = {
     title: "barthkosi - work",
     description: "These entries document my process of building and refining tools that serve a purpose.",
+    openGraph: {
+        images: [
+            {
+                url: "https://res.cloudinary.com/barthkosi/image/upload/v3-work-og.webp",
+            },
+        ],
+    },
 };
 
 export default async function WorkPage() {
