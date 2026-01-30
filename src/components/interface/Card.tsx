@@ -14,6 +14,13 @@ type CardProps = {
     aspectRatio?: string
 }
 
+// Helper to detect if a URL is a video
+const isVideoUrl = (url: string): boolean => {
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogv'];
+    const lowercaseUrl = url.toLowerCase();
+    return videoExtensions.some(ext => lowercaseUrl.includes(ext));
+};
+
 export default function Card({
     image,
     title,
@@ -23,18 +30,31 @@ export default function Card({
     variant = "default",
     aspectRatio = "aspect-video"
 }: CardProps) {
+    const isVideo = isVideoUrl(image);
+
     // Default Card Content
     const DefaultContent = (
         <>
             <div className="flex flex-col gap-2">
                 <div className="w-full p-2 rounded-[var(--radius-lg)] bg-[var(--background-secondary)]">
                     <div className={`relative w-full ${aspectRatio === "auto" ? "" : aspectRatio} overflow-hidden rounded-xl`}>
-                        <img
-                            src={image}
-                            alt={title || ""}
-                            className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover`}
-                            loading="lazy"
-                        />
+                        {isVideo ? (
+                            <video
+                                src={image}
+                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover`}
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                            />
+                        ) : (
+                            <img
+                                src={image}
+                                alt={title || ""}
+                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover`}
+                                loading="lazy"
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -51,11 +71,22 @@ export default function Card({
     // List Card Content
     const ListContent = (
         <div className="w-full gap-3 flex flex-col md:flex-row items-center group">
-            <img
-                src={image}
-                alt={title || ""}
-                className="aspect-video w-full md:max-w-[240px] rounded-[12px] h-auto object-cover bg-[var(--background-secondary)]"
-            />
+            {isVideo ? (
+                <video
+                    src={image}
+                    className="aspect-video w-full md:max-w-[240px] rounded-[12px] h-auto object-cover bg-[var(--background-secondary)]"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                />
+            ) : (
+                <img
+                    src={image}
+                    alt={title || ""}
+                    className="aspect-video w-full md:max-w-[240px] rounded-[12px] h-auto object-cover bg-[var(--background-secondary)]"
+                />
+            )}
             <div className="w-full flex flex-col gap-1">
                 {title && <h5 className="text-[var(--content-primary)]">{title}</h5>}
                 {description && <div className="label-m text-[var(--content-secondary)]">{description}</div>}

@@ -30,6 +30,13 @@ export default function ArchiveContent() {
 
     const CARD_PADDING = 16;
 
+    // Helper to detect if a URL is a video
+    const isVideoUrl = (url: string): boolean => {
+        const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogv'];
+        const lowercaseUrl = url.toLowerCase();
+        return videoExtensions.some(ext => lowercaseUrl.includes(ext));
+    };
+
     useEffect(() => {
         addBlocker('archive-layout');
 
@@ -41,24 +48,42 @@ export default function ArchiveContent() {
             removeBlocker('archive-layout');
         };
 
+        const handleLoad = (id: string, height: number) => {
+            loadedHeights[id] = height + CARD_PADDING;
+            loadedCount++;
+            if (loadedCount === archive.length) {
+                finishLoading();
+            }
+        };
+
+        const handleError = (id: string) => {
+            loadedHeights[id] = ITEM_WIDTH + CARD_PADDING;
+            loadedCount++;
+            if (loadedCount === archive.length) {
+                finishLoading();
+            }
+        };
+
         archive.forEach((item) => {
-            const img = new Image();
-            img.onload = () => {
-                const aspectRatio = img.naturalHeight / img.naturalWidth;
-                loadedHeights[item.id] = ITEM_WIDTH * aspectRatio + CARD_PADDING;
-                loadedCount++;
-                if (loadedCount === archive.length) {
-                    finishLoading();
-                }
-            };
-            img.onerror = () => {
-                loadedHeights[item.id] = ITEM_WIDTH + CARD_PADDING;
-                loadedCount++;
-                if (loadedCount === archive.length) {
-                    finishLoading();
-                }
-            };
-            img.src = item.image;
+            if (isVideoUrl(item.image)) {
+                // Handle video preloading
+                const video = document.createElement('video');
+                video.onloadedmetadata = () => {
+                    const aspectRatio = video.videoHeight / video.videoWidth;
+                    handleLoad(item.id, ITEM_WIDTH * aspectRatio);
+                };
+                video.onerror = () => handleError(item.id);
+                video.src = item.image;
+            } else {
+                // Handle image preloading
+                const img = new Image();
+                img.onload = () => {
+                    const aspectRatio = img.naturalHeight / img.naturalWidth;
+                    handleLoad(item.id, ITEM_WIDTH * aspectRatio);
+                };
+                img.onerror = () => handleError(item.id);
+                img.src = item.image;
+            }
         });
 
         return () => removeBlocker('archive-layout');
