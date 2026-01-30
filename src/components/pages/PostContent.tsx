@@ -42,7 +42,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
     return (
         <main className="flex flex-col">
             {post.bannerImage && (
-                <div className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[1500/300]">
+                <div className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[1500/500]">
                     <Image src={post.bannerImage} alt={post.title} fill className="object-cover" sizes="100vw" priority />
                 </div>
             )}
