@@ -227,44 +227,55 @@ export default function ArchiveContent() {
     };
 
     return (
-        <div
-            className="w-full h-full overflow-visible relative touch-none"
-            style={{ cursor: isGrabbing ? CURSOR_GRABBED : CURSOR_GRAB }}
-            onMouseDown={(e) => { handleStart(e.clientX, e.clientY); setIsGrabbing(true); }}
-            onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
-            onMouseUp={() => { isDragging.current = false; setIsGrabbing(false); }}
-            onMouseLeave={() => { isDragging.current = false; setIsGrabbing(false); }}
-            onTouchStart={(e) => { handleStart(e.touches[0].clientX, e.touches[0].clientY); setIsGrabbing(true); }}
-            onTouchMove={(e) => handleMove(e.touches[0].clientX, e.touches[0].clientY)}
-            onTouchEnd={() => { isDragging.current = false; setIsGrabbing(false); }}
-            onWheel={(e) => {
-                velocity.current.x -= e.deltaX * 0.1;
-                velocity.current.y -= e.deltaY * 0.1;
-            }}
-        >
-            <div ref={containerRef} className="w-full h-full pointer-events-none overflow-visible">
-                {itemPositions?.map((pos) => (
-                    <div
-                        key={pos.id}
-                        className="absolute flex items-center justify-center overflow-visible"
-                        style={{
-                            width: `${ITEM_WIDTH}px`,
-                            top: 0,
-                            left: 0,
-                            willChange: 'transform'
-                        }}
-                    >
-                        <Card
-                            image={pos.image}
-                            aspectRatio="auto"
-                        />
-                    </div>
-                ))}
-            </div>
+        <>
+            <style>{`
+                .archive-grab-cursor,
+                .archive-grab-cursor * {
+                    cursor: ${CURSOR_GRAB} !important;
+                }
+                .archive-grabbed-cursor,
+                .archive-grabbed-cursor * {
+                    cursor: ${CURSOR_GRABBED} !important;
+                }
+            `}</style>
+            <div
+                className={`w-full h-full overflow-visible relative touch-none ${isGrabbing ? 'archive-grabbed-cursor' : 'archive-grab-cursor'}`}
+                onMouseDown={(e) => { e.preventDefault(); handleStart(e.clientX, e.clientY); setIsGrabbing(true); }}
+                onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
+                onMouseUp={() => { isDragging.current = false; setIsGrabbing(false); }}
+                onMouseLeave={() => { isDragging.current = false; setIsGrabbing(false); }}
+                onTouchStart={(e) => { handleStart(e.touches[0].clientX, e.touches[0].clientY); setIsGrabbing(true); }}
+                onTouchMove={(e) => handleMove(e.touches[0].clientX, e.touches[0].clientY)}
+                onTouchEnd={() => { isDragging.current = false; setIsGrabbing(false); }}
+                onWheel={(e) => {
+                    velocity.current.x -= e.deltaX * 0.1;
+                    velocity.current.y -= e.deltaY * 0.1;
+                }}
+            >
+                <div ref={containerRef} className="w-full h-full pointer-events-none overflow-visible">
+                    {itemPositions?.map((pos) => (
+                        <div
+                            key={pos.id}
+                            className="absolute flex items-center justify-center overflow-visible"
+                            style={{
+                                width: `${ITEM_WIDTH}px`,
+                                top: 0,
+                                left: 0,
+                                willChange: 'transform'
+                            }}
+                        >
+                            <Card
+                                image={pos.image}
+                                aspectRatio="auto"
+                            />
+                        </div>
+                    ))}
+                </div>
 
-            <div className="absolute bottom-10 left-0 w-full text-center text-[var(--content-tertiary)] pointer-events-none select-none label-s">
-                drag/scroll to explore
+                <div className="absolute bottom-10 left-0 w-full text-center text-[var(--content-tertiary)] pointer-events-none select-none label-s">
+                    drag/scroll to explore
+                </div>
             </div>
-        </div>
+        </>
     );
 }
