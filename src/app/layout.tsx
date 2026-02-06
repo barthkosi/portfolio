@@ -4,6 +4,7 @@ import "./globals.css";
 import { LoadingProvider } from "@/context/LoadingContext";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import ScrollToTop from "@/components/ScrollToTop";
 
 // Configure fonts
 const instrumentSans = Instrument_Sans({
@@ -61,6 +62,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <LoadingProvider>
+            <ScrollToTop />
             <SmoothScrollProvider>
               {children}
             </SmoothScrollProvider>
