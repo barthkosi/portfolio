@@ -10,7 +10,7 @@ type CardProps = {
     description?: string
     link?: string
     tags?: string[]
-    variant?: 'default' | 'list'
+    variant?: 'default' | 'list' | 'list-stacked'
     aspectRatio?: string
 }
 
@@ -69,12 +69,13 @@ export default function Card({
     );
 
     // List Card Content
+    const isStacked = variant === 'list-stacked';
     const ListContent = (
-        <div className="w-full gap-3 flex flex-col md:flex-row items-center group">
+        <div className={`w-full gap-3 flex flex-col ${isStacked ? 'bg-[var(--background-primary)]' : 'md:flex-row'} items-center group`}>
             {isVideo ? (
                 <video
                     src={image}
-                    className="aspect-video w-full md:max-w-[240px] rounded-[12px] h-auto object-cover bg-[var(--background-secondary)]"
+                    className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-[12px] object-cover bg-[var(--background-secondary)]`}
                     autoPlay
                     muted
                     loop
@@ -84,7 +85,7 @@ export default function Card({
                 <img
                     src={image}
                     alt={title || ""}
-                    className="aspect-video w-full md:max-w-[240px] rounded-[12px] h-auto object-cover bg-[var(--background-secondary)]"
+                    className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-[12px] object-cover bg-[var(--background-secondary)]`}
                 />
             )}
             <div className="w-full flex flex-col gap-1">
@@ -92,7 +93,7 @@ export default function Card({
                 {description && <div className="label-m text-[var(--content-secondary)]">{description}</div>}
             </div>
             {tags && tags.length > 0 && (
-                <div className="w-full lg:max-w-[320px] flex flex-wrap justify-start md:justify-end gap-2">
+                <div className={`w-full ${isStacked ? '' : 'lg:max-w-[320px]'} flex flex-wrap justify-start ${isStacked ? '' : 'md:justify-end'} gap-2`}>
                     {tags.map((tag) => (
                         <div key={tag} className="px-4 py-2 rounded-full label-s bg-[var(--background-secondary)] text-[var(--content-secondary)]">
                             {tag}
@@ -104,7 +105,7 @@ export default function Card({
     );
 
     // Determines which content to render
-    const content = variant === "list" ? ListContent : DefaultContent;
+    const content = (variant === "list" || variant === "list-stacked") ? ListContent : DefaultContent;
 
     if (link) {
         // Check if link is external (starts with http)
