@@ -47,7 +47,7 @@ function IllustrationsSection() {
                 {/* Header */}
                 <div className="w-full max-w-[400px] flex flex-col gap-2 mb-8">
                     <h3>Illustrations</h3>
-                    <p className="text-[var(--content-secondary)]">Lorem ipsum dolor sit amet consectetur. Venenatis hendrerit felis sed consectetur.</p>
+                    <p className="text-[var(--content-secondary)]">A gallery of lines, colors, shapes and forms.</p>
                 </div>
 
                 {/* Cards container - padding-bottom reserves space for absolute cards (60% width × ~1.5 aspect ratio = 90%) */}
@@ -470,7 +470,7 @@ export default function HomeContent() {
                                 visible: anim.fadeUpBouncy.visible,
                             }}
                         >
-                            <p className="text-[var(--content-secondary)]">Lorem ipsum dolor sit amet consectetur. Venenatis hendrerit felis sed consectetur.</p>
+                            <p className="text-[var(--content-secondary)]">I write about tech, design and the messy human condition.</p>
                         </motion.div>
                         <motion.div
                             className="hidden lg:block"
