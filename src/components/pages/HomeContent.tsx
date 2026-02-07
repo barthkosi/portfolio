@@ -43,7 +43,7 @@ function IllustrationsSection() {
             ref={sectionRef}
             className="relative h-[400vh]"
         >
-            <div className="sticky top-4 px-4 md:px-8 lg:px-20 py-8 md:py-12">
+            <div className="sticky top-4 px-4 md:px-8 lg:px-20 py-8 md:py-12 overflow-hidden">
                 {/* Header */}
                 <div className="w-full max-w-[400px] flex flex-col gap-2 mb-8">
                     <h3>Illustrations</h3>
