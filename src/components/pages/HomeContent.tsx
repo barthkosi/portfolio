@@ -332,7 +332,7 @@ export default function HomeContent() {
                                     <Card
                                         image="https://res.cloudinary.com/barthkosi/image/upload/bw-showcase-1.webp"
                                         title="Bookworm"
-                                        description="An AI powered trip planner and document organizer"
+                                        description="A fully customizable graphic interface for manga and comics."
                                         link=""
                                         tags={["UI/UX", "Branding"]}
                                         aspectRatio="auto"
@@ -349,7 +349,7 @@ export default function HomeContent() {
                                     <Card
                                         image="https://res.cloudinary.com/barthkosi/image/upload/lillup.webp"
                                         title="Lillup"
-                                        description="Posters and event banners for the sui x axelar event in Lagos, NG."
+                                        description="Engineering the digital twin infrastructure for human capital. The future of workforce intelligence."
                                         link=""
                                         tags={["UX Design"]}
                                         variant="list-stacked"
