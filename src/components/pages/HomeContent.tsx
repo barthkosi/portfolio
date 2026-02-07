@@ -545,7 +545,7 @@ export default function HomeContent() {
                         <h6>About Me</h6>
                     </Motion>
                     <ScrollReveal className="w-full md:col-span-2">
-                        Lorem ipsum dolor sit amet consectetur. Venenatis hendrerit felis sed consectetur. Id lobortis venenatis fringilla fringilla ultrices nisi faucibus viverra. Morbi faucibus enim nulla suscipit nulla eget eu. Gravida dignissim purus posuere aenean gravida viverra.
+                        I’m obsessed with the 'why' behind digital experiences. For me, good design isn't about shipping features—it's about removing friction and rejecting manipulation. I want to build software that feels human, helpful, and properly optimized for the individual. The long term goal is simple: turn these ideas into a framework that others can use to build better, kinder tools.
                     </ScrollReveal>
                 </section>
 
