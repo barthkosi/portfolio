@@ -31,7 +31,7 @@ export default function ScrollReveal({ children, className }: ScrollRevealProps)
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
-        offset: ["start 0.55", "start 0.25"],
+        offset: ["start 0.55", "start 0.1"],
     });
 
     const words = children.split(" ");
