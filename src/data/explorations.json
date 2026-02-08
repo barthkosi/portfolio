@@ -1,0 +1,16 @@
+[
+    {
+        "id": "liquid-glass",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-ring.webp",
+        "title": "Liquid glass shader",
+        "description": "Recreated liquid glass in the browser with shaders.",
+        "link": "/explorations/glass"
+    },
+    {
+        "id": "vinyl-player",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player-cover.webp",
+        "title": "Vinyl player",
+        "description": "A fully functioning vinyl player built in framer.",
+        "link": "/explorations/vinyl"
+    }
+]

@@ -1,0 +1,16 @@
+[
+    {
+        "id": "replacement",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/replacement.webp",
+        "title": "What is the benchmark for replacement?",
+        "description": "On taste, agency and the death of average",
+        "link": "/writing/replacement"
+    },
+    {
+        "id": "unproductive",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/unproductive.webp",
+        "title": "Productivity as performance",
+        "description": "The intricacies of perfomative success.",
+        "link": "/writing/unproductive"
+    }
+]
