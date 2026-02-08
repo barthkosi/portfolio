@@ -1,0 +1,52 @@
+[
+    {
+        "id": "explrar",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/explrar-logo.webp",
+        "title": "Explrar",
+        "description": "An AI powered trip planner and document organizer",
+        "link": "",
+        "tags": [
+            "UI/UX",
+            "Product Design"
+        ],
+        "aspectRatio": "16:9",
+        "colSpan": 2
+    },
+    {
+        "id": "sui-axelar",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/sui-image-v1.webp",
+        "title": "Sui x Axelar event graphics",
+        "description": "Posters and event banners for the sui x axelar event in Lagos, NG.",
+        "link": "",
+        "tags": [
+            "Graphic Design"
+        ],
+        "aspectRatio": "auto",
+        "colSpan": 1
+    },
+    {
+        "id": "bookworm",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-showcase-1.webp",
+        "title": "Bookworm",
+        "description": "A fully customizable graphic interface for manga and comics.",
+        "link": "",
+        "tags": [
+            "UI/UX",
+            "Branding"
+        ],
+        "aspectRatio": "auto",
+        "row": 2
+    },
+    {
+        "id": "lillup",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/lillup.webp",
+        "title": "Lillup",
+        "description": "Engineering the digital twin infrastructure for human capital. The future of workforce intelligence.",
+        "link": "",
+        "tags": [
+            "UX Design"
+        ],
+        "aspectRatio": "16:9",
+        "row": 2
+    }
+]

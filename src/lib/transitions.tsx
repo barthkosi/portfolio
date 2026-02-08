@@ -116,6 +116,13 @@ export const Motion = ({
 };
 
 export const stagger = (interval = 0.1, delay = 0) => ({
+    hidden: {},
+    visible: {
+        transition: {
+            staggerChildren: interval,
+            delayChildren: delay,
+        },
+    },
     animate: {
         transition: {
             staggerChildren: interval,
@@ -123,3 +130,46 @@ export const stagger = (interval = 0.1, delay = 0) => ({
         },
     },
 });
+
+// Shared animation variants
+export const fadeUpVariant = {
+    hidden: anim.fadeUpBouncy.hidden,
+    visible: anim.fadeUpBouncy.visible,
+};
+
+// Shared viewport configuration for scroll-triggered animations
+export const inViewConfig = { once: true, margin: "0px 0px -150px 0px" };
+
+// Shared gradient mask styles for marquee/carousel effects
+export const gradientMaskVertical = {
+    maskImage: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 12.5%, rgb(0, 0, 0) 87.5%, rgba(0, 0, 0, 0) 100%)',
+    WebkitMaskImage: 'linear-gradient(rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 12.5%, rgb(0, 0, 0) 87.5%, rgba(0, 0, 0, 0) 100%)'
+};
+
+export const gradientMaskHorizontal = {
+    maskImage: 'linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 10%, rgb(0, 0, 0) 90%, rgba(0, 0, 0, 0) 100%)',
+    WebkitMaskImage: 'linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgb(0, 0, 0) 10%, rgb(0, 0, 0) 90%, rgba(0, 0, 0, 0) 100%)'
+};
+
+// Reusable animated section wrapper
+interface AnimatedSectionProps extends HTMLMotionProps<"div"> {
+    staggerInterval?: number;
+    staggerDelay?: number;
+}
+
+export const AnimatedSection = ({
+    staggerInterval = 0.1,
+    staggerDelay = 0,
+    children,
+    ...props
+}: AnimatedSectionProps) => (
+    <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={inViewConfig}
+        variants={stagger(staggerInterval, staggerDelay)}
+        {...props}
+    >
+        {children}
+    </motion.div>
+);
