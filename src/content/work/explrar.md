@@ -94,13 +94,11 @@ The constraint that came with that decision was making sure all five inputs were
 
 Silent AI. You don't talk to it. You don't prompt it. You just tell it what you need through a form that takes thirty seconds to fill, and it does the rest.
 
-`[ VISUAL: Itinerary ]`
+![](https://res.cloudinary.com/barthkosi/image/upload/explrar-trip-plan.webp)
 
-`[ VISUAL: Activities]`
+![](https://res.cloudinary.com/barthkosi/image/upload/explrar-activities.webp)
 
-`[ VISUAL: Map ]`
-
-`[ VISUAL: Map ]`
+![](https://res.cloudinary.com/barthkosi/image/upload/explrar-map.webp)
 
 ## Everything Else
 
