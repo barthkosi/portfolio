@@ -68,7 +68,7 @@ export default function Post({ type }: PostProps) {
 
             {post.bannerImage && (
                 <div className="w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px]">
-                    <img src={post.bannerImage} alt={post.title} className="w-full aspect-[16/9] object-cover" />
+                    <img src={post.bannerImage} alt={post.title} className="w-full aspect-[16/6] object-cover" />
                 </div>
             )}
 
