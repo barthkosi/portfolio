@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useMemo } from "react";
-import Head from "../components/Head";
-import Card from "../components/Card";
+import Head from "../components/interface/Head";
+import Card from "../components/interface/Card";
 import archive from "../data/archive.json";
 import { useLoading } from "../context/LoadingContext";
 
@@ -42,7 +42,7 @@ export default function Archive() {
 
     archive.forEach((item) => {
       const img = new Image();
-      img.onload = () => {        
+      img.onload = () => {
         const aspectRatio = img.naturalHeight / img.naturalWidth;
         loadedHeights[item.id] = ITEM_WIDTH * aspectRatio + CARD_PADDING;
         loadedCount++;

@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import Nav from "./Nav";
+import Nav from "./interface/Nav";
 
 export default function PageLayoutFull() {
     return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, Variants } from "motion/react";
-import { anim, stagger } from "../lib/transitions";
+import { anim, stagger } from "../../lib/transitions";
 
 export type MediaType = 'image' | 'video';
 

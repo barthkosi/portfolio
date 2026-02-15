@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import Head from "../components/Head";
+import Head from "../components/interface/Head";
 import { useLoading } from "../context/LoadingContext";
 import heroMarquee from "../data/heroMarquee.json";
 import {

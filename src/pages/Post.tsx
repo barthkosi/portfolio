@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import Head from '../components/Head';
-import Card from '../components/Card';
+import Head from '../components/interface/Head';
+import Card from '../components/interface/Card';
 import { getPostBySlug, getContent, ContentItem, ContentType } from '../lib/content';
 import React from 'react';
-import Button from '@/components/Button';
+import Button from '@/components/interface/Button';
 
 interface PostProps {
     type: ContentType;

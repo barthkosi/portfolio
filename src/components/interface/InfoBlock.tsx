@@ -1,6 +1,6 @@
 import { motion, Variants } from "motion/react"
-import { anim } from "../lib/transitions"
-import { useLoading } from "../context/LoadingContext"
+import { anim } from "../../lib/transitions"
+import { useLoading } from "../../context/LoadingContext"
 
 type InfoBlockVariant = 'default' | 'centered'
 

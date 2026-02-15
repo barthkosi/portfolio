@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { anim, stagger } from "@/lib/transitions";
-import Button from "@/components/Button";
+import Button from "@/components/interface/Button";
 
 const services = [
     {

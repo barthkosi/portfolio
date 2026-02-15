@@ -1,5 +1,5 @@
 import { Motion } from "@/lib/transitions";
-import ScrollReveal from "@/components/ScrollReveal";
+import ScrollReveal from "@/components/interface/ScrollReveal";
 import { inViewConfig } from "@/lib/homeAnimations";
 
 export function AboutSection() {

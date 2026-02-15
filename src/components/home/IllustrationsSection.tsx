@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, MotionValue } from "motion/react";
-import Button from "@/components/Button";
+import Button from "@/components/interface/Button";
 import illustrations from "@/data/illustrations.json";
 
 interface IllustrationCardAnimatedProps {

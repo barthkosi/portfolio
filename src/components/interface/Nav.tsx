@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
-import Button from "../components/Button";
-import { anim, physics } from "../lib/transitions";
-import { useLoading } from "../context/LoadingContext";
+import Button from "./Button";
+import { anim, physics } from "../../lib/transitions";
+import { useLoading } from "../../context/LoadingContext";
 
 export default function Nav() {
   const [isOpen, setIsOpen] = useState(false);

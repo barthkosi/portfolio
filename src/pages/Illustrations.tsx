@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import { motion } from "motion/react";
 import { Masonry, RenderComponentProps } from "masonic";
-import Head from "../components/Head";
+import Head from "../components/interface/Head";
 import { springBouncy } from "../lib/transitions";
-import InfoBlock from "../components/InfoBlock";
-import Card from "../components/Card";
+import InfoBlock from "../components/interface/InfoBlock";
+import Card from "../components/interface/Card";
 import illustrations from "../data/illustrations.json";
 
 type IllustrationItem = {
