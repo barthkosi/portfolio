@@ -160,7 +160,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                         }
                                         if (images.length > 0) {
                                             return (
-                                                <div className="flex flex-col md:flex-row gap-6 mb-4 lg:mb-6 lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]">
+                                                <div className="flex flex-col md:flex-row gap-4 lg:gap-6 mb-4 lg:mb-6 lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]">
                                                     {images.map((img, i) => (
                                                         <div key={i} className="flex-1 min-w-0">
                                                             <figure>
