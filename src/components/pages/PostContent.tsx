@@ -11,17 +11,17 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
     const [isLoaded, setIsLoaded] = useState(false);
 
     return (
-        <span
-            className={`block relative overflow-hidden rounded-[12px] w-full lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px] bg-[var(--background-secondary)] transition-all duration-300 ${!isLoaded ? 'shimmer-loading' : ''}`}
+        <div
+            className={`relative overflow-hidden rounded-[12px] w-full lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px] bg-[var(--background-secondary)] transition-all duration-300 ${!isLoaded ? 'shimmer-loading' : ''}`}
             style={{ aspectRatio: isLoaded ? 'auto' : aspectRatio }}
         >
-            <span className={`block w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
+            <div className={`w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
                 {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, {
                     onLoad: () => setIsLoaded(true),
                     onLoadedData: () => setIsLoaded(true),
                 }) : children}
-            </span>
-        </span>
+            </div>
+        </div>
     );
 };
 
@@ -42,7 +42,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
     return (
         <main className="flex flex-col">
             {post.bannerImage && (
-                <div className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/9]">
+                <div className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/6]">
                     <Image src={post.bannerImage} alt={post.title} fill className="object-cover" sizes="100vw" priority />
                 </div>
             )}
@@ -75,42 +75,60 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                 <article className="w-full max-w-[640px]">
                     <ReactMarkdown
                         components={{
-                            p: (props) => <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
+                            p: ({ children, ...rest }) => {
+                                // Check if paragraph contains only media (figures) — skip wrapper to avoid double margin
+                                const childArray = React.Children.toArray(children);
+                                const isMediaOnly = childArray.length > 0 && childArray.every(
+                                    child => React.isValidElement(child) && (child as React.ReactElement<any>).type === 'figure'
+                                );
+                                if (isMediaOnly) return <>{children}</>;
+                                return <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...rest}>{children}</p>;
+                            },
                             a: (props) => <a className="blog-text mb-4 lg:mb-6 text-[var(--content-link)] hover:text-[var(--content-link-hover)] transition-colors" {...props} />,
                             img: (props) => {
-                                const src = String(props.src || '');
+                                const src = props.src || '';
+                                const alt = props.alt || '';
                                 // Detect video file extensions
                                 if (src.match(/\.(mp4|webm|mov)(\?.*)?$/i)) {
                                     return (
-                                        <MediaWrapper aspectRatio="16/9" type="video">
-                                            <video
-                                                src={src}
-                                                className="w-full h-auto block"
-                                                autoPlay
-                                                loop
-                                                muted
-                                                playsInline
-                                            />
-                                        </MediaWrapper>
+                                        <figure className="mb-4 lg:mb-6">
+                                            <MediaWrapper aspectRatio="16/9" type="video">
+                                                <video
+                                                    src={src}
+                                                    className="w-full h-auto block"
+                                                    autoPlay
+                                                    loop
+                                                    muted
+                                                    playsInline
+                                                />
+                                            </MediaWrapper>
+                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                        </figure>
                                     );
                                 }
                                 // Detect Cloudinary video player embeds
                                 if (src.includes('player.cloudinary.com/embed')) {
                                     return (
-                                        <MediaWrapper aspectRatio="16/9" type="video">
-                                            <iframe
-                                                src={src}
-                                                className="w-full aspect-video block"
-                                                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                                                allowFullScreen
-                                            />
-                                        </MediaWrapper>
+                                        <figure className="mb-4 lg:mb-6">
+                                            <MediaWrapper aspectRatio="16/9" type="video">
+                                                <iframe
+                                                    src={src}
+                                                    className="w-full aspect-video block"
+                                                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                                                    allowFullScreen
+                                                />
+                                            </MediaWrapper>
+                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                        </figure>
                                     );
                                 }
                                 return (
-                                    <MediaWrapper aspectRatio="3/2" type="image">
-                                        <img className="w-full h-auto block" {...props} alt={props.alt || ""} />
-                                    </MediaWrapper>
+                                    <figure className="mb-4 lg:mb-6">
+                                        <MediaWrapper aspectRatio="3/2" type="image">
+                                            <img className="w-full h-auto block" {...props} />
+                                        </MediaWrapper>
+                                        {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                    </figure>
                                 );
                             },
                             h1: (props) => <h1 className="h3 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
