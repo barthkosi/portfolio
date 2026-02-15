@@ -47,7 +47,7 @@ export default function WorkContent({ initialProjects, allTags }: WorkContentPro
     };
 
     return (
-        <>
+        <div className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
             <InfoBlock
                 title="Work"
                 number={projects.length}
@@ -55,7 +55,7 @@ export default function WorkContent({ initialProjects, allTags }: WorkContentPro
                 onComplete={() => setIntroFinished(true)}
             />
 
-            <div className="w-full flex flex-col">
+            <div className="w-full items-center lg:items-start flex flex-col">
                 <Filter
                     tags={tags}
                     activeTag={activeTag}
@@ -125,6 +125,6 @@ export default function WorkContent({ initialProjects, allTags }: WorkContentPro
                     </Motion>
                 )}
             </div>
-        </>
+        </div>
     );
 }
