@@ -86,7 +86,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                             },
                             a: (props) => <a className="blog-text mb-4 lg:mb-6 text-[var(--content-link)] hover:text-[var(--content-link-hover)] transition-colors" {...props} />,
                             img: (props) => {
-                                const src = props.src || '';
+                                const src = String(props.src || '');
                                 const alt = props.alt || '';
                                 // Detect video file extensions
                                 if (src.match(/\.(mp4|webm|mov)(\?.*)?$/i)) {
