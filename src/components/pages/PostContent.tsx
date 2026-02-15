@@ -109,7 +109,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                                     playsInline
                                                 />
                                             </MediaWrapper>
-                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
                                         </figure>
                                     );
                                 }
@@ -125,7 +125,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                                     allowFullScreen
                                                 />
                                             </MediaWrapper>
-                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
                                         </figure>
                                     );
                                 }
@@ -134,7 +134,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                         <MediaWrapper aspectRatio="3/2" type="image">
                                             <img className="w-full h-auto block" {...props} />
                                         </MediaWrapper>
-                                        {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                        {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
                                     </figure>
                                 );
                             },
