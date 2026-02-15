@@ -36,6 +36,13 @@ interface PostContentProps {
     nextPost?: { slug: string; title: string } | null;
 }
 
+// Pre-process markdown: convert ::: blocks into ```row fenced code blocks
+const processContent = (content: string) => {
+    return content.replace(/^:::[ ]*\r?\n([\s\S]*?)^:::[ ]*$/gm, (_, block: string) => {
+        return '```row\n' + block.trim() + '\n```';
+    });
+};
+
 export default function PostContent({ post, otherPosts, type, prevPost, nextPost }: PostContentProps) {
     if (!post) return null;
 
@@ -138,9 +145,42 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                             ol: (props) => <ol className="list-decimal pl-6 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
                             li: (props) => <li className="mb-4 lg:mb-6 pl-1" {...props} />,
                             blockquote: (props) => <blockquote className="border-l-5 border-[var(--border-primary)] pl-3 mb-6 text-[var(--content-tertiary)]" {...props} />,
+                            pre: ({ children }) => {
+                                // Check if this is a :::row gallery code block
+                                const child = React.Children.toArray(children)[0];
+                                if (React.isValidElement(child)) {
+                                    const codeProps = child.props as any;
+                                    if (codeProps.className === 'language-row') {
+                                        const raw = String(codeProps.children).trim();
+                                        const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+                                        const images: { alt: string; src: string }[] = [];
+                                        let match;
+                                        while ((match = imageRegex.exec(raw)) !== null) {
+                                            images.push({ alt: match[1], src: match[2] });
+                                        }
+                                        if (images.length > 0) {
+                                            return (
+                                                <div className="flex flex-col md:flex-row gap-6 mb-4 lg:mb-6 lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]">
+                                                    {images.map((img, i) => (
+                                                        <div key={i} className="flex-1 min-w-0">
+                                                            <figure>
+                                                                <div className="rounded-[12px] overflow-hidden">
+                                                                    <img className="w-full h-auto block" src={img.src} alt={img.alt} />
+                                                                </div>
+                                                                {img.alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{img.alt}</figcaption>}
+                                                            </figure>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        }
+                                    }
+                                }
+                                return <pre>{children}</pre>;
+                            },
                         }}
                     >
-                        {post.content || ""}
+                        {processContent(post.content || "")}
                     </ReactMarkdown>
                 </article>
 
