@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Card from "@/components/Card";
 import Button from "@/components/Button";
 import { Motion, stagger } from "@/lib/transitions";
@@ -6,6 +7,7 @@ import { fadeUpVariant, inViewConfig } from "@/lib/homeAnimations";
 import explorationsData from "@/data/explorations.json";
 
 export function ExplorationsSection() {
+    const isDesktop = useMediaQuery("(min-width: 768px)");
     return (
         <section className="flex flex-col items-center px-4 md:px-8 lg:px-20 py-8 md:py-12 gap-8">
             <motion.div
@@ -26,15 +28,17 @@ export function ExplorationsSection() {
             <motion.div
                 className="w-full flex flex-col md:flex-row gap-5"
                 initial="hidden"
-                whileInView="visible"
+                whileInView={isDesktop ? "visible" : undefined}
                 viewport={inViewConfig}
-                variants={stagger(0.1)}
+                variants={isDesktop ? stagger(0.1) : undefined}
             >
                 {explorationsData.map((item) => (
                     <motion.div
                         key={item.id}
                         className="w-full"
                         variants={fadeUpVariant}
+                        whileInView={!isDesktop ? "visible" : undefined}
+                        viewport={inViewConfig}
                     >
                         <Card
                             image={item.image}

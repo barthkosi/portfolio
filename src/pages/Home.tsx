@@ -9,6 +9,9 @@ import {
   WritingSection,
   AboutSection,
   IllustrationsSection,
+  HowIOperateSection,
+  ServicesSection,
+  FinalCTASection,
 } from "@/components/home";
 
 export default function Home() {
@@ -52,9 +55,12 @@ export default function Home() {
         </div>
 
         <ExplorationsSection />
+        <HowIOperateSection />
+        <ServicesSection />
         <WritingSection />
         <AboutSection />
         <IllustrationsSection />
+        <FinalCTASection />
       </main>
     </>
   );
