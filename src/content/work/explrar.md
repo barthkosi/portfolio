@@ -22,11 +22,11 @@ Later came faster than expected.
 
 Explrar was pivoting, recent logo refresh and the whole product was shifting to AI-first — not a chatbot, not a back-and-forth conversation, but something quieter and more considered. A single form. Five inputs. You pick your destination, your dates, your group size, your meal preferences, your activity level, and the product hands you a fully custom itinerary. No prompt anxiety. No staring at a blinking cursor trying to figure out how to phrase your request. Just options, a click, and a plan.
 
-`[ VISUAL: Logo refresh before vs after ]`
+![VISUAL: Logo refresh before vs after](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
 That got my attention. And with a new brief came something I didn't have before — room to actually cook.
 
-## The Itch
+### The Itch
 
 I was maybe 30-40% through the project. Designing screens, following the brief, doing the thing. And then that part of my brain — the one that's gotten me in trouble and saved me in equal measure — just kicked in.
 
@@ -44,45 +44,45 @@ Those four words liberated me.
 
 From there it was a cascade. The next thing that had been quietly bothering me was the typeface — Poppins, one of the grandfathers of ugly typography. I know, I know. It's everywhere. That's the problem. I tried a few alternatives against the UI and landed on Manrope for headings and labels, Inter for body text. Clean, modern, just characterful enough without screaming for attention.
 
-`[ VISUAL: Type comparison — Poppins vs Manrope/Inter on the same screen ]`
+![Type comparison — Poppins vs Manrope/Inter on the same screen](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
 Then came the color reckoning.
 
 The original UI had yellow and blue running through everything — pulled straight from the logo and spread across the interface like it was doing the brand a favor. It wasn't. Right around the time the AI redesign kicked off, Explrar refreshed their logo, and the yellow got quietly demoted to a tiny arrow in the mark. That was all the opening I needed. So I made the call to cut it from the UI entirely. The yellow failed every contrast ratio test possible, didn't play well with light text, and designing around it would've been a constant battle with accessibility for a color that wasn't even pulling its weight anymore. So out it went.
 
-`[ VISUAL: Color comparison — yellow/blue version vs blue-only version, same screen ]`
+![Color comparison — yellow/blue version vs blue-only version, same screen](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
 Blue took the lead. Things started breathing.
 
-`[ VISUAL: Before/after — full screen comparison, old design vs new ]`
+![Before/after — full screen comparison, old design vs new](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
-## The System
+### The System
 
 At some point during the redesign I'd standardized enough of the UI that a pattern was clearly emerging. There was a flow to it, a logic. And once you can see the logic, building a design system isn't really optional anymore — it's just the obvious next step.
 
 So I pitched it.
 
-`[ VISUAL: screens with padding highlighted to show consistent spacing. ]`
+![Screens with padding highlighted to show consistent spacing](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
 The argument was simple: a proper system would make iteration faster, open up more room for creativity on the interesting problems, and stop the quiet chaos of color inconsistencies that had been creeping in. I couldn't imagine handing off a UI with 50 different hardcoded color values to a developer and calling that a good day's work.
 
 I built it the way you're supposed to build these things — atomically. Single components first, small and isolated, then scaling up, nesting smaller pieces inside larger ones until you had a full vocabulary. Buttons, inputs, cards, dropdowns, all the way up to full section templates. Over 40 components total, each with usage guidelines, consistent naming schemes, and documented spacing and sizing values.
 
-`[ VISUAL: Full design system spread — Figma screenshot showing all 40+ components laid out ]`
+![Full design system spread — Figma screenshot showing all 40+ components laid out](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
-That next part came out of a specific frustration. One of the devs was eyeballing everything — typography, spacing, scaling. Just winging it. And I'd watch my carefully considered layouts come back slightly off in ways that were hard to articulate but impossible to ignore. So I started writing obsessively detailed documentation. Every value. Every rule. The kind of specs that leave no room for interpretation, which is exactly the point.
+This next part came out of a specific frustration one that a lot of designers can relate to. One of the devs was eyeballing everything — typography, spacing, scaling. Just winging it. And I'd watch my carefully considered layouts come back slightly off in ways that were hard to articulate but impossible to ignore. So I started writing obsessively detailed documentation. Every value. Every rule. The kind of specs that leave no room for interpretation, which is exactly the point.
 
-`[ VISUAL: Snippet of handoff documentation — spacing values, naming conventions, usage guidelines, multiple shots. ]`
+![Snippet of handoff documentation — spacing values, naming conventions, usage guidelines, multiple shots](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
 My favorite things to build were the custom dropdown components for the itinerary form. Nothing revolutionary about them technically — they were just fun to build, and I cared a lot about making sure they felt exactly right. Consistent, considered, unmistakably Explrar. Sometimes that's the whole job.
 
 ![Custom dropdown components](https://res.cloudinary.com/barthkosi/image/upload/explrar-custom-dropdown.webp)
 
-## The Form
+### The Form
 
 The centerpiece of the AI redesign was a single screen.
 
-![itinerary form screens](https://res.cloudinary.com/barthkosi/image/upload/explrar-itinerary-form.webp)
+![Itinerary form screens](https://res.cloudinary.com/barthkosi/image/upload/explrar-itinerary-form.webp)
 
 Five inputs: destination city, trip dates, number of travelers, meal preferences, and activity level. That's it. Fill it out, and the app hands you a fully tailored itinerary.
 
@@ -100,7 +100,7 @@ Silent AI. You don't talk to it. You don't prompt it. You just tell it what you 
 
 ![](https://res.cloudinary.com/barthkosi/image/upload/explrar-map.webp)
 
-## Everything Else
+### Everything Else
 
 Not every screen needs a crisis to be worth designing well.
 
@@ -110,9 +110,11 @@ The home screen was the first thing users would see after logging in, so it had 
 
 The document storage feature came later. The idea was straightforward — a place to keep digital copies of the things you always need on a trip. The more interesting part was the upload flow. Instead of a full screen takeover, I went with a bottom sheet. You tap upload, the sheet comes up, you select your document, and then you link it to a trip. And here's the quiet smart part: depending on where in the app you trigger the upload from, it already knows which trip to suggest. Context-aware, frictionless, exactly the kind of detail that nobody notices until it's missing.
 
-`[ VISUAL: Document upload bottom sheet ]`
+![Document upload bottom sheet](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
-`[ VISUAL: Document upload screen 2 ]`
+![Document upload screen](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
+
+![Document upload - closeup](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
 Then there were the badges. 
 
@@ -120,17 +122,28 @@ Then there were the badges.
 
 Users earned them based on number of trips completed — each one a custom illustration, with a color system that evolved the further you climbed. The early badges looked one way, the later ones felt like you'd actually earned something different. It was one of the more purely fun things to design on this project, and it gave me a reason to start illustrating again, which I hadn't expected from a travel app.
 
-`[ VISUAL: Three badge screen side by side in the UI]`
+![Three badge screen side by side in the UI](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
-## Looking Back
+### Looking Back
 
 This project was a rollercoaster. I came in with low expectations, a narrow brief, and a payment flow to design. I left with a full AI redesign, a design system with over 40 components, a document storage feature, a badge system, a home screen, and a bunch of illustrated badges that I got to draw myself.
 
-`[ VISUAL: Extra UI and even stuff that was not shipped 4-5 screens]`
+![](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
+
+![](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
+
+![](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
+
+![Extra UI and even stuff that was not shipped 4-5 screens](https://res.cloudinary.com/barthkosi/image/upload/placeholder.webp)
 
 There was also a widget tutorial flow I designed — illustrated instructions walking users through adding an Explrar Widget to their home screen. It never made it to production, which is always a little sad, but it exists, and it was good work.
 
-![Widget tutorial illustrations that never shipped](https://res.cloudinary.com/barthkosi/image/upload/explrar-widget-tutorial.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/explrar-widget-tutorial.webp)
+
+:::
+![](https://res.cloudinary.com/barthkosi/image/upload/explrar-widget-tutorial.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/explrar-widget-tutorial.webp)
+:::
 
 The creative freedom came slowly and then all at once, and once it arrived I grabbed it with both hands. The design system alone was one of the better learning experiences I've had — I'm always trying to learn while I'm designing, and building something that structured, that documented, that considered from the ground up, was genuinely satisfying in a way I didn't see coming.
 

@@ -29,6 +29,13 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
     );
 };
 
+// Pre-process markdown: convert ::: blocks into ```row fenced code blocks
+const processContent = (content: string) => {
+    return content.replace(/^:::[ ]*\r?\n([\s\S]*?)^:::[ ]*$/gm, (_, block: string) => {
+        return '```row\n' + block.trim() + '\n```';
+    });
+};
+
 export default function Post({ type }: PostProps) {
     const { slug } = useParams<{ slug: string }>();
     const [post, setPost] = useState<ContentItem | null>(null);
@@ -102,13 +109,50 @@ export default function Post({ type }: PostProps) {
                     <ReactMarkdown
                         components={{
                             p: ({ children, ...rest }) => {
-                                // Check if paragraph contains only media (figures) — skip wrapper to avoid double margin
                                 const childArray = React.Children.toArray(children);
-                                const isMediaOnly = childArray.length > 0 && childArray.every(
+                                const filteredChildren = childArray.filter(child =>
+                                    !(typeof child === 'string' && child.trim().length === 0)
+                                );
+                                const isMediaOnly = filteredChildren.length > 0 && filteredChildren.every(
                                     child => React.isValidElement(child) && (child as React.ReactElement<any>).type === 'figure'
                                 );
-                                if (isMediaOnly) return <>{children}</>;
+                                if (isMediaOnly) {
+                                    return <div className="mb-4 lg:mb-6">{children}</div>;
+                                }
                                 return <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...rest}>{children}</p>;
+                            },
+                            pre: ({ children }) => {
+                                // Check if this is a :::row gallery code block
+                                const child = React.Children.toArray(children)[0];
+                                if (React.isValidElement(child)) {
+                                    const codeProps = child.props as any;
+                                    if (codeProps.className === 'language-row') {
+                                        const raw = String(codeProps.children).trim();
+                                        const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+                                        const images: { alt: string; src: string }[] = [];
+                                        let match;
+                                        while ((match = imageRegex.exec(raw)) !== null) {
+                                            images.push({ alt: match[1], src: match[2] });
+                                        }
+                                        if (images.length > 0) {
+                                            return (
+                                                <div className="flex flex-col md:flex-row gap-4 lg:gap-6 mb-4 lg:mb-6 lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]">
+                                                    {images.map((img, i) => (
+                                                        <div key={i} className="flex-1 min-w-0">
+                                                            <figure>
+                                                                <div className="rounded-[12px] overflow-hidden">
+                                                                    <img className="w-full h-auto block" src={img.src} alt={img.alt} />
+                                                                </div>
+                                                                {img.alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{img.alt}</figcaption>}
+                                                            </figure>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        }
+                                    }
+                                }
+                                return <pre>{children}</pre>;
                             },
                             a: (props) => <a className="blog-text mb-4 lg:mb-6 text-[var(--content-link)] hover:text-[var(--content-link-hover)] transition-colors" {...props} />,
                             img: (props) => {
@@ -117,7 +161,7 @@ export default function Post({ type }: PostProps) {
                                 // Detect video file extensions
                                 if (src.match(/\.(mp4|webm|mov)(\?.*)?$/i)) {
                                     return (
-                                        <figure className="mb-4 lg:mb-6">
+                                        <figure>
                                             <MediaWrapper aspectRatio="16/9" type="video">
                                                 <video
                                                     src={src}
@@ -128,14 +172,14 @@ export default function Post({ type }: PostProps) {
                                                     playsInline
                                                 />
                                             </MediaWrapper>
-                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
                                         </figure>
                                     );
                                 }
                                 // Detect Cloudinary video player embeds
                                 if (src.includes('player.cloudinary.com/embed')) {
                                     return (
-                                        <figure className="mb-4 lg:mb-6">
+                                        <figure>
                                             <MediaWrapper aspectRatio="16/9" type="video">
                                                 <iframe
                                                     src={src}
@@ -144,16 +188,16 @@ export default function Post({ type }: PostProps) {
                                                     allowFullScreen
                                                 />
                                             </MediaWrapper>
-                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
                                         </figure>
                                     );
                                 }
                                 return (
-                                    <figure className="mb-4 lg:mb-6">
+                                    <figure>
                                         <MediaWrapper aspectRatio="3/2" type="image">
                                             <img className="w-full h-auto block" {...props} />
                                         </MediaWrapper>
-                                        {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                        {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
                                     </figure>
                                 );
                             },
@@ -166,7 +210,7 @@ export default function Post({ type }: PostProps) {
                             blockquote: (props) => <blockquote className="border-l-5 border-[var(--border-primary)] pl-3 mb-6 text-[var(--content-tertiary)]" {...props} />,
                         }}
                     >
-                        {post.content}
+                        {processContent(post.content)}
                     </ReactMarkdown>
                 </article>
 
