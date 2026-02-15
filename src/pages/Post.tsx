@@ -5,6 +5,7 @@ import Head from '../components/Head';
 import Card from '../components/Card';
 import { getPostBySlug, getContent, ContentItem, ContentType } from '../lib/content';
 import React from 'react';
+import Button from '@/components/Button';
 
 interface PostProps {
     type: ContentType;
@@ -87,14 +88,12 @@ export default function Post({ type }: PostProps) {
                             ))}
                         </div>
                         {post.buttonText && post.buttonLink && (
-                            <a
+                            <Button
                                 href={post.buttonLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="label-m px-4 py-2 rounded-xl bg-[var(--background-secondary)] text-[var(--content-primary)] hover:bg-[var(--background-tertiary)] transition-colors"
+                                openInNewTab
                             >
                                 {post.buttonText}
-                            </a>
+                            </Button>
                         )}
                     </div>
                 </div>
@@ -102,42 +101,60 @@ export default function Post({ type }: PostProps) {
                 <article className="w-full max-w-[640px]">
                     <ReactMarkdown
                         components={{
-                            p: (props) => <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
+                            p: ({ children, ...rest }) => {
+                                // Check if paragraph contains only media (figures) — skip wrapper to avoid double margin
+                                const childArray = React.Children.toArray(children);
+                                const isMediaOnly = childArray.length > 0 && childArray.every(
+                                    child => React.isValidElement(child) && (child as React.ReactElement<any>).type === 'figure'
+                                );
+                                if (isMediaOnly) return <>{children}</>;
+                                return <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...rest}>{children}</p>;
+                            },
                             a: (props) => <a className="blog-text mb-4 lg:mb-6 text-[var(--content-link)] hover:text-[var(--content-link-hover)] transition-colors" {...props} />,
                             img: (props) => {
                                 const src = props.src || '';
+                                const alt = props.alt || '';
                                 // Detect video file extensions
                                 if (src.match(/\.(mp4|webm|mov)(\?.*)?$/i)) {
                                     return (
-                                        <MediaWrapper aspectRatio="16/9" type="video">
-                                            <video
-                                                src={src}
-                                                className="w-full h-auto block"
-                                                autoPlay
-                                                loop
-                                                muted
-                                                playsInline
-                                            />
-                                        </MediaWrapper>
+                                        <figure className="mb-4 lg:mb-6">
+                                            <MediaWrapper aspectRatio="16/9" type="video">
+                                                <video
+                                                    src={src}
+                                                    className="w-full h-auto block"
+                                                    autoPlay
+                                                    loop
+                                                    muted
+                                                    playsInline
+                                                />
+                                            </MediaWrapper>
+                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                        </figure>
                                     );
                                 }
                                 // Detect Cloudinary video player embeds
                                 if (src.includes('player.cloudinary.com/embed')) {
                                     return (
-                                        <MediaWrapper aspectRatio="16/9" type="video">
-                                            <iframe
-                                                src={src}
-                                                className="w-full aspect-video block"
-                                                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                                                allowFullScreen
-                                            />
-                                        </MediaWrapper>
+                                        <figure className="mb-4 lg:mb-6">
+                                            <MediaWrapper aspectRatio="16/9" type="video">
+                                                <iframe
+                                                    src={src}
+                                                    className="w-full aspect-video block"
+                                                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                                                    allowFullScreen
+                                                />
+                                            </MediaWrapper>
+                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                        </figure>
                                     );
                                 }
                                 return (
-                                    <MediaWrapper aspectRatio="3/2" type="image">
-                                        <img className="w-full h-auto block" {...props} />
-                                    </MediaWrapper>
+                                    <figure className="mb-4 lg:mb-6">
+                                        <MediaWrapper aspectRatio="3/2" type="image">
+                                            <img className="w-full h-auto block" {...props} />
+                                        </MediaWrapper>
+                                        {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2">{alt}</figcaption>}
+                                    </figure>
                                 );
                             },
                             h1: (props) => <h1 className="h3 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
