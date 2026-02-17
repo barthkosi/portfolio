@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import Button from "./Button";
 import Card from "./Card";
 import { physics } from "@/lib/transitions";
-import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
 
 export interface ExtraItem {
     id: string;

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import Head from "../components/Head";
+import Head from "../components/interface/Head";
 import { useLoading } from "../context/LoadingContext";
 import heroMarquee from "../data/heroMarquee.json";
 import {
@@ -9,6 +9,9 @@ import {
   WritingSection,
   AboutSection,
   IllustrationsSection,
+  HowIOperateSection,
+  ServicesSection,
+  FinalCTASection,
 } from "@/components/home";
 
 export default function Home() {
@@ -52,9 +55,12 @@ export default function Home() {
         </div>
 
         <ExplorationsSection />
+        <HowIOperateSection />
+        <ServicesSection />
         <WritingSection />
         <AboutSection />
         <IllustrationsSection />
+        <FinalCTASection />
       </main>
     </>
   );

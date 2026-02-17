@@ -1,4 +1,4 @@
-import { motion, HTMLMotionProps, Variants, Transition } from "framer-motion";
+import { motion, HTMLMotionProps, Variants, Transition } from "motion/react";
 
 export const DEFAULT_EASE = [0.23, 1, 0.32, 1] as const;
 export const DEFAULT_DURATION = 0.35;
@@ -109,11 +109,15 @@ export const Motion = ({
   );
 };
 
-export const stagger = (interval = 0.1, delay = 0) => ({
-  animate: {
+export const stagger = (interval = 0.1, delay = 0) => {
+  const config = {
     transition: {
       staggerChildren: interval,
       delayChildren: delay,
     },
-  },
-});
+  };
+  return {
+    animate: config,
+    visible: config,
+  };
+};

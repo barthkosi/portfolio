@@ -6,8 +6,8 @@ import ScrollToTop from "./components/ScrollToTop"
 import PageLayout from "./components/PageLayout";
 import PageLayoutAlt from "./components/PageLayoutAlt";
 import PageLayoutFull from "./components/PageLayoutFull";
-import LazyRoute from "./components/LazyRoute";
-import LoadingScreen from "./components/LoadingScreen";
+import LazyRoute from "./components/interface/LazyRoute";
+import LoadingScreen from "./components/interface/LoadingScreen";
 import { LoadingProvider, useLoading } from "./context/LoadingContext";
 import { useImagePreloader } from "./hooks/useImagePreloader";
 
@@ -78,7 +78,7 @@ function AppContent() {
   useEffect(() => {
     if (checkSkipLoader(location.pathname)) {
       completeLoading();
-    } 
+    }
   }, []);
 
   // Handle route changes - show loader on navigation

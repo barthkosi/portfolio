@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion, Variants } from "motion/react";
-import Head from "../components/Head";
-import InfoBlock from "../components/InfoBlock";
-import Card from "../components/Card";
-import Filter from "../components/Filter";
+import Head from "../components/interface/Head";
+import InfoBlock from "../components/interface/InfoBlock";
+import Card from "../components/interface/Card";
+import Filter from "../components/interface/Filter";
 import { getContent, getAllTags, ContentItem } from "../lib/content";
 import { springBouncy } from "@/lib/transitions";
 

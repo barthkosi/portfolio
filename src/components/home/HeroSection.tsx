@@ -1,5 +1,5 @@
 import { motion, Variants } from "motion/react";
-import Button from "@/components/Button";
+import Button from "@/components/interface/Button";
 import Marquee from "react-fast-marquee";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { anim } from "@/lib/transitions";

@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
-import Card from "@/components/Card";
-import Button from "@/components/Button";
+import Card from "@/components/interface/Card";
+import Button from "@/components/interface/Button";
 import { Motion, stagger } from "@/lib/transitions";
 import { fadeUpVariant, inViewConfig } from "@/lib/homeAnimations";
 import featuredWork from "@/data/featuredWork.json";
