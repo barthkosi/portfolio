@@ -4,7 +4,6 @@ import { motion, Variants } from "motion/react";
 import Button from "@/components/interface/Button";
 import Marquee from "react-fast-marquee";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { useLoading } from "@/context/LoadingContext";
 import { anim, fadeUpVariant, gradientMaskVertical, gradientMaskHorizontal } from "@/lib/transitions";
 import heroMarquee from "@/data/heroMarquee.json";
 
@@ -26,7 +25,6 @@ const marqueeMobileVariants: Variants = {
 
 export default function HeroSection() {
     const isDesktop = useMediaQuery('(min-width: 1024px)');
-    const { isContentReady } = useLoading();
 
     return (
         <section className="flex flex-col pl-4 md:pl-8 pr-4 md:pr-8 lg:pr-0 lg:flex-row lg:gap-8 items-center">
@@ -34,7 +32,7 @@ export default function HeroSection() {
             <motion.div
                 className="w-full items-start flex flex-col justify-center gap-4"
                 initial="hidden"
-                animate={isContentReady ? "visible" : "hidden"}
+                animate="visible"
                 variants={{
                     hidden: {},
                     visible: {
@@ -79,7 +77,7 @@ export default function HeroSection() {
             <motion.div
                 className="w-[140%] lg:w-[100%] flex justify-center items-start"
                 initial="hidden"
-                animate={isContentReady ? "visible" : "hidden"}
+                animate="visible"
                 variants={isDesktop ? marqueeDesktopVariants : marqueeMobileVariants}
             >
                 <div

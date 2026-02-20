@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Sans, Manrope, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
-import { LoadingProvider } from "@/context/LoadingContext";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -61,12 +60,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <LoadingProvider>
-            <ScrollToTop />
-            <SmoothScrollProvider>
-              {children}
-            </SmoothScrollProvider>
-          </LoadingProvider>
+          <ScrollToTop />
+          <SmoothScrollProvider>
+            {children}
+          </SmoothScrollProvider>
         </ThemeProvider>
       </body>
     </html>

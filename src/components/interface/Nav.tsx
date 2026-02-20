@@ -6,14 +6,12 @@ import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import Button from "@/components/interface/Button";
 import { anim, physics } from "@/lib/transitions";
-import { useLoading } from "@/context/LoadingContext";
 
 export default function Nav() {
     const [isOpen, setIsOpen] = useState(false);
     const [showVault, setShowVault] = useState(false);
     const [showSocial, setShowSocial] = useState(false);
     const pathname = usePathname();
-    const { isContentReady } = useLoading();
 
     useEffect(() => {
         setIsOpen(false);
@@ -52,7 +50,7 @@ export default function Nav() {
         <motion.nav
             className={`w-full flex flex-col ${isOpen ? 'h-screen' : 'h-[64px]'} md:h-[102px] p-4 md:p-8 items-start justify-between gap-6 sticky top-0 z-50 overflow-visible`}
             initial={anim.fadeDownBouncyBouncy.initial}
-            animate={isContentReady ? anim.fadeDownBouncyBouncy.animate : anim.fadeDownBouncyBouncy.initial}
+            animate={anim.fadeDownBouncyBouncy.animate}
             exit={anim.fadeDownBouncyBouncy.exit}
         >
             <div
