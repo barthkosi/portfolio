@@ -71,11 +71,11 @@ export default function Card({
     // List Card Content
     const isStacked = variant === 'list-stacked';
     const ListContent = (
-        <div className={`w-full gap-3 flex flex-col ${isStacked ? 'bg-[var(--background-primary)]' : 'md:flex-row'} items-center group`}>
+        <div className={`w-full gap-3 flex flex-col ${isStacked ? 'bg-[var(--background-primary)] rounded-t-xl' : 'md:flex-row'} items-center group`}>
             {isVideo ? (
                 <video
                     src={image}
-                    className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-[12px] object-cover bg-[var(--background-secondary)]`}
+                    className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-xl object-cover bg-[var(--background-secondary)]`}
                     autoPlay
                     muted
                     loop
@@ -85,7 +85,7 @@ export default function Card({
                 <img
                     src={image}
                     alt={title || ""}
-                    className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-[12px] object-cover bg-[var(--background-secondary)]`}
+                    className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-xl object-cover bg-[var(--background-secondary)]`}
                 />
             )}
             <div className="w-full flex flex-col gap-1">
