@@ -7,11 +7,7 @@ import {
   FeaturedWorkSection,
   ExplorationsSection,
   WritingSection,
-  AboutSection,
-  IllustrationsSection,
-  HowIOperateSection,
-  ServicesSection,
-  FinalCTASection,
+  AboutSection
 } from "@/components/home";
 
 export default function Home() {
@@ -53,14 +49,9 @@ export default function Home() {
           <HeroSection isContentReady={isContentReady} />
           <FeaturedWorkSection />
         </div>
-
-        <ExplorationsSection />
-        <HowIOperateSection />
-        <ServicesSection />
-        <WritingSection />
         <AboutSection />
-        <IllustrationsSection />
-        <FinalCTASection />
+        <ExplorationsSection />
+        <WritingSection />
       </main>
     </>
   );

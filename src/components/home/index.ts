@@ -1,9 +1,5 @@
 export { HeroSection } from "./HeroSection";
 export { FeaturedWorkSection } from "./FeaturedWorkSection";
+export { AboutSection } from "./AboutSection";
 export { ExplorationsSection } from "./ExplorationsSection";
 export { WritingSection } from "./WritingSection";
-export { AboutSection } from "./AboutSection";
-export { IllustrationsSection } from "./IllustrationsSection";
-export { HowIOperateSection } from "./HowIOperateSection";
-export { ServicesSection } from "./ServicesSection";
-export { FinalCTASection } from "./FinalCTASection";
