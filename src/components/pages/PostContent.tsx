@@ -82,11 +82,13 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                 <article className="w-full max-w-[640px]">
                     <ReactMarkdown
                         components={{
-                            p: ({ children, ...rest }) => {
-                                // Check if paragraph contains only media (figures) — skip wrapper to avoid double margin
-                                const childArray = React.Children.toArray(children);
-                                const isMediaOnly = childArray.length > 0 && childArray.every(
-                                    child => React.isValidElement(child) && (child as React.ReactElement<any>).type === 'figure'
+                            p: ({ node, children, ...rest }) => {
+                                // Inspect the raw hast node to detect if this paragraph
+                                // contains only images/videos — rendered as block elements,
+                                // so they can't be inside a <p> without causing a hydration error.
+                                const childNodes = (node as any)?.children ?? [];
+                                const isMediaOnly = childNodes.length > 0 && childNodes.every(
+                                    (child: any) => child.type === 'element' && child.tagName === 'img'
                                 );
                                 if (isMediaOnly) return <>{children}</>;
                                 return <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...rest}>{children}</p>;
