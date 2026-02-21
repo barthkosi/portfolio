@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,10 +10,13 @@ export const metadata: Metadata = {
 export default function NotFound() {
     return (
         <div className="w-fill flex flex-col lg:flex-row gap-8 lg:gap-0 items-center justify-center h-[calc(100vh-96px)] lg:h-[calc(100vh-166px)] px-4 text-[var(--content-primary)]">
-            <img
+            <Image
                 src="https://res.cloudinary.com/barthkosi/image/upload/portfolio-404.webp"
                 alt="404"
+                width={900}
+                height={600}
                 className="w-full lg:w-2/3 h-auto -ml-[64px] lg:-ml-[96px]"
+                priority
             />
             <div className="w-full lg:w-1/3 flex flex-col items-start">
                 <h2 className="mb-4">Page Not Found</h2>

@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import Button from "@/components/interface/Button";
 import SocialIcon from "@/components/interface/SocialIcon";
+import ChevronDown from "@/components/interface/ChevronDown";
 import { anim, physics } from "@/lib/transitions";
 import { useLoading } from "@/context/LoadingContext";
 import navData from "@/data/navigation.json";
@@ -76,12 +78,15 @@ export default function Nav() {
 
             <div className="w-full relative flex flex-row justify-between items-center">
                 <Link href="/" className="flex flex-row items-center gap-2 text-[var(--content-primary)] hover:text-[var(--content-secondary)]">
-                    <img
+                    <Image
                         src="https://res.cloudinary.com/barthkosi/image/upload/pfp.webp"
                         alt="Barth logo"
-                        className="w-[38px] h-[38px] rounded-[8px] object-cover"
+                        width={38}
+                        height={38}
+                        className="rounded-[8px] object-cover"
+                        priority
                     />
-                    <div className="label-l ">barth ✶</div>
+                    <div className="label-l">barth ✶</div>
                 </Link>
 
                 {/* Desktop Menu */}
@@ -100,22 +105,7 @@ export default function Nav() {
                     >
                         <button className="group py-2 items-center flex flex-row gap-1 hover:text-[var(--content-primary)] transition-colors">
                             Vault
-                            <motion.svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                animate={{ rotate: showVault ? 180 : 0 }}
-                                transition={physics.bouncy}
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M5.21967 8.21967C5.51256 7.92678 5.98744 7.92678 6.28033 8.21967L10 11.9393L13.7197 8.21967C14.0126 7.92678 14.4874 7.92678 14.7803 8.21967C15.0732 8.51256 15.0732 8.98744 14.7803 9.28033L10.5303 13.5303C10.3897 13.671 10.1989 13.75 10 13.75C9.80109 13.75 9.61032 13.671 9.46967 13.5303L5.21967 9.28033C4.92678 8.98744 4.92678 8.51256 5.21967 8.21967Z"
-                                    fill="currentColor"
-                                />
-                            </motion.svg>
+                            <ChevronDown isOpen={showVault} />
                         </button>
 
                         <AnimatePresence>
@@ -144,22 +134,7 @@ export default function Nav() {
                     >
                         <button className="group py-2 items-center flex flex-row gap-1 hover:text-[var(--content-primary)] transition-colors">
                             Social
-                            <motion.svg
-                                width="20"
-                                height="20"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                                animate={{ rotate: showSocial ? 180 : 0 }}
-                                transition={physics.bouncy}
-                            >
-                                <path
-                                    fillRule="evenodd"
-                                    clipRule="evenodd"
-                                    d="M5.21967 8.21967C5.51256 7.92678 5.98744 7.92678 6.28033 8.21967L10 11.9393L13.7197 8.21967C14.0126 7.92678 14.4874 7.92678 14.7803 8.21967C15.0732 8.51256 15.0732 8.98744 14.7803 9.28033L10.5303 13.5303C10.3897 13.671 10.1989 13.75 10 13.75C9.80109 13.75 9.61032 13.671 9.46967 13.5303L5.21967 9.28033C4.92678 8.98744 4.92678 8.51256 5.21967 8.21967Z"
-                                    fill="currentColor"
-                                />
-                            </motion.svg>
+                            <ChevronDown isOpen={showSocial} />
                         </button>
 
                         <AnimatePresence>
