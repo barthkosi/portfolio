@@ -111,7 +111,7 @@ export default function Nav() {
                         <AnimatePresence>
                             {showVault && (
                                 <motion.div
-                                    className="absolute top-full left-1/2 -translate-x-1/2 mt-0 bg-[var(--background-primary)] text-[var(--content-primary)] border border-[var(--background-secondary)] rounded-[12px] shadow-lg p-3 flex flex-col gap-0"
+                                    className="absolute top-full left-1/2 -translate-x-1/2 mt-0 bg-[var(--background-primary)] text-[var(--content-primary)] border border-[var(--background-secondary)] rounded-xl shadow-lg p-3 flex flex-col gap-0"
                                     initial={anim.fadeDownBouncyBouncy.initial}
                                     animate={anim.fadeDownBouncyBouncy.animate}
                                     exit={anim.fadeDownBouncyBouncy.exit}
@@ -140,7 +140,7 @@ export default function Nav() {
                         <AnimatePresence>
                             {showSocial && (
                                 <motion.div
-                                    className="absolute top-full left-1/2 -translate-x-1/2 mt-0 bg-[var(--background-primary)] text-[var(--content-primary)] border border-[var(--background-secondary)] rounded-[12px] shadow-lg p-3 flex flex-col gap-0"
+                                    className="absolute top-full left-1/2 -translate-x-1/2 mt-0 bg-[var(--background-primary)] text-[var(--content-primary)] border border-[var(--background-secondary)] rounded-xl shadow-lg p-3 flex flex-col gap-0"
                                     initial={anim.fadeDownBouncy.initial}
                                     animate={anim.fadeDownBouncy.animate}
                                     exit={anim.fadeDownBouncy.exit}
@@ -151,7 +151,7 @@ export default function Nav() {
                                             href={item.href}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1"
+                                            className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1 whitespace-nowrap"
                                         >
                                             {item.label}
                                         </a>
