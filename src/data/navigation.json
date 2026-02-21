@@ -1,0 +1,36 @@
+{
+    "main": [
+        {
+            "label": "Work",
+            "href": "/work",
+            "description": "Projects and case studies"
+        },
+        {
+            "label": "Explorations",
+            "href": "/explorations",
+            "description": "Personal projects"
+        },
+        {
+            "label": "Illustrations",
+            "href": "/illustrations",
+            "description": "Experiments with lines"
+        }
+    ],
+    "vault": [
+        {
+            "label": "Archive",
+            "href": "/archive",
+            "description": "Gallery of my work"
+        },
+        {
+            "label": "Reading List",
+            "href": "/reading-list",
+            "description": "Books I recommend"
+        },
+        {
+            "label": "Writing",
+            "href": "/writing",
+            "description": "On the human condition"
+        }
+    ]
+}

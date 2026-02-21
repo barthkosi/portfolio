@@ -5,8 +5,11 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import Button from "@/components/interface/Button";
+import SocialIcon from "@/components/interface/SocialIcon";
 import { anim, physics } from "@/lib/transitions";
 import { useLoading } from "@/context/LoadingContext";
+import navData from "@/data/navigation.json";
+import socialData from "@/data/social.json";
 
 export default function Nav() {
     const [isOpen, setIsOpen] = useState(false);
@@ -81,12 +84,15 @@ export default function Nav() {
                     <div className="label-l ">barth ✶</div>
                 </Link>
 
-                {/* Desktop Menu - inline with logo */}
+                {/* Desktop Menu */}
                 <div className="hidden md:flex label-s flex-row gap-6 text-[var(--content-secondary)] items-center">
-                    <Link href="/work" className="hover:text-[var(--content-primary)]">Work</Link>
-                    <Link href="/explorations" className="hover:text-[var(--content-primary)]">Explorations</Link>
-                    <Link href="/illustrations" className="hover:text-[var(--content-primary)]">Illustrations</Link>
+                    {navData.main.map((item) => (
+                        <Link key={item.href} href={item.href} className="hover:text-[var(--content-primary)]">
+                            {item.label}
+                        </Link>
+                    ))}
 
+                    {/* Vault dropdown */}
                     <div
                         className="relative"
                         onMouseEnter={() => setShowVault(true)}
@@ -106,7 +112,8 @@ export default function Nav() {
                                 <path
                                     fillRule="evenodd"
                                     clipRule="evenodd"
-                                    d="M5.21967 8.21967C5.51256 7.92678 5.98744 7.92678 6.28033 8.21967L10 11.9393L13.7197 8.21967C14.0126 7.92678 14.4874 7.92678 14.7803 8.21967C15.0732 8.51256 15.0732 8.98744 14.7803 9.28033L10.5303 13.5303C10.3897 13.671 10.1989 13.75 10 13.75C9.80109 13.75 9.61032 13.671 9.46967 13.5303L5.21967 9.28033C4.92678 8.98744 4.92678 8.51256 5.21967 8.21967Z" fill="currentColor"
+                                    d="M5.21967 8.21967C5.51256 7.92678 5.98744 7.92678 6.28033 8.21967L10 11.9393L13.7197 8.21967C14.0126 7.92678 14.4874 7.92678 14.7803 8.21967C15.0732 8.51256 15.0732 8.98744 14.7803 9.28033L10.5303 13.5303C10.3897 13.671 10.1989 13.75 10 13.75C9.80109 13.75 9.61032 13.671 9.46967 13.5303L5.21967 9.28033C4.92678 8.98744 4.92678 8.51256 5.21967 8.21967Z"
+                                    fill="currentColor"
                                 />
                             </motion.svg>
                         </button>
@@ -119,14 +126,17 @@ export default function Nav() {
                                     animate={anim.fadeDownBouncyBouncy.animate}
                                     exit={anim.fadeDownBouncyBouncy.exit}
                                 >
-                                    <Link href="/archive" className="hover:text-[var(--content-secondary)] whitespace-nowrap py-1">Archive</Link>
-                                    <Link href="/reading-list" className="hover:text-[var(--content-secondary)] whitespace-nowrap py-1">Reading List</Link>
-                                    <Link href="/writing" className="hover:text-[var(--content-secondary)] whitespace-nowrap py-1">Writing</Link>
+                                    {navData.vault.map((item) => (
+                                        <Link key={item.href} href={item.href} className="hover:text-[var(--content-secondary)] whitespace-nowrap py-1">
+                                            {item.label}
+                                        </Link>
+                                    ))}
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
 
+                    {/* Social dropdown */}
                     <div
                         className="relative"
                         onMouseEnter={() => setShowSocial(true)}
@@ -146,7 +156,8 @@ export default function Nav() {
                                 <path
                                     fillRule="evenodd"
                                     clipRule="evenodd"
-                                    d="M5.21967 8.21967C5.51256 7.92678 5.98744 7.92678 6.28033 8.21967L10 11.9393L13.7197 8.21967C14.0126 7.92678 14.4874 7.92678 14.7803 8.21967C15.0732 8.51256 15.0732 8.98744 14.7803 9.28033L10.5303 13.5303C10.3897 13.671 10.1989 13.75 10 13.75C9.80109 13.75 9.61032 13.671 9.46967 13.5303L5.21967 9.28033C4.92678 8.98744 4.92678 8.51256 5.21967 8.21967Z" fill="currentColor"
+                                    d="M5.21967 8.21967C5.51256 7.92678 5.98744 7.92678 6.28033 8.21967L10 11.9393L13.7197 8.21967C14.0126 7.92678 14.4874 7.92678 14.7803 8.21967C15.0732 8.51256 15.0732 8.98744 14.7803 9.28033L10.5303 13.5303C10.3897 13.671 10.1989 13.75 10 13.75C9.80109 13.75 9.61032 13.671 9.46967 13.5303L5.21967 9.28033C4.92678 8.98744 4.92678 8.51256 5.21967 8.21967Z"
+                                    fill="currentColor"
                                 />
                             </motion.svg>
                         </button>
@@ -159,22 +170,22 @@ export default function Nav() {
                                     animate={anim.fadeDownBouncy.animate}
                                     exit={anim.fadeDownBouncy.exit}
                                 >
-                                    <a href="https://x.com/barthkosi/" target="_blank" rel="noopener noreferrer" className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1">
-                                        X(Twitter)
-                                    </a>
-                                    <a href="https://cosmos.so/barthkosi/" target="_blank" rel="noopener noreferrer" className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1">
-                                        Cosmos
-                                    </a>
-                                    <a href="https://www.linkedin.com/in/barthkosi/" target="_blank" rel="noopener noreferrer" className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1">
-                                        LinkedIn
-                                    </a>
-                                    <a href="https://github.com/barthkosi/" target="_blank" rel="noopener noreferrer" className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1">
-                                        GitHub
-                                    </a>
+                                    {socialData.map((item) => (
+                                        <a
+                                            key={item.href}
+                                            href={item.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1"
+                                        >
+                                            {item.label}
+                                        </a>
+                                    ))}
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
+
                     <Button
                         variant="secondary"
                         size="sm"
@@ -243,37 +254,23 @@ export default function Nav() {
                             },
                         }}
                     >
+                        {/* Main links */}
                         <div className="flex flex-col gap-1">
-                            <motion.div
-                                className="flex flex-col gap-1"
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <Link href="/work" onClick={() => setIsOpen(false)}>Work</Link>
-                            </motion.div>
-
-                            <motion.div
-                                className="flex flex-col gap-1"
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <Link href="/explorations" onClick={() => setIsOpen(false)}>Explorations</Link>
-                            </motion.div>
-
-                            <motion.div
-                                className="flex flex-col gap-1"
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <Link href="/illustrations" onClick={() => setIsOpen(false)}>Illustrations</Link>
-                            </motion.div>
+                            {navData.main.map((item) => (
+                                <motion.div
+                                    key={item.href}
+                                    className="flex flex-col gap-1"
+                                    variants={{
+                                        hidden: anim.fadeDownBouncyBouncy.hidden,
+                                        visible: anim.fadeDownBouncyBouncy.visible,
+                                    }}
+                                >
+                                    <Link href={item.href} onClick={() => setIsOpen(false)}>{item.label}</Link>
+                                </motion.div>
+                            ))}
                         </div>
+
+                        {/* Vault links */}
                         <div className="flex flex-col gap-1">
                             <motion.div
                                 variants={{
@@ -283,32 +280,20 @@ export default function Nav() {
                             >
                                 <div className="label-s text-[var(--content-tertiary)]">Vault</div>
                             </motion.div>
-                            <motion.div
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <Link href="/archive" onClick={() => setIsOpen(false)}>Archive</Link>
-                            </motion.div>
-                            <motion.div
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <Link href="/reading-list" onClick={() => setIsOpen(false)}>Reading List</Link>
-                            </motion.div>
-                            <motion.div
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <Link href="/writing" onClick={() => setIsOpen(false)}>Writing</Link>
-                            </motion.div>
+                            {navData.vault.map((item) => (
+                                <motion.div
+                                    key={item.href}
+                                    variants={{
+                                        hidden: anim.fadeDownBouncyBouncy.hidden,
+                                        visible: anim.fadeDownBouncyBouncy.visible,
+                                    }}
+                                >
+                                    <Link href={item.href} onClick={() => setIsOpen(false)}>{item.label}</Link>
+                                </motion.div>
+                            ))}
                         </div>
 
+                        {/* Social links */}
                         <div className="flex flex-col gap-1">
                             <motion.div
                                 variants={{
@@ -318,46 +303,19 @@ export default function Nav() {
                             >
                                 <div className="label-s text-[var(--content-tertiary)]">Social</div>
                             </motion.div>
-                            <motion.div
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <a href="https://x.com/barthkosi/" target="_blank" rel="noopener noreferrer">
-                                    X(Twitter)
-                                </a>
-                            </motion.div>
-                            <motion.div
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <a href="https://cosmos.so/barthkosi/" target="_blank" rel="noopener noreferrer">
-                                    Cosmos
-                                </a>
-                            </motion.div>
-                            <motion.div
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <a href="https://www.linkedin.com/in/barthkosi/" target="_blank" rel="noopener noreferrer">
-                                    LinkedIn
-                                </a>
-                            </motion.div>
-                            <motion.div
-                                variants={{
-                                    hidden: anim.fadeDownBouncyBouncy.hidden,
-                                    visible: anim.fadeDownBouncyBouncy.visible,
-                                }}
-                            >
-                                <a href="https://github.com/barthkosi/" target="_blank" rel="noopener noreferrer">
-                                    Github
-                                </a>
-                            </motion.div>
+                            {socialData.map((item) => (
+                                <motion.div
+                                    key={item.href}
+                                    variants={{
+                                        hidden: anim.fadeDownBouncyBouncy.hidden,
+                                        visible: anim.fadeDownBouncyBouncy.visible,
+                                    }}
+                                >
+                                    <a href={item.href} target="_blank" rel="noopener noreferrer">
+                                        {item.label}
+                                    </a>
+                                </motion.div>
+                            ))}
                         </div>
 
                         <motion.div

@@ -12,7 +12,7 @@ export default function NotFound() {
             <img
                 src="https://res.cloudinary.com/barthkosi/image/upload/portfolio-404.webp"
                 alt="404"
-                className="w-ful lg:w-2/3 h-auto -ml-[64px] lg:-ml-[96px]"
+                className="w-full lg:w-2/3 h-auto -ml-[64px] lg:-ml-[96px]"
             />
             <div className="w-full lg:w-1/3 flex flex-col items-start">
                 <h2 className="mb-4">Page Not Found</h2>

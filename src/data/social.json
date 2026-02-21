@@ -1,0 +1,22 @@
+[
+    {
+        "label": "X (Twitter)",
+        "href": "https://x.com/barthkosi/",
+        "icon": "x"
+    },
+    {
+        "label": "Cosmos",
+        "href": "https://cosmos.so/barthkosi/",
+        "icon": "cosmos"
+    },
+    {
+        "label": "LinkedIn",
+        "href": "https://www.linkedin.com/in/barthkosi/",
+        "icon": "linkedin"
+    },
+    {
+        "label": "GitHub",
+        "href": "https://github.com/barthkosi/",
+        "icon": "github"
+    }
+]
