@@ -2,8 +2,11 @@ import { Metadata } from "next";
 import ReadingListContent from "@/components/pages/ReadingListContent";
 
 export const metadata: Metadata = {
-    title: "barthkosi - reading list",
+    title: "Reading List",
     description: "Reading more is one of my biggest goals. This list shifts and grows as new titles find their way into my hands",
+    alternates: {
+        canonical: "https://www.barthkosi.com/reading-list",
+    },
     openGraph: {
         images: [
             {

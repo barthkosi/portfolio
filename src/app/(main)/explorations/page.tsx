@@ -3,8 +3,11 @@ import { getContent, getAllTags } from "@/lib/content";
 import ExplorationsContent from "@/components/pages/ExplorationsContent";
 
 export const metadata: Metadata = {
-    title: "barthkosi - explorations",
+    title: "Explorations",
     description: "Personal experiments and creative explorations, from concept designs to visual studies.",
+    alternates: {
+        canonical: "https://www.barthkosi.com/explorations",
+    },
     openGraph: {
         images: [
             {

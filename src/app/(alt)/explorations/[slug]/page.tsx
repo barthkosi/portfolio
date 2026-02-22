@@ -16,8 +16,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!post) return {};
 
     return {
-        title: `barthkosi - ${post.title.toLowerCase()}`,
+        title: post.title,
         description: post.description,
+        alternates: {
+            canonical: `https://www.barthkosi.com/explorations/${slug}`,
+        },
         openGraph: {
             images: [post.coverImage || post.bannerImage || ""]
         }

@@ -57,6 +57,18 @@ export const metadata: Metadata = {
     description: "Product designer and frontend developer crafting visual systems, web interactions, and motion design that injects joy into the digital world.",
     images: ["https://res.cloudinary.com/barthkosi/image/upload/opengraph.webp"],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+    },
+  },
+  alternates: {
+    canonical: "https://www.barthkosi.com",
+  },
   icons: {
     icon: [
       {

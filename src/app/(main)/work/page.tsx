@@ -3,8 +3,11 @@ import { getContent, getAllTags } from "@/lib/content";
 import WorkContent from "@/components/pages/WorkContent";
 
 export const metadata: Metadata = {
-    title: "barthkosi - work",
+    title: "Work",
     description: "These entries document my process of building and refining tools that serve a purpose.",
+    alternates: {
+        canonical: "https://www.barthkosi.com/work",
+    },
     openGraph: {
         images: [
             {
