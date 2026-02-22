@@ -2,7 +2,7 @@
 
 import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
-import explorations from "@/data/explorations.json";
+import explorations from "@/data/home/explorations.json";
 
 export default function ExplorationsSection() {
     return (

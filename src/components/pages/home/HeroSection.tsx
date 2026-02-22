@@ -6,7 +6,7 @@ import Button from "@/components/interface/Button";
 import Marquee from "react-fast-marquee";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { anim, fadeUpVariant, gradientMaskVertical, gradientMaskHorizontal } from "@/lib/transitions";
-import heroMarquee from "@/data/heroMarquee.json";
+import heroMarquee from "@/data/home/heroMarquee.json";
 
 const marqueeDesktopVariants: Variants = {
     hidden: anim.fadeRightBouncy.hidden,

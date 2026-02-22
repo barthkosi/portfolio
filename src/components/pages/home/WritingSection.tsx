@@ -2,7 +2,7 @@
 
 import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
-import writingData from "@/data/writing.json";
+import writingData from "@/data/home/writing.json";
 
 export default function WritingSection() {
     return (

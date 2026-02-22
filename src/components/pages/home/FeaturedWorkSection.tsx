@@ -2,7 +2,7 @@
 
 import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
-import featuredWork from "@/data/featuredWork.json";
+import featuredWork from "@/data/home/featuredWork.json";
 
 export default function FeaturedWorkSection() {
     const firstRow = featuredWork.filter(item => !item.row || item.row === 1);
