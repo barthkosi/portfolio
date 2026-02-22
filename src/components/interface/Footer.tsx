@@ -4,7 +4,7 @@ import Link from "next/link";
 import Marquee from "react-fast-marquee";
 import SocialIcon from "@/components/interface/SocialIcon";
 import navData from "@/data/navigation.json";
-import socialData from "@/data/social.json";
+import socialData from "@/data/social-links.json";
 
 export default function Footer() {
     return (

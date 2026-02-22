@@ -10,7 +10,7 @@ import SocialIcon from "@/components/interface/SocialIcon";
 import ChevronDown from "@/components/interface/ChevronDown";
 import { anim, physics } from "@/lib/transitions";
 import navData from "@/data/navigation.json";
-import socialData from "@/data/social.json";
+import socialData from "@/data/social-links.json";
 
 export default function Nav() {
     const [isOpen, setIsOpen] = useState(false);
