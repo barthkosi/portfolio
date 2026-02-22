@@ -3,7 +3,6 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import Card from "@/components/interface/Card";
 import archive from "@/data/archive.json";
-import { useLoading } from "@/context/LoadingContext";
 
 const GAP = 32;
 // Updated paths for Next.js pubic assets
@@ -16,7 +15,6 @@ export default function ArchiveContent() {
     const [isMobile, setIsMobile] = useState(false);
     const [isGrabbing, setIsGrabbing] = useState(false);
     const [imageHeights, setImageHeights] = useState<Record<string, number>>({});
-    const { addBlocker, removeBlocker } = useLoading();
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -38,14 +36,11 @@ export default function ArchiveContent() {
     };
 
     useEffect(() => {
-        addBlocker('archive-layout');
-
         const loadedHeights: Record<string, number> = {};
         let loadedCount = 0;
 
         const finishLoading = () => {
             setImageHeights({ ...loadedHeights });
-            removeBlocker('archive-layout');
         };
 
         const handleLoad = (id: string, height: number) => {
@@ -66,7 +61,6 @@ export default function ArchiveContent() {
 
         archive.forEach((item) => {
             if (isVideoUrl(item.image)) {
-                // Handle video preloading
                 const video = document.createElement('video');
                 video.onloadedmetadata = () => {
                     const aspectRatio = video.videoHeight / video.videoWidth;
@@ -75,7 +69,6 @@ export default function ArchiveContent() {
                 video.onerror = () => handleError(item.id);
                 video.src = item.image;
             } else {
-                // Handle image preloading
                 const img = new Image();
                 img.onload = () => {
                     const aspectRatio = img.naturalHeight / img.naturalWidth;
@@ -85,9 +78,7 @@ export default function ArchiveContent() {
                 img.src = item.image;
             }
         });
-
-        return () => removeBlocker('archive-layout');
-    }, [ITEM_WIDTH, addBlocker, removeBlocker]);
+    }, [ITEM_WIDTH]);
 
     const itemPositions = useMemo(() => {
         if (Object.keys(imageHeights).length < archive.length) {

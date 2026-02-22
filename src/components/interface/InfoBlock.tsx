@@ -2,7 +2,6 @@
 
 import { motion, Variants } from "motion/react"
 import { anim } from "@/lib/transitions"
-import { useLoading } from "@/context/LoadingContext"
 
 type InfoBlockVariant = 'default' | 'centered'
 
@@ -22,7 +21,6 @@ export default function InfoBlock({
     onComplete,
 }: InfoBlockProps) {
     const isCentered = variant === 'centered'
-    const { isContentReady } = useLoading()
 
     const mainContainerVariants: Variants = {
         hidden: { opacity: 0 },
@@ -67,7 +65,7 @@ export default function InfoBlock({
             ].join(' ')}
             variants={mainContainerVariants}
             initial="hidden"
-            animate={isContentReady ? "visible" : "hidden"}
+            animate="visible"
         >
             <motion.div
                 className={[
