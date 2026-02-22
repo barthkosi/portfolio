@@ -93,7 +93,7 @@ export default function HeroSection() {
                                 <div className="flex flex-col gap-1 animate-scroll-up">
                                     {[...heroMarquee.slice(0, 5), ...heroMarquee.slice(0, 5), ...heroMarquee.slice(0, 5)].map((item, index) => (
                                         <div key={`col1-${item.id}-${index}`} className="w-full flex-shrink-0">
-                                            <Image src={item.image} alt={`Project ${item.id}`} width={280} height={158} className="w-full aspect-video object-cover rounded-[var(--radius-lg)]" />
+                                            <Image src={item.image} alt={item.alt} width={280} height={158} className="w-full aspect-video object-cover rounded-[var(--radius-lg)]" />
                                         </div>
                                     ))}
                                 </div>
@@ -102,7 +102,7 @@ export default function HeroSection() {
                                 <div className="flex flex-col gap-1 animate-scroll-down">
                                     {[...heroMarquee.slice(5), ...heroMarquee.slice(0, 3), ...heroMarquee.slice(5), ...heroMarquee.slice(0, 3), ...heroMarquee.slice(5), ...heroMarquee.slice(0, 3)].map((item, index) => (
                                         <div key={`col2-${item.id}-${index}`} className="w-full flex-shrink-0">
-                                            <Image src={item.image} alt={`Project ${item.id}`} width={280} height={158} className="w-full aspect-video object-cover rounded-[var(--radius-lg)]" />
+                                            <Image src={item.image} alt={item.alt} width={280} height={158} className="w-full aspect-video object-cover rounded-[var(--radius-lg)]" />
                                         </div>
                                     ))}
                                 </div>
@@ -112,12 +112,12 @@ export default function HeroSection() {
                         <>
                             <Marquee direction="left" speed={50} autoFill style={gradientMaskHorizontal}>
                                 {heroMarquee.slice(0, 5).map((item) => (
-                                    <Image key={item.id} src={item.image} alt={`Project ${item.id}`} width={320} height={180} className="h-40 md:h-52 w-auto aspect-video object-cover rounded-[var(--radius-lg)] gap-[2px] mx-[1px]" />
+                                    <Image key={item.id} src={item.image} alt={item.alt} width={320} height={180} className="h-40 md:h-52 w-auto aspect-video object-cover rounded-[var(--radius-lg)] gap-[2px] mx-[1px]" />
                                 ))}
                             </Marquee>
                             <Marquee direction="right" speed={50} autoFill style={gradientMaskHorizontal}>
                                 {heroMarquee.slice(5).map((item) => (
-                                    <Image key={item.id} src={item.image} alt={`Project ${item.id}`} width={320} height={180} className="h-40 md:h-52 w-auto aspect-video object-cover rounded-[var(--radius-lg)] gap-[2px] mx-[1px]" />
+                                    <Image key={item.id} src={item.image} alt={item.alt} width={320} height={180} className="h-40 md:h-52 w-auto aspect-video object-cover rounded-[var(--radius-lg)] gap-[2px] mx-[1px]" />
                                 ))}
                             </Marquee>
                         </>

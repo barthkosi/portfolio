@@ -28,8 +28,35 @@ const sourceSerif4 = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  title: "Bartholomew Kosi",
-  description: "Product Designer & Frontend Developer",
+  metadataBase: new URL("https://www.barthkosi.com"),
+  title: {
+    default: "Barth Kosi – Product Designer & Frontend Developer",
+    template: "%s | Barth Kosi",
+  },
+  description: "Product designer and frontend developer crafting visual systems, web interactions, and motion design that injects joy into the digital world.",
+  keywords: ["product design", "frontend developer", "UI design", "motion design", "web design", "portfolio", "Barth Kosi", "barthkosi"],
+  authors: [{ name: "Barth Kosi", url: "https://www.barthkosi.com" }],
+  openGraph: {
+    type: "website",
+    url: "https://www.barthkosi.com",
+    siteName: "Barth Kosi",
+    title: "Barth Kosi – Product Designer & Frontend Developer",
+    description: "Product designer and frontend developer crafting visual systems, web interactions, and motion design that injects joy into the digital world.",
+    images: [
+      {
+        url: "https://res.cloudinary.com/barthkosi/image/upload/opengraph.webp",
+        width: 1200,
+        height: 630,
+        alt: "Barth Kosi – Product Designer & Frontend Developer",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Barth Kosi – Product Designer & Frontend Developer",
+    description: "Product designer and frontend developer crafting visual systems, web interactions, and motion design that injects joy into the digital world.",
+    images: ["https://res.cloudinary.com/barthkosi/image/upload/opengraph.webp"],
+  },
   icons: {
     icon: [
       {

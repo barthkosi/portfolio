@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://barthkosi.xyz/sitemap.xml
+Sitemap: https://barthkosi.com/sitemap.xml

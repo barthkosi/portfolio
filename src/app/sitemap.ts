@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { getContent } from '@/lib/content'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://barthkosi.xyz'
+    const baseUrl = 'https://barthkosi.com'
 
     // Static pages
     const staticPages: MetadataRoute.Sitemap = [
@@ -54,6 +54,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const dynamicPages: MetadataRoute.Sitemap = []
 
     try {
+        // Get all work posts
+        const workPosts = getContent('work')
+        workPosts.forEach((post) => {
+            dynamicPages.push({
+                url: `${baseUrl}/work/${post.slug}`,
+                lastModified: new Date(post.date),
+                changeFrequency: 'monthly',
+                priority: 0.9,
+            })
+        })
+
         // Get all writing posts
         const writingPosts = getContent('writing')
         writingPosts.forEach((post) => {

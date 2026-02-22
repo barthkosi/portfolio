@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     description: "Barth creates visual systems and digital experiences. Explore my portfolio of web interactions, engineered solutions, and dynamic motion design.",
     openGraph: {
         type: "website",
-        url: "https://barthkosi.xyz",
+        url: "https://barthkosi.com",
         title: "barthkosi - design & engineering",
         description: "Design & Development",
         images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/opengraph.webp" }],
