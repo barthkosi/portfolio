@@ -1,5 +1,12 @@
 [
     {
+        "id": "3d-ASCII-Viewer",
+        "image": "https://res.cloudinary.com/barthkosi/video/upload/3d-ascii-viewer-demo.mp4",
+        "title": "3d-ASCII-Viewer",
+        "description": "A webapp That allows users to convert 3d models to ASCII art.",
+        "link": "/explorations/3d-ascii-viewer"
+    },
+    {
         "id": "liquid-glass",
         "image": "https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-demo.mp4",
         "title": "Liquid glass shader",
