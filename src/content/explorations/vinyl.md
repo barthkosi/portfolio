@@ -2,8 +2,8 @@
 title: "Vinyl Player"
 date: "2025-06-07" 
 description: "A fully functioning vinyl player built in framer."
-coverImage: "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player-cover.webp"
-bannerImage: ""
+coverImage: "https://res.cloudinary.com/barthkosi/video/upload/vinyl-player-demo.mp4"
+bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player-cover.webp"
 author: "Barth"
 tags: ["Framer"]
 buttonText: "View Live"

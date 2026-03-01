@@ -1,8 +1,8 @@
 [
     {
         "id": "3d-ASCII-Viewer",
-        "image": "https://res.cloudinary.com/barthkosi/video/upload/3d-ascii-viewer-demo.mp4",
-        "title": "3d-ASCII-Viewer",
+        "image": "https://res.cloudinary.com/barthkosi/video/upload/3d-ascii-demo.mp4",
+        "title": "3D to ASCII",
         "description": "A webapp That allows users to convert 3d models to ASCII art.",
         "link": "/explorations/3d-ascii-viewer"
     },
@@ -15,7 +15,7 @@
     },
     {
         "id": "vinyl-player",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player-cover.webp",
+        "image": "https://res.cloudinary.com/barthkosi/video/upload/vinyl-player-demo.mp4",
         "title": "Vinyl player",
         "description": "A fully functioning vinyl player built in framer.",
         "link": "/explorations/vinyl"
