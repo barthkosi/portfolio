@@ -2,8 +2,8 @@
     {
         "id": "3d-ASCII-Viewer",
         "image": "https://res.cloudinary.com/barthkosi/video/upload/3d-ascii-demo.mp4",
-        "title": "3D to ASCII",
-        "description": "A webapp That allows users to convert 3d models to ASCII art.",
+        "title": "3D to ASCII Viewer",
+        "description": "A webapp that allows users to convert 3d models to ASCII art.",
         "link": "/explorations/3d-ascii-viewer"
     },
     {
