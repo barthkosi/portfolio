@@ -12,7 +12,7 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
 
     return (
         <div
-            className={`relative overflow-hidden rounded-[12px] w-full lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px] bg-[var(--background-secondary)] transition-all duration-300 ${!isLoaded ? 'shimmer-loading' : ''}`}
+            className={`relative overflow-hidden rounded-[12px] w-full bg-[var(--background-secondary)] transition-all duration-300 ${!isLoaded ? 'shimmer-loading' : ''}`}
             style={{ aspectRatio: isLoaded ? 'auto' : aspectRatio }}
         >
             <div className={`w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
@@ -54,7 +54,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                 </div>
             )}
 
-            <div className="flex flex-col max-w-[720px] items-center lg:items-start w-full p-4 md:p-8 mx-auto gap-8">
+            <div className={`flex flex-col items-center lg:items-start w-full p-4 md:p-8 mx-auto gap-8 ${post.layout === 'full' ? '' : 'max-w-[720px]'}`}>
 
                 <div className="w-full flex flex-col gap-4 items-start md:items-center">
                     <h1 className="text-start md:text-center text-[var(--content-primary)]">{post.title}</h1>
@@ -79,7 +79,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                     </div>
                 </div>
 
-                <article className="w-full max-w-[640px]">
+                <article className={`w-full ${post.layout === 'full' ? '' : 'max-w-[640px]'}`}>
                     <ReactMarkdown
                         components={{
                             p: ({ node, children, ...rest }) => {
@@ -162,7 +162,7 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                         }
                                         if (images.length > 0) {
                                             return (
-                                                <div className="flex flex-col md:flex-row gap-4 lg:gap-6 mb-4 lg:mb-6 lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]">
+                                                <div className={`flex flex-col md:flex-row gap-4 lg:gap-6 mb-4 lg:mb-6 ${post.layout !== 'full' ? 'lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]' : ''}`}>
                                                     {images.map((img, i) => (
                                                         <div key={i} className="flex-1 min-w-0">
                                                             <figure>

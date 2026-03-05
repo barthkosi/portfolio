@@ -16,6 +16,7 @@ export interface ContentItem {
     tags?: string[];
     buttonText?: string;
     buttonLink?: string;
+    layout?: 'default' | 'full';
     content: string;
 }
 
@@ -54,6 +55,7 @@ export const getContent = (type: ContentType): ContentItem[] => {
             tags: data.tags || [],
             buttonText: data.buttonText,
             buttonLink: data.buttonLink,
+            layout: data.layout === 'full' ? 'full' : 'default',
             content: content || '',
         } as ContentItem;
     });
