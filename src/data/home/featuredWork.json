@@ -1,5 +1,18 @@
 [
     {
+        "id": "atoms",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/atoms-cover.webp",
+        "title": "Atoms",
+        "description": "A pinterest alternative for creatives.",
+        "link": "/work/atoms",
+        "tags": [
+            "UI/UX",
+            "Product Design"
+        ],
+        "aspectRatio": "auto",
+        "colSpan": 3
+    },
+    {
         "id": "explrar",
         "image": "https://res.cloudinary.com/barthkosi/image/upload/explrar-logo.webp",
         "title": "Explrar",
@@ -10,7 +23,7 @@
             "Product Design"
         ],
         "aspectRatio": "16:9",
-        "colSpan": 2,
+        "colSpan": 3,
         "locked": true
     },
     {
@@ -23,7 +36,7 @@
             "Graphic Design"
         ],
         "aspectRatio": "auto",
-        "colSpan": 1,
+        "colSpan": 2,
         "locked": true
     },
     {
@@ -37,7 +50,7 @@
             "Branding"
         ],
         "aspectRatio": "auto",
-        "colSpan": 1,
+        "colSpan": 2,
         "locked": true
     },
     {

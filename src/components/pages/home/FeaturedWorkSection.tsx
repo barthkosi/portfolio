@@ -11,23 +11,37 @@ export default function FeaturedWorkSection() {
                 <h2 className="h4">Featured Work</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
-                {featuredWork.map((item) => (
-                    <div
+            {/* Row 1: Atoms + Explrar — equal halves */}
+            <div className="featured-grid-2 w-full">
+                {featuredWork.slice(0, 2).map((item) => (
+                    <Card
                         key={item.id}
-                        className={item.colSpan === 2 ? "md:col-span-2" : "md:col-span-1"}
-                    >
-                        <Card
-                            image={item.image}
-                            title={item.title}
-                            description={item.description}
-                            link={item.link}
-                            tags={item.tags}
-                            aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
-                            variant="list-stacked"
-                            locked={"locked" in item && (item as any).locked}
-                        />
-                    </div>
+                        image={item.image}
+                        title={item.title}
+                        description={item.description}
+                        link={item.link}
+                        tags={item.tags}
+                        aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
+                        variant="list-stacked"
+                        locked={"locked" in item && (item as any).locked}
+                    />
+                ))}
+            </div>
+
+            {/* Row 2: remaining 3 items — equal thirds */}
+            <div className="featured-grid-3 w-full">
+                {featuredWork.slice(2).map((item) => (
+                    <Card
+                        key={item.id}
+                        image={item.image}
+                        title={item.title}
+                        description={item.description}
+                        link={item.link}
+                        tags={item.tags}
+                        aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
+                        variant="list-stacked"
+                        locked={"locked" in item && (item as any).locked}
+                    />
                 ))}
             </div>
 
