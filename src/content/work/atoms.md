@@ -37,13 +37,13 @@ tags: ["UI/UX" , "Product Design"]
 
 :::
 ![](https://res.cloudinary.com/barthkosi/image/upload/atoms-profile.webp)
-![](https://res.cloudinary.com/barthkosi/image/upload/atoms-extra.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/atoms-extra-shots.webp)
 :::
 
 ![](https://res.cloudinary.com/barthkosi/image/upload/atoms-browser.webp)
 
 :::
-![](https://res.cloudinary.com/barthkosi/image/upload/v1772676221/atoms-landing.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/atoms-landing-hero.webp)
 ![](https://res.cloudinary.com/barthkosi/image/upload/atoms-desktop.webp)
 :::
 
