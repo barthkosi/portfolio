@@ -5,8 +5,8 @@
         "alt": "Bookworms app UI design – reading tracker interface"
     },
     {
-        "id": "2",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756360174/bookworm_-_cover_kc0pcr.webp",
+        "id": "bookworm-cover",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bookworm-cover.webp",
         "alt": "Bookworm app cover screen design"
     },
     {
@@ -51,7 +51,7 @@
     },
     {
         "id": "9",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756359953/cover_lnaewc.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/metal-cover.webp",
         "alt": "Project cover image – featured portfolio work"
     }
 ]

@@ -143,7 +143,7 @@ export default function Card({
     // When locked, disable all interactivity — no link, no hover scale
     if (locked) {
         return (
-            <div className="w-full cursor-not-allowed">
+            <div className="w-full">
                 {content}
             </div>
         )
