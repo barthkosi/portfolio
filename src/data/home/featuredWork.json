@@ -37,7 +37,7 @@
             "Branding"
         ],
         "aspectRatio": "auto",
-        "row": 2,
+        "colSpan": 1,
         "locked": true
     },
     {
@@ -50,6 +50,6 @@
             "UX Design"
         ],
         "aspectRatio": "16:9",
-        "row": 2
+        "colSpan": 2
     }
 ]
