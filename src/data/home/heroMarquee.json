@@ -1,11 +1,11 @@
 [
     {
         "id": "1",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756281622/bookworms_f3dtzz.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756281622/bookworm.webp",
         "alt": "Bookworms app UI design – reading tracker interface"
     },
     {
-        "id": "bw-cover",
+        "id": "2",
         "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-cover.webp",
         "alt": "Bookworm app cover screen design"
     },
