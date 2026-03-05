@@ -17,6 +17,7 @@ export interface ContentItem {
     buttonText?: string;
     buttonLink?: string;
     layout?: 'default' | 'full';
+    locked?: boolean;
     content: string;
 }
 
@@ -56,6 +57,7 @@ export const getContent = (type: ContentType): ContentItem[] => {
             buttonText: data.buttonText,
             buttonLink: data.buttonLink,
             layout: data.layout === 'full' ? 'full' : 'default',
+            locked: data.locked === true,
             content: content || '',
         } as ContentItem;
     });

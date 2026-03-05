@@ -105,6 +105,7 @@ export default function ExplorationsContent({ initialExplorations, allTags }: Ex
                                                     tags={exploration.tags}
                                                     variant="list"
                                                     aspectRatio="aspect-video"
+                                                    locked={exploration.locked}
                                                 />
                                             </motion.div>
                                         ))}

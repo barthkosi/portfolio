@@ -30,6 +30,7 @@ export default function FeaturedWorkSection() {
                                 tags={item.tags}
                                 aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
                                 variant="list-stacked"
+                                locked={"locked" in item && (item as any).locked}
                             />
                         </div>
                     ))}
@@ -47,6 +48,7 @@ export default function FeaturedWorkSection() {
                                 tags={item.tags}
                                 aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
                                 variant="list-stacked"
+                                locked={"locked" in item && (item as any).locked}
                             />
                         </div>
                     ))}

@@ -10,7 +10,8 @@
             "Product Design"
         ],
         "aspectRatio": "16:9",
-        "colSpan": 2
+        "colSpan": 2,
+        "locked": true
     },
     {
         "id": "sui-axelar",
@@ -22,7 +23,8 @@
             "Graphic Design"
         ],
         "aspectRatio": "auto",
-        "colSpan": 1
+        "colSpan": 1,
+        "locked": true
     },
     {
         "id": "bookworm",
@@ -35,7 +37,8 @@
             "Branding"
         ],
         "aspectRatio": "auto",
-        "row": 2
+        "row": 2,
+        "locked": true
     },
     {
         "id": "lillup",

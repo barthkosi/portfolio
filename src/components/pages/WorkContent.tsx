@@ -105,6 +105,7 @@ export default function WorkContent({ initialProjects, allTags }: WorkContentPro
                                                     tags={project.tags}
                                                     variant="list"
                                                     aspectRatio="aspect-video"
+                                                    locked={project.locked}
                                                 />
                                             </motion.div>
                                         ))}

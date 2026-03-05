@@ -105,6 +105,7 @@ export default function WritingContent({ initialPosts, allTags }: WritingContent
                                                     tags={post.tags}
                                                     variant="list"
                                                     aspectRatio="aspect-video"
+                                                    locked={post.locked}
                                                 />
                                             </motion.div>
                                         ))}

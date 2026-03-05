@@ -33,6 +33,7 @@ export default function WritingSection() {
                             description={item.description}
                             link={item.link}
                             variant="list-stacked"
+                            locked={"locked" in item && (item as any).locked}
                         />
                     </div>
                 ))}

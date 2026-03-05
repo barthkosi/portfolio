@@ -1,0 +1,277 @@
+﻿diff --git a/src/components/interface/Card.tsx b/src/components/interface/Card.tsx
+index 6948b40..f109014 100644
+--- a/src/components/interface/Card.tsx
++++ b/src/components/interface/Card.tsx
+@@ -12,6 +12,7 @@ type CardProps = {
+     tags?: string[]
+     variant?: 'default' | 'list' | 'list-stacked'
+     aspectRatio?: string
++    locked?: boolean
+ }
+ 
+ // Helper to detect if a URL is a video
+@@ -21,6 +22,24 @@ const isVideoUrl = (url: string): boolean => {
+     return videoExtensions.some(ext => lowercaseUrl.includes(ext));
+ };
+ 
++// Lock icon SVG component
++const LockIcon = () => (
++    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
++        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
++        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
++    </svg>
++);
++
++// Locked overlay badge
++const LockedBadge = () => (
++    <div className="absolute inset-0 z-10 flex items-center justify-center">
++        <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full label-s bg-[var(--background-inverse)] text-[var(--content-primary-inverse)]">
++            <LockIcon />
++            Locked
++        </span>
++    </div>
++);
++
+ export default function Card({
+     image,
+     title,
+@@ -28,9 +47,12 @@ export default function Card({
+     link,
+     tags,
+     variant = "default",
+-    aspectRatio = "aspect-video"
++    aspectRatio = "aspect-video",
++    locked = false
+ }: CardProps) {
+     const isVideo = isVideoUrl(image);
++    const grayscaleClass = locked ? "grayscale" : "";
++    const textOpacityStyle = locked ? { opacity: 0.4 } : undefined;
+ 
+     // Default Card Content
+     const DefaultContent = (
+@@ -38,10 +60,11 @@ export default function Card({
+             <div className="flex flex-col gap-2">
+                 <div className="w-full p-2 rounded-[var(--radius-lg)] bg-[var(--background-secondary)]">
+                     <div className={`relative w-full ${aspectRatio === "auto" ? "" : aspectRatio} overflow-hidden rounded-xl`}>
++                        {locked && <LockedBadge />}
+                         {isVideo ? (
+                             <video
+                                 src={image}
+-                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover`}
++                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover ${grayscaleClass}`}
+                                 autoPlay
+                                 muted
+                                 loop
+@@ -51,7 +74,7 @@ export default function Card({
+                             <img
+                                 src={image}
+                                 alt={title || ""}
+-                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover`}
++                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover ${grayscaleClass}`}
+                                 loading="lazy"
+                             />
+                         )}
+@@ -59,7 +82,7 @@ export default function Card({
+                 </div>
+ 
+                 {(title || description) && (
+-                    <div className="w-full flex flex-col p-4 gap-1 rounded-[var(--radius-lg)] bg-[var(--background-secondary)]">
++                    <div className="w-full flex flex-col p-4 gap-1 rounded-[var(--radius-lg)] bg-[var(--background-secondary)]" style={textOpacityStyle}>
+                         {title && <div className="w-full text-[var(--content-primary)] label-m">{title}</div>}
+                         {description && <div className="w-full text-[var(--content-tertiary)] body-s-medium">{description}</div>}
+                     </div>
+@@ -70,30 +93,40 @@ export default function Card({
+ 
+     // List Card Content
+     const isStacked = variant === 'list-stacked';
++    const imageClasses = `${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-xl object-cover bg-[var(--background-secondary)] ${grayscaleClass}`;
+     const ListContent = (
+         <div className={`w-full gap-3 flex flex-col ${isStacked ? 'bg-[var(--background-primary)] rounded-t-xl' : 'md:flex-row'} items-center group`}>
+             {isVideo ? (
+                 <video
+                     src={image}
+-                    className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-xl object-cover bg-[var(--background-secondary)]`}
++                    className={imageClasses}
+                     autoPlay
+                     muted
+                     loop
+                     playsInline
+                 />
++            ) : locked ? (
++                <div className={`relative ${isStacked ? 'w-full' : `w-full ${aspectRatio === "auto" ? "" : ""}`} ${isStacked ? '' : 'md:max-w-[240px]'}`}>
++                    <LockedBadge />
++                    <img
++                        src={image}
++                        alt={title || ""}
++                        className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} rounded-xl object-cover bg-[var(--background-secondary)] ${grayscaleClass}`}
++                    />
++                </div>
+             ) : (
+                 <img
+                     src={image}
+                     alt={title || ""}
+-                    className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-xl object-cover bg-[var(--background-secondary)]`}
++                    className={imageClasses}
+                 />
+             )}
+-            <div className="w-full flex flex-col gap-1">
++            <div className="w-full flex flex-col gap-1" style={textOpacityStyle}>
+                 {title && <h5 className="text-[var(--content-primary)]">{title}</h5>}
+                 {description && <div className="label-m text-[var(--content-secondary)]">{description}</div>}
+             </div>
+             {tags && tags.length > 0 && (
+-                <div className={`w-full ${isStacked ? '' : 'lg:max-w-[320px]'} flex flex-wrap justify-start ${isStacked ? '' : 'md:justify-end'} gap-2`}>
++                <div className={`w-full ${isStacked ? '' : 'lg:max-w-[320px]'} flex flex-wrap justify-start ${isStacked ? '' : 'md:justify-end'} gap-2`} style={textOpacityStyle}>
+                     {tags.map((tag) => (
+                         <div key={tag} className="px-4 py-2 rounded-full label-s bg-[var(--background-secondary)] text-[var(--content-secondary)]">
+                             {tag}
+@@ -107,6 +140,15 @@ export default function Card({
+     // Determines which content to render
+     const content = (variant === "list" || variant === "list-stacked") ? ListContent : DefaultContent;
+ 
++    // When locked, disable all interactivity ΓÇö no link, no hover scale
++    if (locked) {
++        return (
++            <div className="w-full cursor-not-allowed">
++                {content}
++            </div>
++        )
++    }
++
+     if (link) {
+         // Check if link is external (starts with http)
+         const isExternal = link.startsWith('http');
+diff --git a/src/components/pages/ExplorationsContent.tsx b/src/components/pages/ExplorationsContent.tsx
+index 11567d8..4b96d7c 100644
+--- a/src/components/pages/ExplorationsContent.tsx
++++ b/src/components/pages/ExplorationsContent.tsx
+@@ -105,6 +105,7 @@ export default function ExplorationsContent({ initialExplorations, allTags }: Ex
+                                                     tags={exploration.tags}
+                                                     variant="list"
+                                                     aspectRatio="aspect-video"
++                                                    locked={exploration.locked}
+                                                 />
+                                             </motion.div>
+                                         ))}
+diff --git a/src/components/pages/WorkContent.tsx b/src/components/pages/WorkContent.tsx
+index 7089aa6..6349d0b 100644
+--- a/src/components/pages/WorkContent.tsx
++++ b/src/components/pages/WorkContent.tsx
+@@ -105,6 +105,7 @@ export default function WorkContent({ initialProjects, allTags }: WorkContentPro
+                                                     tags={project.tags}
+                                                     variant="list"
+                                                     aspectRatio="aspect-video"
++                                                    locked={project.locked}
+                                                 />
+                                             </motion.div>
+                                         ))}
+diff --git a/src/components/pages/WritingContent.tsx b/src/components/pages/WritingContent.tsx
+index 84e5e00..af03b10 100644
+--- a/src/components/pages/WritingContent.tsx
++++ b/src/components/pages/WritingContent.tsx
+@@ -105,6 +105,7 @@ export default function WritingContent({ initialPosts, allTags }: WritingContent
+                                                     tags={post.tags}
+                                                     variant="list"
+                                                     aspectRatio="aspect-video"
++                                                    locked={post.locked}
+                                                 />
+                                             </motion.div>
+                                         ))}
+diff --git a/src/components/pages/home/ExplorationsSection.tsx b/src/components/pages/home/ExplorationsSection.tsx
+index 946407b..4d077a0 100644
+--- a/src/components/pages/home/ExplorationsSection.tsx
++++ b/src/components/pages/home/ExplorationsSection.tsx
+@@ -21,6 +21,7 @@ export default function ExplorationsSection() {
+                             description={item.description}
+                             link={item.link}
+                             variant="list-stacked"
++                            locked={"locked" in item && (item as any).locked}
+                         />
+                     </div>
+                 ))}
+diff --git a/src/components/pages/home/FeaturedWorkSection.tsx b/src/components/pages/home/FeaturedWorkSection.tsx
+index 1172d32..3d3a6b6 100644
+--- a/src/components/pages/home/FeaturedWorkSection.tsx
++++ b/src/components/pages/home/FeaturedWorkSection.tsx
+@@ -30,6 +30,7 @@ export default function FeaturedWorkSection() {
+                                 tags={item.tags}
+                                 aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
+                                 variant="list-stacked"
++                                locked={"locked" in item && (item as any).locked}
+                             />
+                         </div>
+                     ))}
+@@ -47,6 +48,7 @@ export default function FeaturedWorkSection() {
+                                 tags={item.tags}
+                                 aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
+                                 variant="list-stacked"
++                                locked={"locked" in item && (item as any).locked}
+                             />
+                         </div>
+                     ))}
+diff --git a/src/components/pages/home/WritingSection.tsx b/src/components/pages/home/WritingSection.tsx
+index 1e7b48e..3a2a838 100644
+--- a/src/components/pages/home/WritingSection.tsx
++++ b/src/components/pages/home/WritingSection.tsx
+@@ -33,6 +33,7 @@ export default function WritingSection() {
+                             description={item.description}
+                             link={item.link}
+                             variant="list-stacked"
++                            locked={"locked" in item && (item as any).locked}
+                         />
+                     </div>
+                 ))}
+diff --git a/src/data/home/featuredWork.json b/src/data/home/featuredWork.json
+index 1c387de..501fe87 100644
+--- a/src/data/home/featuredWork.json
++++ b/src/data/home/featuredWork.json
+@@ -10,7 +10,8 @@
+             "Product Design"
+         ],
+         "aspectRatio": "16:9",
+-        "colSpan": 2
++        "colSpan": 2,
++        "locked": true
+     },
+     {
+         "id": "sui-axelar",
+@@ -22,7 +23,8 @@
+             "Graphic Design"
+         ],
+         "aspectRatio": "auto",
+-        "colSpan": 1
++        "colSpan": 1,
++        "locked": true
+     },
+     {
+         "id": "bookworm",
+@@ -35,7 +37,8 @@
+             "Branding"
+         ],
+         "aspectRatio": "auto",
+-        "row": 2
++        "row": 2,
++        "locked": true
+     },
+     {
+         "id": "lillup",
+diff --git a/src/lib/content.ts b/src/lib/content.ts
+index a491f33..423837c 100644
+--- a/src/lib/content.ts
++++ b/src/lib/content.ts
+@@ -17,6 +17,7 @@ export interface ContentItem {
+     buttonText?: string;
+     buttonLink?: string;
+     layout?: 'default' | 'full';
++    locked?: boolean;
+     content: string;
+ }
+ 
+@@ -56,6 +57,7 @@ export const getContent = (type: ContentType): ContentItem[] => {
+             buttonText: data.buttonText,
+             buttonLink: data.buttonLink,
+             layout: data.layout === 'full' ? 'full' : 'default',
++            locked: data.locked === true,
+             content: content || '',
+         } as ContentItem;
+     });
