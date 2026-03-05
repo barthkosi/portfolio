@@ -3,7 +3,7 @@ title: "Atoms"
 date: "2024-09-09" 
 layout: full
 description: "A pinterest alternative for creatives."
-coverImage: "https://res.cloudinary.com/barthkosi/image/upload/atoms-cover.webp"
+coverImage: "https://res.cloudinary.com/barthkosi/image/upload/atoms-demo.gif"
 bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/atoms-logo.webp"
 author: "Barth"
 tags: ["UI/UX" , "Product Design"]
