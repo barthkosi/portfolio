@@ -12,7 +12,7 @@ export default function FeaturedWorkSection() {
             </div>
 
             {/* Row 1: Atoms + Explrar — equal halves */}
-            <div className="featured-grid-2 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full">
                 {featuredWork.slice(0, 2).map((item) => (
                     <Card
                         key={item.id}
@@ -29,7 +29,7 @@ export default function FeaturedWorkSection() {
             </div>
 
             {/* Row 2: remaining 3 items — equal thirds */}
-            <div className="featured-grid-3 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
                 {featuredWork.slice(2).map((item) => (
                     <Card
                         key={item.id}
