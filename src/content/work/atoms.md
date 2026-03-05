@@ -34,3 +34,17 @@ tags: ["UI/UX" , "Product Design"]
 ![Search by HEX/RGB](https://res.cloudinary.com/barthkosi/image/upload/atoms-search-2.webp)
 ![Search results and filters](https://res.cloudinary.com/barthkosi/image/upload/atoms-search-3.webp)
 :::
+
+:::
+![](https://res.cloudinary.com/barthkosi/image/upload/atoms-profile.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/atoms-extra.webp)
+:::
+
+![](https://res.cloudinary.com/barthkosi/image/upload/atoms-browser.webp)
+
+:::
+![](https://res.cloudinary.com/barthkosi/image/upload/v1772676221/atoms-landing.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/atoms-desktop.webp)
+:::
+
+![](https://res.cloudinary.com/barthkosi/image/upload/atoms-404.webp)
