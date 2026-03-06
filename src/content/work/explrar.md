@@ -1,7 +1,7 @@
 ---
 title: "Explrar: Process Breakdown"
-date: "2025-08-10" 
-description: "An AI powered trip planner and document organizer."
+date: "2025-08-10"
+description: "Coming Soon"
 coverImage: "https://res.cloudinary.com/barthkosi/image/upload/explrar-cover-blue.webp"
 bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/explrar-banner.webp"
 locked: true
