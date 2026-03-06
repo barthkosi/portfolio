@@ -32,15 +32,16 @@ export default async function WorkPostPage({ params }: { params: Promise<{ slug:
     const post = await getPostBySlug('work', slug);
     const allPosts = await getContent('work');
 
-    if (!post) {
+    if (!post || post.locked) {
         notFound();
     }
 
     const otherPosts = allPosts.filter(p => p.slug !== slug).slice(0, 3);
 
-    const currentIndex = allPosts.findIndex(p => p.slug === slug);
-    const prevPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
-    const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+    const navigablePosts = allPosts.filter(p => !p.locked);
+    const currentIndex = navigablePosts.findIndex(p => p.slug === slug);
+    const prevPost = currentIndex > 0 ? navigablePosts[currentIndex - 1] : null;
+    const nextPost = currentIndex < navigablePosts.length - 1 ? navigablePosts[currentIndex + 1] : null;
 
     return <PostContent
         post={post}

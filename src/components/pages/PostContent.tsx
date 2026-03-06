@@ -211,11 +211,11 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                     ) : <span />}
                 </div>
 
-                {otherPosts.length > 0 && (
+                {otherPosts.filter(p => !p.locked).length > 0 && (
                     <div className="w-full flex flex-col gap-5">
                         <h3 className="h4 text-[var(--content-primary)]">More {type}</h3>
                         <div className="flex flex-col gap-4">
-                            {otherPosts.map(p => (
+                            {otherPosts.filter(p => !p.locked).map(p => (
                                 <Card
                                     key={p.slug}
                                     image={p.coverImage || ""}
