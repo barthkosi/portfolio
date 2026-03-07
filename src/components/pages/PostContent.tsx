@@ -39,7 +39,7 @@ interface PostContentProps {
 interface HeadingItem {
     id: string;
     text: string;
-    level: 2 | 3;
+    level: 1 | 2 | 3;
 }
 
 // Pre-process markdown: convert ::: blocks into ```row fenced code blocks
@@ -57,11 +57,12 @@ const slugify = (text: string): string =>
         .trim()
         .replace(/[\s_]+/g, '-');
 
-// Extract H2/H3 headings from raw markdown content
+// Extract H1/H2/H3 headings from raw markdown content
 const extractHeadings = (content: string): HeadingItem[] => {
     const lines = content.split('\n');
     const headings: HeadingItem[] = [];
     for (const line of lines) {
+        const h1 = line.match(/^#\s+(.+)/);
         const h2 = line.match(/^##\s+(.+)/);
         const h3 = line.match(/^###\s+(.+)/);
         if (h3) {
@@ -70,6 +71,9 @@ const extractHeadings = (content: string): HeadingItem[] => {
         } else if (h2) {
             const text = h2[1].trim();
             headings.push({ id: slugify(text), text, level: 2 });
+        } else if (h1) {
+            const text = h1[1].trim();
+            headings.push({ id: slugify(text), text, level: 1 });
         }
     }
     return headings;
@@ -134,7 +138,7 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                         onClick={(e) => handleClick(e, id)}
                         className={`
                                 group flex items-start gap-2 py-1 transition-all duration-200
-                                ${level === 3 ? 'pl-3' : ''}
+                                ${level === 2 ? 'pl-2' : level === 3 ? 'pl-4' : ''}
                             `}
                     >
                         <span
@@ -260,16 +264,20 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                         </figure>
                                     );
                                 },
-                                h1: (props) => <h1 className="h3 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
+                                h1: ({ children, ...props }) => {
+                                    const text = typeof children === 'string' ? children : String(children);
+                                    const id = slugify(text);
+                                    return <h1 id={id} className="blogh1 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>{children}</h1>;
+                                },
                                 h2: ({ children, ...props }) => {
                                     const text = typeof children === 'string' ? children : String(children);
                                     const id = slugify(text);
-                                    return <h2 id={id} className="h4 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>{children}</h2>;
+                                    return <h2 id={id} className="blogh2 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>{children}</h2>;
                                 },
                                 h3: ({ children, ...props }) => {
                                     const text = typeof children === 'string' ? children : String(children);
                                     const id = slugify(text);
-                                    return <h3 id={id} className="h5 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>{children}</h3>;
+                                    return <h3 id={id} className="blogh3 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>{children}</h3>;
                                 },
                                 ul: (props) => <ul className="list-disc pl-6 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
                                 ol: (props) => <ol className="list-decimal pl-6 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
