@@ -12,7 +12,6 @@ export interface ContentItem {
     description: string;
     coverImage?: string;
     bannerImage?: string;
-    author?: string;
     tags?: string[];
     buttonText?: string;
     buttonLink?: string;
@@ -52,7 +51,6 @@ export const getContent = (type: ContentType): ContentItem[] => {
             description: data.description || '',
             coverImage: data.coverImage,
             bannerImage: data.bannerImage,
-            author: data.author,
             tags: data.tags || [],
             buttonText: data.buttonText,
             buttonLink: data.buttonLink,

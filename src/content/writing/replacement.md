@@ -4,7 +4,6 @@ date: "2025-12-07"
 description: "On taste, agency and the death of average."
 coverImage: "https://res.cloudinary.com/barthkosi/image/upload/replacement.webp"
 bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/replacement-banner.webp"
-author: "Barth"
 tags: ["Agency"]
 ---
 

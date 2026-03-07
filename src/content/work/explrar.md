@@ -5,7 +5,6 @@ description: "Coming Soon"
 coverImage: "https://res.cloudinary.com/barthkosi/image/upload/explrar-cover-blue.webp"
 bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/explrar-banner.webp"
 locked: true
-author: "Barth"
 tags: ["UI/UX" , "Product Design"]
 buttonText: "Live Website"
 buttonLink: "https://www.explrar.com"

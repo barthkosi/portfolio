@@ -6,6 +6,5 @@ locked: true
 description: "Coming Soon"
 coverImage: "https://res.cloudinary.com/barthkosi/image/upload/bw-cover.webp"
 bannerImage: ""
-author: "Barth"
 tags: ["UI/UX" , "Product Design"]
 ---

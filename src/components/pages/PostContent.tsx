@@ -327,7 +327,6 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                     <div className="flex flex-col items-start md:items-center gap-4 text-[var(--content-tertiary)] label-s">
                         <div className="flex flex-col items-start md:items-center gap-2">
                             <span className='label-m'>{new Date(post.date || "").toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                            {post.author && <span className='label-m'>{post.author}</span>}
                         </div>
                         <div className="flex flex-wrap gap-1">
                             {post.tags && post.tags.length > 0 && post.tags.map(tag => (

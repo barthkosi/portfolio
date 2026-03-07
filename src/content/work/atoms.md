@@ -5,7 +5,6 @@ layout: full
 description: "A pinterest alternative for creatives."
 coverImage: "https://res.cloudinary.com/barthkosi/image/upload/atoms-demo.gif"
 bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/atoms-logo.webp"
-author: "Barth"
 tags: ["UI/UX" , "Product Design"]
 ---
 
