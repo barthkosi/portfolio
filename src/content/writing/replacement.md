@@ -45,7 +45,7 @@ I will proffer no guidance, agency remains in your hands, you must learn first h
 
 **Cultivate your skills or you will sink. that is my only warning.**
 
-### Closing note
+## Closing note
 
 Average will always exist, but it drifts upward each time a new tool arrives. The masters, however, keep sprinting ahead, turning ability into art. **AI does not steal our future, it hands us a sharper chisel and dares us to carve deeper.**
 

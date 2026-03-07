@@ -6,6 +6,7 @@ coverImage: "https://res.cloudinary.com/barthkosi/image/upload/unproductive.webp
 bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/unproductive.webp"
 author: "Barth"
 tags: ["Self"]
+locked: true
 ---
 
 > the belief that by naming a goal you are closer to achieving it, that by storing a thought you have understood it, that by filing a fact you have earned the right to deploy it and this is productivity as performance.

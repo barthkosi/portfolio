@@ -6,7 +6,7 @@ import featuredWork from "@/data/home/featuredWork.json";
 
 export default function FeaturedWorkSection() {
     return (
-        <section className="flex flex-col items-center px-4 md:px-8 lg:px-20 py-8 md:py-12 pt-10 gap-8">
+        <section className="flex flex-col items-center px-4 md:px-8 py-8 md:py-12 gap-8">
             <div className="flex flex-col gap-4 w-full text-start">
                 <h2 className="h4">Featured Work</h2>
             </div>

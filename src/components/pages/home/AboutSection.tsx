@@ -4,7 +4,7 @@ import ScrollReveal from "@/components/interface/ScrollReveal";
 
 export default function AboutSection() {
     return (
-        <section className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-0 h-fit px-4 md:px-8 lg:px-20 py-8 md:py-12">
+        <section className="w-full flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-0 h-fit px-4 md:px-8 py-8 md:py-12">
             <div className="w-full">
                 <h6>About Me</h6>
             </div>
