@@ -6,7 +6,7 @@ import explorations from "@/data/home/explorations.json";
 
 export default function ExplorationsSection() {
     return (
-        <section className="flex flex-col items-center px-4 md:px-8 lg:px-20 py-8 md:py-12 gap-8">
+        <section className="flex flex-col items-center px-4 md:px-8 py-8 md:py-12 gap-8">
             <div className="flex flex-col gap-2 max-w-[640px] text-center">
                 <h3>Explorations</h3>
                 <p className="text-[var(--content-secondary)]">Experiments, tests, and unfinished ideas.</p>
