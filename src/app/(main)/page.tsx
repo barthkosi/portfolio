@@ -20,5 +20,9 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-    return <HomeContent />;
+    return (
+        <div className="-m-4 md:-m-8">
+            <HomeContent />
+        </div>
+    );
 }
