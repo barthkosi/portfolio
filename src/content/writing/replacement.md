@@ -35,7 +35,7 @@ Extraordinary work: that is where the future negotiates its terms.
 
 In every field, progress circles back on itself. New tools spawn new questions, which demand new skills, which spark new tools. AI joins that spiral as a catalyst, not a conclusion. The goal was never to replace. It was always to grow and growth pulls us forward, replacement means shuffling the pieces. It was never a new deck.
 
-### The quiet power of partnership
+## The quiet power of partnership
 
 Think of AI as an assistant that never tires, forgets, or sleeps. Yet the assistant waits for direction, your partner needs hypotheses, context, prompts. Agency remains human. Taste remains human. Meaning remains human. That is our true safeguard against obsolescence.
 

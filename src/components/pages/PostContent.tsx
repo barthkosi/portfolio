@@ -79,36 +79,128 @@ const extractHeadings = (content: string): HeadingItem[] => {
     return headings;
 };
 
-// Table of Contents sidebar component
 function TableOfContents({ headings }: { headings: HeadingItem[] }) {
     const [activeId, setActiveId] = useState<string>('');
-    const observerRef = useRef<IntersectionObserver | null>(null);
+    const containerRef = useRef<HTMLElement>(null);
+    const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+    const clipRectRef = useRef<SVGRectElement>(null);
 
+    const [pathData, setPathData] = useState<string>('');
+    const [pathHeight, setPathHeight] = useState<number>(0);
+
+    // Initial path generation and resize observer
     useEffect(() => {
-        if (headings.length === 0) return;
+        if (!containerRef.current || headings.length === 0) return;
 
-        const handleIntersect = (entries: IntersectionObserverEntry[]) => {
-            // Find the topmost visible heading
-            const visible = entries
-                .filter(e => e.isIntersecting)
-                .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const updatePath = () => {
+            if (!containerRef.current || headings.length === 0) return;
+            const containerTop = containerRef.current.getBoundingClientRect().top;
+            let path = '';
+            let lastPt: { x: number, y: number } | null = null;
+            let maxY = 0;
 
-            if (visible.length > 0) {
-                setActiveId(visible[0].target.id);
+            headings.forEach((h, i) => {
+                const el = itemRefs.current[h.id];
+                if (!el) return;
+                const rect = el.getBoundingClientRect();
+                const y = Math.max(0, rect.top - containerTop + rect.height / 2);
+                maxY = Math.max(maxY, y);
+
+                // Adjust x based on level to create the curve
+                const x = h.level === 1 ? 2 : h.level === 2 ? 10 : 18;
+
+                if (i === 0) {
+                    path += `M ${x} ${y}`;
+                } else if (lastPt) {
+                    const cy = (lastPt.y + y) / 2;
+                    path += ` C ${lastPt.x} ${cy}, ${x} ${cy}, ${x} ${y}`;
+                }
+                lastPt = { x, y };
+            });
+            setPathData(path);
+            setPathHeight(maxY + 10);
+        };
+
+        // Small delay to ensure fonts/layout are stable
+        const timeoutId = setTimeout(updatePath, 100);
+        window.addEventListener('resize', updatePath);
+        return () => {
+            clearTimeout(timeoutId);
+            window.removeEventListener('resize', updatePath);
+        };
+    }, [headings]);
+
+    // Scroll listener for SVG height and active state
+    useEffect(() => {
+        if (headings.length === 0 || !containerRef.current) return;
+
+        let ticking = false;
+
+        const updateScroll = () => {
+            if (!containerRef.current || headings.length === 0) return;
+            const scrollY = window.scrollY;
+            const OFFSET = 120; // Accounting for fixed header
+            const pageHeadings = headings.map(h => {
+                const el = document.getElementById(h.id);
+                return {
+                    id: h.id,
+                    top: el ? el.getBoundingClientRect().top + window.scrollY - OFFSET : 0
+                };
+            });
+
+            let targetY = 0;
+            let currentActiveId = headings[0].id;
+            const cTop = containerRef.current.getBoundingClientRect().top;
+
+            if (scrollY < pageHeadings[0].top) {
+                targetY = 0;
+                currentActiveId = '';
+            } else if (scrollY >= pageHeadings[pageHeadings.length - 1].top) {
+                const lastId = pageHeadings[pageHeadings.length - 1].id;
+                currentActiveId = lastId;
+                const el = itemRefs.current[lastId];
+                if (el) targetY = el.getBoundingClientRect().top - cTop + el.getBoundingClientRect().height / 2;
+            } else {
+                for (let i = 0; i < pageHeadings.length - 1; i++) {
+                    const curr = pageHeadings[i];
+                    const next = pageHeadings[i + 1];
+                    if (scrollY >= curr.top && scrollY < next.top) {
+                        currentActiveId = curr.id;
+                        const progress = (scrollY - curr.top) / (next.top - curr.top);
+                        const elCurr = itemRefs.current[curr.id];
+                        const elNext = itemRefs.current[next.id];
+
+                        if (elCurr && elNext) {
+                            const y1 = elCurr.getBoundingClientRect().top - cTop + elCurr.getBoundingClientRect().height / 2;
+                            const y2 = elNext.getBoundingClientRect().top - cTop + elNext.getBoundingClientRect().height / 2;
+                            targetY = y1 + progress * (y2 - y1);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            if (clipRectRef.current) {
+                clipRectRef.current.setAttribute('height', Math.max(0, targetY).toString());
+            }
+
+            setActiveId(currentActiveId);
+        };
+
+        const handleScroll = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    updateScroll();
+                    ticking = false;
+                });
+                ticking = true;
             }
         };
 
-        observerRef.current = new IntersectionObserver(handleIntersect, {
-            rootMargin: '-80px 0px -60% 0px',
-            threshold: 0,
-        });
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        updateScroll(); // initial call
 
-        headings.forEach(({ id }) => {
-            const el = document.getElementById(id);
-            if (el) observerRef.current?.observe(el);
-        });
-
-        return () => observerRef.current?.disconnect();
+        return () => window.removeEventListener('scroll', handleScroll);
     }, [headings]);
 
     if (headings.length === 0) return null;
@@ -125,36 +217,82 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
     };
 
     return (
-        <nav className="flex flex-col gap-1 w-[200px]">
-            <span className="label-s text-[var(--content-tertiary)] mb-2 opacity-60 uppercase tracking-wider">
+        <nav ref={containerRef as React.RefObject<HTMLDivElement>} className="relative flex flex-col gap-1 w-[200px] pl-6">
+            <span className="label-s text-[var(--content-tertiary)] mb-2 opacity-60 uppercase tracking-wider relative -left-6">
                 On this page
             </span>
+
+            {pathData && (
+                <svg
+                    className="absolute top-0 left-0 pointer-events-none"
+                    style={{ width: 24, height: pathHeight + 10, overflow: 'visible' }}
+                >
+                    <path
+                        d={pathData}
+                        fill="none"
+                        className="stroke-[var(--border-primary)]"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    />
+
+                    <path
+                        d={pathData}
+                        fill="none"
+                        className="stroke-[var(--content-primary)]"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        clipPath="url(#active-line-clip)"
+                    />
+                    <clipPath id="active-line-clip">
+                        <rect ref={clipRectRef} x="-10" y="-10" width="40" height="0" />
+                    </clipPath>
+
+                    {/* Add small connection dots at each heading */}
+                    {headings.map((h, i) => {
+                        const el = itemRefs.current[h.id];
+                        if (!el || !containerRef.current) return null;
+                        const rect = el.getBoundingClientRect();
+                        const cTop = containerRef.current.getBoundingClientRect().top;
+                        const y = Math.max(0, rect.top - cTop + rect.height / 2);
+                        const x = h.level === 1 ? 2 : h.level === 2 ? 10 : 18;
+
+                        // Check if the current heading is before or equal to the active heading
+                        const activeIndex = headings.findIndex(h => h.id === activeId);
+                        const isPassed = i <= activeIndex;
+
+                        return (
+                            <circle
+                                key={`dot-${h.id}`}
+                                cx={x}
+                                cy={y}
+                                r="3"
+                                className={`transition-all duration-300 ${isPassed ? 'fill-[var(--content-primary)]' : 'fill-[var(--background-primary)] stroke-[var(--border-primary)] stroke-2'}`}
+                            />
+                        );
+                    })}
+                </svg>
+            )}
+
             {headings.map(({ id, text, level }) => {
                 const isActive = activeId === id;
                 return (
                     <a
                         key={id}
+                        ref={(el) => { itemRefs.current[id] = el; }}
                         href={`#${id}`}
                         onClick={(e) => handleClick(e, id)}
                         className={`
-                                group flex items-start gap-2 py-1 transition-all duration-200
+                                group flex items-start py-1 transition-all duration-200 relative
                                 ${level === 2 ? 'pl-2' : level === 3 ? 'pl-4' : ''}
                             `}
                     >
                         <span
                             className={`
-                                    mt-[6px] shrink-0 w-[2px] rounded-full transition-all duration-200
-                                    ${isActive
-                                    ? 'h-[14px] bg-[var(--content-primary)]'
-                                    : 'h-[10px] bg-[var(--border-primary)] group-hover:bg-[var(--content-secondary)]'
-                                }
-                                `}
-                        />
-                        <span
-                            className={`
                                     label-s leading-snug transition-colors duration-200
                                     ${isActive
-                                    ? 'text-[var(--content-primary)]'
+                                    ? 'text-[var(--content-primary)] font-medium'
                                     : 'text-[var(--content-tertiary)] group-hover:text-[var(--content-secondary)]'
                                 }
                                 `}

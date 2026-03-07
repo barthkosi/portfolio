@@ -28,7 +28,7 @@ export default function HeroSection() {
     const isDesktop = useMediaQuery('(min-width: 1024px)');
 
     return (
-        <section className="relative flex flex-col lg:flex-row px-4 md:px-8 lg:pr-0 lg:gap-8 items-center h-[calc(100dvh-64px)] md:h-[calc(100dvh-101px)] overflow-hidden">
+        <section className="relative flex flex-col lg:flex-row px-4 md:px-8 lg:pr-0 lg:gap-8 items-center h-[calc(100vh-64px)] md:h-[calc(100vh-101px)] overflow-hidden">
             {/* Hero Content */}
             <motion.div
                 className="w-full items-start flex flex-col justify-center gap-4"
