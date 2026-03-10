@@ -4,7 +4,7 @@
         "image": "https://res.cloudinary.com/barthkosi/video/upload/3d-ascii-demo.mp4",
         "title": "3D to ASCII Viewer",
         "description": "A webapp that allows users to convert 3d models to ASCII art.",
-        "link": "/explorations/3d-ascii-viewer"
+        "link": "/explorations/ascii"
     },
     {
         "id": "liquid-glass",
