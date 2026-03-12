@@ -44,6 +44,7 @@ const BookCard = ({
             description={data.author}
             link={data.link}
             aspectRatio="auto"
+            shimmerAspectRatio="2/3"
         />
     </motion.div>
 );
