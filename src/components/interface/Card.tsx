@@ -3,6 +3,7 @@
 import { springBase } from "@/lib/transitions"
 import { motion } from "motion/react"
 import Link from "next/link"
+import { useState } from "react"
 
 type CardProps = {
     image: string
@@ -12,6 +13,7 @@ type CardProps = {
     tags?: string[]
     variant?: 'default' | 'list' | 'list-stacked'
     aspectRatio?: string
+    shimmerAspectRatio?: string
     locked?: boolean
 }
 
@@ -48,8 +50,10 @@ export default function Card({
     tags,
     variant = "default",
     aspectRatio = "aspect-video",
+    shimmerAspectRatio,
     locked = false
 }: CardProps) {
+    const [isLoaded, setIsLoaded] = useState(false);
     const isVideo = isVideoUrl(image);
     const grayscaleClass = locked ? "grayscale" : "";
     const textOpacityStyle = locked ? { opacity: 0.4 } : undefined;
@@ -59,23 +63,28 @@ export default function Card({
         <>
             <div className="flex flex-col gap-2">
                 <div className="w-full p-2 rounded-[var(--radius-lg)] bg-[var(--background-secondary)]">
-                    <div className={`relative w-full ${aspectRatio === "auto" ? "" : aspectRatio} overflow-hidden rounded-xl`}>
+                    <div
+                        className={`relative overflow-hidden rounded-xl transition-all duration-300 ${!isLoaded && shimmerAspectRatio ? 'shimmer-loading bg-[var(--background-secondary)]' : ''} ${!isLoaded && !shimmerAspectRatio ? aspectRatio : ''} ${isLoaded ? `${aspectRatio === "auto" ? "" : aspectRatio}` : 'w-full'}`}
+                        style={!isLoaded && shimmerAspectRatio ? { aspectRatio: shimmerAspectRatio } : undefined}
+                    >
                         {locked && <LockedBadge />}
                         {isVideo ? (
                             <video
                                 src={image}
-                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover ${grayscaleClass}`}
+                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover ${grayscaleClass} transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 autoPlay
                                 muted
                                 loop
                                 playsInline
+                                onLoadedData={() => setIsLoaded(true)}
                             />
                         ) : (
                             <img
                                 src={image}
                                 alt={title || ""}
-                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover ${grayscaleClass}`}
+                                className={`${aspectRatio === "auto" ? "w-full h-auto" : "absolute inset-0 w-full h-full"} object-cover ${grayscaleClass} transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                                 loading="lazy"
+                                onLoad={() => setIsLoaded(true)}
                             />
                         )}
                     </div>
@@ -93,18 +102,23 @@ export default function Card({
 
     // List Card Content
     const isStacked = variant === 'list-stacked';
-    const imageClasses = `${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} ${isStacked ? '' : 'md:max-w-[240px]'} rounded-xl object-cover bg-[var(--background-secondary)] ${grayscaleClass}`;
     const ListContent = (
         <div className={`w-full gap-3 flex flex-col ${isStacked ? 'bg-[var(--background-primary)] rounded-t-xl' : 'md:flex-row'} items-center group`}>
             {isVideo ? (
-                <video
-                    src={image}
-                    className={imageClasses}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                />
+                <div
+                    className={`relative overflow-hidden rounded-xl ${isStacked ? 'w-full' : 'w-full md:max-w-[240px]'} transition-all duration-300 ${!isLoaded && shimmerAspectRatio ? 'shimmer-loading bg-[var(--background-secondary)]' : ''}`}
+                    style={!isLoaded && shimmerAspectRatio ? { aspectRatio: shimmerAspectRatio } : undefined}
+                >
+                    <video
+                        src={image}
+                        className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} rounded-xl object-cover ${grayscaleClass} transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        onLoadedData={() => setIsLoaded(true)}
+                    />
+                </div>
             ) : locked ? (
                 <div className={`relative ${isStacked ? 'w-full' : `w-full ${aspectRatio === "auto" ? "" : ""}`} ${isStacked ? '' : 'md:max-w-[240px]'}`}>
                     <LockedBadge />
@@ -115,11 +129,17 @@ export default function Card({
                     />
                 </div>
             ) : (
-                <img
-                    src={image}
-                    alt={title || ""}
-                    className={imageClasses}
-                />
+                <div
+                    className={`relative overflow-hidden rounded-xl ${isStacked ? 'w-full' : 'w-full md:max-w-[240px]'} transition-all duration-300 ${!isLoaded && shimmerAspectRatio ? 'shimmer-loading bg-[var(--background-secondary)]' : ''}`}
+                    style={!isLoaded && shimmerAspectRatio ? { aspectRatio: shimmerAspectRatio } : undefined}
+                >
+                    <img
+                        src={image}
+                        alt={title || ""}
+                        className={`${aspectRatio === "auto" ? "w-full h-auto" : `${aspectRatio} w-full`} rounded-xl object-cover bg-[var(--background-secondary)] ${grayscaleClass} transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                        onLoad={() => setIsLoaded(true)}
+                    />
+                </div>
             )}
             <div className="w-full flex flex-col gap-1" style={textOpacityStyle}>
                 {title && <h5 className="text-[var(--content-primary)]">{title}</h5>}
