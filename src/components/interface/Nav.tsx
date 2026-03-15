@@ -54,9 +54,9 @@ export default function Nav() {
     return (
         <motion.nav
             className={`w-full flex flex-col ${isOpen ? 'h-screen' : 'h-[64px]'} md:h-[102px] p-4 md:p-8 items-start justify-between gap-6 sticky top-0 z-50 overflow-visible`}
-            initial={anim.fadeDownBouncyBouncy.initial}
-            animate={anim.fadeDownBouncyBouncy.animate}
-            exit={anim.fadeDownBouncyBouncy.exit}
+            initial={anim.fadeDown.initial}
+            animate={anim.fadeDown.animate}
+            exit={anim.fadeDown.exit}
         >
             <div
                 className="absolute inset-0 pointer-events-none"
