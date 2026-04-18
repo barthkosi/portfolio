@@ -276,7 +276,7 @@ export default function ArchiveContent() {
     return (
         <AnimatePresence mode="wait">
             {isDownloading ? (
-                <div key="loader" className="w-full h-full flex items-center justify-center">
+                <div key="loader" className="w-full h-full flex items-center justify-center p-4">
                     <Loader percent={percent} delay={0.6} />
                 </div>
             ) : (
