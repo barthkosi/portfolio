@@ -17,8 +17,14 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
         >
             <div className={`w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
                 {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, {
-                    onLoad: () => setIsLoaded(true),
-                    onLoadedData: () => setIsLoaded(true),
+                    onLoad: (e: any) => {
+                        setIsLoaded(true);
+                        if ((children.props as any).onLoad) (children.props as any).onLoad(e);
+                    },
+                    onLoadedData: (e: any) => {
+                        setIsLoaded(true);
+                        if ((children.props as any).onLoadedData) (children.props as any).onLoadedData(e);
+                    },
                 }) : children}
             </div>
         </div>
@@ -59,7 +65,9 @@ const slugify = (text: string): string =>
 
 // Extract H1/H2/H3 headings from raw markdown content
 const extractHeadings = (content: string): HeadingItem[] => {
-    const lines = content.split('\n');
+    // Exclude markdown code blocks so comments aren't parsed as headings
+    const safeContent = content.replace(/```[\s\S]*?```/g, '');
+    const lines = safeContent.split('\n');
     const headings: HeadingItem[] = [];
     for (const line of lines) {
         const h1 = line.match(/^#\s+(.+)/);
@@ -132,76 +140,33 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
 
     // Scroll listener for SVG height and active state
     useEffect(() => {
-        if (headings.length === 0 || !containerRef.current) return;
+        if (headings.length === 0) return;
 
-        let ticking = false;
-
-        const updateScroll = () => {
-            if (!containerRef.current || headings.length === 0) return;
-            const scrollY = window.scrollY;
-            const OFFSET = 120; // Accounting for fixed header
-            const pageHeadings = headings.map(h => {
-                const el = document.getElementById(h.id);
-                return {
-                    id: h.id,
-                    top: el ? el.getBoundingClientRect().top + window.scrollY - OFFSET : 0
-                };
-            });
-
-            let targetY = 0;
-            let currentActiveId = headings[0].id;
-            const cTop = containerRef.current.getBoundingClientRect().top;
-
-            if (scrollY < pageHeadings[0].top) {
-                targetY = 0;
-                currentActiveId = '';
-            } else if (scrollY >= pageHeadings[pageHeadings.length - 1].top) {
-                const lastId = pageHeadings[pageHeadings.length - 1].id;
-                currentActiveId = lastId;
-                const el = itemRefs.current[lastId];
-                if (el) targetY = el.getBoundingClientRect().top - cTop + el.getBoundingClientRect().height / 2;
-            } else {
-                for (let i = 0; i < pageHeadings.length - 1; i++) {
-                    const curr = pageHeadings[i];
-                    const next = pageHeadings[i + 1];
-                    if (scrollY >= curr.top && scrollY < next.top) {
-                        currentActiveId = curr.id;
-                        const progress = (scrollY - curr.top) / (next.top - curr.top);
-                        const elCurr = itemRefs.current[curr.id];
-                        const elNext = itemRefs.current[next.id];
-
-                        if (elCurr && elNext) {
-                            const y1 = elCurr.getBoundingClientRect().top - cTop + elCurr.getBoundingClientRect().height / 2;
-                            const y2 = elNext.getBoundingClientRect().top - cTop + elNext.getBoundingClientRect().height / 2;
-                            targetY = y1 + progress * (y2 - y1);
-                        }
-                        break;
-                    }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setActiveId(entry.target.id);
                 }
-            }
+            });
+        }, { rootMargin: '-10% 0% -80% 0%', threshold: 0 });
 
-            if (clipRectRef.current) {
-                clipRectRef.current.setAttribute('height', Math.max(0, targetY).toString());
-            }
+        headings.forEach(h => {
+            const el = document.getElementById(h.id);
+            if (el) observer.observe(el);
+        });
 
-            setActiveId(currentActiveId);
-        };
-
-        const handleScroll = () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    updateScroll();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        updateScroll(); // initial call
-
-        return () => window.removeEventListener('scroll', handleScroll);
+        return () => observer.disconnect();
     }, [headings]);
+
+    useEffect(() => {
+        if (!containerRef.current || !activeId) return;
+        const el = itemRefs.current[activeId];
+        if (el && clipRectRef.current) {
+            const cTop = containerRef.current.getBoundingClientRect().top;
+            const y = Math.max(0, el.getBoundingClientRect().top - cTop + el.getBoundingClientRect().height / 2);
+            clipRectRef.current.setAttribute('height', y.toString());
+        }
+    }, [activeId]);
 
     if (headings.length === 0) return null;
 
@@ -246,7 +211,7 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                         clipPath="url(#active-line-clip)"
                     />
                     <clipPath id="active-line-clip">
-                        <rect ref={clipRectRef} x="-10" y="-10" width="40" height="0" />
+                        <rect ref={clipRectRef} x="-10" y="-10" width="40" height="0" className="transition-all duration-300" />
                     </clipPath>
 
                     {/* Add small connection dots at each heading */}
@@ -326,7 +291,9 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                     <h1 className="text-start md:text-center text-[var(--content-primary)]">{post.title}</h1>
                     <div className="flex flex-col items-start md:items-center gap-4 text-[var(--content-tertiary)] label-s">
                         <div className="flex flex-col items-start md:items-center gap-2">
-                            <span className='label-m'>{new Date(post.date || "").toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                            <span className='label-m' suppressHydrationWarning>
+                                {post.date ? new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                            </span>
                         </div>
                         <div className="flex flex-wrap gap-1">
                             {post.tags && post.tags.length > 0 && post.tags.map(tag => (
@@ -425,7 +392,14 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                     if (React.isValidElement(child)) {
                                         const codeProps = child.props as any;
                                         if (codeProps.className === 'language-row') {
-                                            const raw = String(codeProps.children).trim();
+                                            // Safely extract string content
+                                            const extractString = (node: any): string => {
+                                                if (typeof node === 'string') return node;
+                                                if (Array.isArray(node)) return node.map(extractString).join('');
+                                                if (React.isValidElement(node)) return extractString((node.props as any).children);
+                                                return '';
+                                            };
+                                            const raw = extractString(codeProps.children).trim();
                                             const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
                                             const images: { alt: string; src: string }[] = [];
                                             let match;
