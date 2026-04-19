@@ -134,8 +134,18 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                 if (i === 0) {
                     path += `M ${x} ${y}`;
                 } else if (lastPt) {
-                    const cy = (lastPt.y + y) / 2;
-                    path += ` C ${lastPt.x} ${cy}, ${x} ${cy}, ${x} ${y}`;
+                    const y_mid = (lastPt.y + y) / 2;
+                    const r = 8;
+                    const x_mid = (lastPt.x + x) / 2;
+
+                    if (lastPt.x === x) {
+                        path += ` L ${x} ${y}`;
+                    } else {
+                        path += ` L ${lastPt.x} ${y_mid - r}`;
+                        path += ` Q ${lastPt.x} ${y_mid} ${x_mid} ${y_mid}`;
+                        path += ` Q ${x} ${y_mid} ${x} ${y_mid + r}`;
+                        path += ` L ${x} ${y}`;
+                    }
                 }
                 lastPt = { x, y };
 
