@@ -17,8 +17,14 @@ const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.Reac
         >
             <div className={`w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
                 {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, {
-                    onLoad: () => setIsLoaded(true),
-                    onLoadedData: () => setIsLoaded(true),
+                    onLoad: (e: any) => {
+                        setIsLoaded(true);
+                        if ((children.props as any).onLoad) (children.props as any).onLoad(e);
+                    },
+                    onLoadedData: (e: any) => {
+                        setIsLoaded(true);
+                        if ((children.props as any).onLoadedData) (children.props as any).onLoadedData(e);
+                    },
                 }) : children}
             </div>
         </div>
@@ -59,7 +65,9 @@ const slugify = (text: string): string =>
 
 // Extract H1/H2/H3 headings from raw markdown content
 const extractHeadings = (content: string): HeadingItem[] => {
-    const lines = content.split('\n');
+    // Exclude markdown code blocks so comments aren't parsed as headings
+    const safeContent = content.replace(/```[\s\S]*?```/g, '');
+    const lines = safeContent.split('\n');
     const headings: HeadingItem[] = [];
     for (const line of lines) {
         const h1 = line.match(/^#\s+(.+)/);
@@ -87,103 +95,132 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
 
     const [pathData, setPathData] = useState<string>('');
     const [pathHeight, setPathHeight] = useState<number>(0);
+    const [dotPositions, setDotPositions] = useState<{id: string, x: number, y: number}[]>([]);
 
-    // Initial path generation and resize observer
+    const scrollDataRef = useRef<{
+        headingsTop: { id: string, top: number }[],
+        itemY: Record<string, number>
+    }>({ headingsTop: [], itemY: {} });
+
+    // Initial path generation and cache setup
     useEffect(() => {
         if (!containerRef.current || headings.length === 0) return;
 
-        const updatePath = () => {
+        const updatePathAndCache = () => {
             if (!containerRef.current || headings.length === 0) return;
             const containerTop = containerRef.current.getBoundingClientRect().top;
             let path = '';
             let lastPt: { x: number, y: number } | null = null;
             let maxY = 0;
 
+            const scrollY = window.scrollY;
+            const OFFSET = 120;
+            const headingsTop: { id: string, top: number }[] = [];
+            const itemMapY: Record<string, number> = {};
+            const dots: {id: string, x: number, y: number}[] = [];
+
             headings.forEach((h, i) => {
                 const el = itemRefs.current[h.id];
                 if (!el) return;
+                
                 const rect = el.getBoundingClientRect();
                 const y = Math.max(0, rect.top - containerTop + rect.height / 2);
                 maxY = Math.max(maxY, y);
+                itemMapY[h.id] = y;
 
-                // Adjust x based on level to create the curve
                 const x = h.level === 1 ? 2 : h.level === 2 ? 10 : 18;
+                dots.push({ id: h.id, x, y });
 
                 if (i === 0) {
                     path += `M ${x} ${y}`;
                 } else if (lastPt) {
-                    const cy = (lastPt.y + y) / 2;
-                    path += ` C ${lastPt.x} ${cy}, ${x} ${cy}, ${x} ${y}`;
+                    const r = 8;
+                    if (lastPt.x === x) {
+                        path += ` L ${x} ${y}`;
+                    } else {
+                        // Stay vertical on the previous track until r pixels before the target y
+                        path += ` L ${lastPt.x} ${y - r}`;
+                        // Flip sweep: Indent (Right) is CCW (0) in SVG's Y-down world, Outdent (Left) is CW (1)
+                        const sweep = x > lastPt.x ? 0 : 1;
+                        path += ` A ${r} ${r} 0 0 ${sweep} ${x} ${y}`;
+                    }
                 }
                 lastPt = { x, y };
+
+                // Calculate absolute positions for scroll tracking
+                const docEl = document.getElementById(h.id);
+                headingsTop.push({
+                    id: h.id,
+                    top: docEl ? docEl.getBoundingClientRect().top + scrollY - OFFSET : 0
+                });
             });
+            
             setPathData(path);
             setPathHeight(maxY + 10);
+            setDotPositions(dots);
+            scrollDataRef.current = { headingsTop, itemY: itemMapY };
         };
 
-        // Small delay to ensure fonts/layout are stable
-        const timeoutId = setTimeout(updatePath, 100);
-        window.addEventListener('resize', updatePath);
+        const timeoutId = setTimeout(updatePathAndCache, 100);
+        window.addEventListener('resize', updatePathAndCache);
+
+        let resizeObserver: ResizeObserver | null = null;
+        if (typeof ResizeObserver !== 'undefined') {
+            resizeObserver = new ResizeObserver(() => updatePathAndCache());
+            resizeObserver.observe(document.body);
+        }
+
         return () => {
             clearTimeout(timeoutId);
-            window.removeEventListener('resize', updatePath);
+            window.removeEventListener('resize', updatePathAndCache);
+            if (resizeObserver) resizeObserver.disconnect();
         };
     }, [headings]);
 
-    // Scroll listener for SVG height and active state
+    // Fast scroll listener for smooth SVG interpolation
     useEffect(() => {
-        if (headings.length === 0 || !containerRef.current) return;
+        if (headings.length === 0) return;
 
         let ticking = false;
 
         const updateScroll = () => {
-            if (!containerRef.current || headings.length === 0) return;
             const scrollY = window.scrollY;
-            const OFFSET = 120; // Accounting for fixed header
-            const pageHeadings = headings.map(h => {
-                const el = document.getElementById(h.id);
-                return {
-                    id: h.id,
-                    top: el ? el.getBoundingClientRect().top + window.scrollY - OFFSET : 0
-                };
-            });
+            const { headingsTop, itemY } = scrollDataRef.current;
+            if (headingsTop.length === 0) return;
 
             let targetY = 0;
-            let currentActiveId = headings[0].id;
-            const cTop = containerRef.current.getBoundingClientRect().top;
+            let currentActiveId = headingsTop[0].id;
 
-            if (scrollY < pageHeadings[0].top) {
+            // Check if we're near the bottom of the page to force the last heading active
+            const isAtBottom = window.innerHeight + scrollY >= document.documentElement.scrollHeight - 100;
+
+            if (scrollY < headingsTop[0].top && !isAtBottom) {
                 targetY = 0;
                 currentActiveId = '';
-            } else if (scrollY >= pageHeadings[pageHeadings.length - 1].top) {
-                const lastId = pageHeadings[pageHeadings.length - 1].id;
+            } else if (isAtBottom || scrollY >= headingsTop[headingsTop.length - 1].top) {
+                const lastId = headingsTop[headingsTop.length - 1].id;
                 currentActiveId = lastId;
-                const el = itemRefs.current[lastId];
-                if (el) targetY = el.getBoundingClientRect().top - cTop + el.getBoundingClientRect().height / 2;
+                targetY = itemY[lastId] || 0;
             } else {
-                for (let i = 0; i < pageHeadings.length - 1; i++) {
-                    const curr = pageHeadings[i];
-                    const next = pageHeadings[i + 1];
+                for (let i = 0; i < headingsTop.length - 1; i++) {
+                    const curr = headingsTop[i];
+                    const next = headingsTop[i + 1];
                     if (scrollY >= curr.top && scrollY < next.top) {
                         currentActiveId = curr.id;
-                        const progress = (scrollY - curr.top) / (next.top - curr.top);
-                        const elCurr = itemRefs.current[curr.id];
-                        const elNext = itemRefs.current[next.id];
-
-                        if (elCurr && elNext) {
-                            const y1 = elCurr.getBoundingClientRect().top - cTop + elCurr.getBoundingClientRect().height / 2;
-                            const y2 = elNext.getBoundingClientRect().top - cTop + elNext.getBoundingClientRect().height / 2;
-                            targetY = y1 + progress * (y2 - y1);
-                        }
+                        const diff = next.top - curr.top;
+                        const progress = diff > 0 ? (scrollY - curr.top) / diff : 0;
+                        const y1 = itemY[curr.id] || 0;
+                        const y2 = itemY[next.id] || 0;
+                        targetY = y1 + progress * (y2 - y1);
                         break;
                     }
                 }
             }
 
             if (clipRectRef.current) {
-                clipRectRef.current.setAttribute('height', Math.max(0, targetY).toString());
+                // Add 10 to account for the y="-10" offset of the clipPath rect
+                clipRectRef.current.setAttribute('height', Math.max(0, targetY + 10).toString());
             }
-
             setActiveId(currentActiveId);
         };
 
@@ -198,9 +235,12 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
-        updateScroll(); // initial call
+        const initTimeoutId = setTimeout(updateScroll, 150);
 
-        return () => window.removeEventListener('scroll', handleScroll);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            clearTimeout(initTimeoutId);
+        };
     }, [headings]);
 
     if (headings.length === 0) return null;
@@ -236,42 +276,37 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                         strokeLinejoin="round"
                     />
 
-                    <path
-                        d={pathData}
-                        fill="none"
-                        className="stroke-[var(--content-primary)]"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        clipPath="url(#active-line-clip)"
-                    />
+                    {/* Uncolored background dots */}
+                    {dotPositions.map(({ id, x, y }) => (
+                        <circle
+                            key={`dot-bg-${id}`}
+                            cx={x} cy={y} r="3"
+                            className="fill-[var(--background-primary)] stroke-[var(--border-primary)] stroke-2"
+                        />
+                    ))}
+
                     <clipPath id="active-line-clip">
                         <rect ref={clipRectRef} x="-10" y="-10" width="40" height="0" />
                     </clipPath>
 
-                    {/* Add small connection dots at each heading */}
-                    {headings.map((h, i) => {
-                        const el = itemRefs.current[h.id];
-                        if (!el || !containerRef.current) return null;
-                        const rect = el.getBoundingClientRect();
-                        const cTop = containerRef.current.getBoundingClientRect().top;
-                        const y = Math.max(0, rect.top - cTop + rect.height / 2);
-                        const x = h.level === 1 ? 2 : h.level === 2 ? 10 : 18;
-
-                        // Check if the current heading is before or equal to the active heading
-                        const activeIndex = headings.findIndex(h => h.id === activeId);
-                        const isPassed = i <= activeIndex;
-
-                        return (
+                    {/* Colored elements exactly masked by the clip height */}
+                    <g clipPath="url(#active-line-clip)">
+                        <path
+                            d={pathData}
+                            fill="none"
+                            className="stroke-[var(--content-primary)]"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                        {dotPositions.map(({ id, x, y }) => (
                             <circle
-                                key={`dot-${h.id}`}
-                                cx={x}
-                                cy={y}
-                                r="3"
-                                className={`transition-all duration-300 ${isPassed ? 'fill-[var(--content-primary)]' : 'fill-[var(--background-primary)] stroke-[var(--border-primary)] stroke-2'}`}
+                                key={`dot-active-${id}`}
+                                cx={x} cy={y} r="3"
+                                className="fill-[var(--content-primary)]"
                             />
-                        );
-                    })}
+                        ))}
+                    </g>
                 </svg>
             )}
 
@@ -310,7 +345,15 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
     if (!post) return null;
 
     const isDefaultLayout = post.layout !== 'full';
-    const headings = isDefaultLayout ? extractHeadings(post.content || '') : [];
+    const headings = React.useMemo(() => 
+        isDefaultLayout ? extractHeadings(post.content || '') : [], 
+        [isDefaultLayout, post.content]
+    );
+
+    const filteredOtherPosts = React.useMemo(() => 
+        otherPosts.filter(p => !p.locked),
+        [otherPosts]
+    );
 
     return (
         <main className="flex flex-col">
@@ -326,7 +369,9 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                     <h1 className="text-start md:text-center text-[var(--content-primary)]">{post.title}</h1>
                     <div className="flex flex-col items-start md:items-center gap-4 text-[var(--content-tertiary)] label-s">
                         <div className="flex flex-col items-start md:items-center gap-2">
-                            <span className='label-m'>{new Date(post.date || "").toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                            <span className='label-m' suppressHydrationWarning>
+                                {post.date ? new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                            </span>
                         </div>
                         <div className="flex flex-wrap gap-1">
                             {post.tags && post.tags.length > 0 && post.tags.map(tag => (
@@ -425,7 +470,14 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                                     if (React.isValidElement(child)) {
                                         const codeProps = child.props as any;
                                         if (codeProps.className === 'language-row') {
-                                            const raw = String(codeProps.children).trim();
+                                            // Safely extract string content
+                                            const extractString = (node: any): string => {
+                                                if (typeof node === 'string') return node;
+                                                if (Array.isArray(node)) return node.map(extractString).join('');
+                                                if (React.isValidElement(node)) return extractString((node.props as any).children);
+                                                return '';
+                                            };
+                                            const raw = extractString(codeProps.children).trim();
                                             const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
                                             const images: { alt: string; src: string }[] = [];
                                             let match;
@@ -493,11 +545,11 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                     ) : <span />}
                 </div>
 
-                {otherPosts.filter(p => !p.locked).length > 0 && (
+                {filteredOtherPosts.length > 0 && (
                     <div className="w-full flex flex-col gap-5">
                         <h3 className="h4 text-[var(--content-primary)]">More {type}</h3>
                         <div className="flex flex-col gap-4">
-                            {otherPosts.filter(p => !p.locked).map(p => (
+                            {filteredOtherPosts.map(p => (
                                 <Card
                                     key={p.slug}
                                     image={p.coverImage || ""}
