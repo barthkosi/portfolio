@@ -196,7 +196,8 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                     const next = headingsTop[i + 1];
                     if (scrollY >= curr.top && scrollY < next.top) {
                         currentActiveId = curr.id;
-                        const progress = (scrollY - curr.top) / (next.top - curr.top);
+                        const diff = next.top - curr.top;
+                        const progress = diff > 0 ? (scrollY - curr.top) / diff : 0;
                         const y1 = itemY[curr.id] || 0;
                         const y2 = itemY[next.id] || 0;
                         targetY = y1 + progress * (y2 - y1);
@@ -332,7 +333,15 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
     if (!post) return null;
 
     const isDefaultLayout = post.layout !== 'full';
-    const headings = isDefaultLayout ? extractHeadings(post.content || '') : [];
+    const headings = React.useMemo(() => 
+        isDefaultLayout ? extractHeadings(post.content || '') : [], 
+        [isDefaultLayout, post.content]
+    );
+
+    const filteredOtherPosts = React.useMemo(() => 
+        otherPosts.filter(p => !p.locked),
+        [otherPosts]
+    );
 
     return (
         <main className="flex flex-col">
@@ -524,11 +533,11 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                     ) : <span />}
                 </div>
 
-                {otherPosts.filter(p => !p.locked).length > 0 && (
+                {filteredOtherPosts.length > 0 && (
                     <div className="w-full flex flex-col gap-5">
                         <h3 className="h4 text-[var(--content-primary)]">More {type}</h3>
                         <div className="flex flex-col gap-4">
-                            {otherPosts.filter(p => !p.locked).map(p => (
+                            {filteredOtherPosts.map(p => (
                                 <Card
                                     key={p.slug}
                                     image={p.coverImage || ""}
