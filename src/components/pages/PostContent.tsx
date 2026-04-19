@@ -191,10 +191,13 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
             let targetY = 0;
             let currentActiveId = headingsTop[0].id;
 
-            if (scrollY < headingsTop[0].top) {
+            // Check if we're near the bottom of the page to force the last heading active
+            const isAtBottom = window.innerHeight + scrollY >= document.documentElement.scrollHeight - 100;
+
+            if (scrollY < headingsTop[0].top && !isAtBottom) {
                 targetY = 0;
                 currentActiveId = '';
-            } else if (scrollY >= headingsTop[headingsTop.length - 1].top) {
+            } else if (isAtBottom || scrollY >= headingsTop[headingsTop.length - 1].top) {
                 const lastId = headingsTop[headingsTop.length - 1].id;
                 currentActiveId = lastId;
                 targetY = itemY[lastId] || 0;
@@ -215,7 +218,8 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
             }
 
             if (clipRectRef.current) {
-                clipRectRef.current.setAttribute('height', Math.max(0, targetY).toString());
+                // Add 10 to account for the y="-10" offset of the clipPath rect
+                clipRectRef.current.setAttribute('height', Math.max(0, targetY + 10).toString());
             }
             setActiveId(currentActiveId);
         };
