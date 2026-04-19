@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useMemo, useCallback, memo } from "react";
 import Card from "@/components/interface/Card";
 import archive from "@/data/archive.json";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, type Variants } from "motion/react";
 
 const GAP = 32;
 const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
@@ -78,7 +78,7 @@ async function fetchAsBlob(
         throw err;
     }
 
-    return new Blob(chunks);
+    return new Blob(chunks as BlobPart[]);
 }
 
 /**
@@ -503,7 +503,7 @@ export default function ArchiveContent() {
 
 // === LOADER COMPONENT ===
 
-const loaderVariants = {
+const loaderVariants: Variants = {
     initial: { opacity: 0 },
     animate: {
         opacity: 1,
