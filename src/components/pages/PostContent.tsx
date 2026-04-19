@@ -96,25 +96,36 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
     const [pathData, setPathData] = useState<string>('');
     const [pathHeight, setPathHeight] = useState<number>(0);
 
-    // Initial path generation and resize observer
+    const scrollDataRef = useRef<{
+        headingsTop: { id: string, top: number }[],
+        itemY: Record<string, number>
+    }>({ headingsTop: [], itemY: {} });
+
+    // Initial path generation and cache setup
     useEffect(() => {
         if (!containerRef.current || headings.length === 0) return;
 
-        const updatePath = () => {
+        const updatePathAndCache = () => {
             if (!containerRef.current || headings.length === 0) return;
             const containerTop = containerRef.current.getBoundingClientRect().top;
             let path = '';
             let lastPt: { x: number, y: number } | null = null;
             let maxY = 0;
 
+            const scrollY = window.scrollY;
+            const OFFSET = 120;
+            const headingsTop: { id: string, top: number }[] = [];
+            const itemMapY: Record<string, number> = {};
+
             headings.forEach((h, i) => {
                 const el = itemRefs.current[h.id];
                 if (!el) return;
+                
                 const rect = el.getBoundingClientRect();
                 const y = Math.max(0, rect.top - containerTop + rect.height / 2);
                 maxY = Math.max(maxY, y);
+                itemMapY[h.id] = y;
 
-                // Adjust x based on level to create the curve
                 const x = h.level === 1 ? 2 : h.level === 2 ? 10 : 18;
 
                 if (i === 0) {
@@ -124,49 +135,96 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                     path += ` C ${lastPt.x} ${cy}, ${x} ${cy}, ${x} ${y}`;
                 }
                 lastPt = { x, y };
+
+                // Calculate absolute positions for scroll tracking
+                const docEl = document.getElementById(h.id);
+                headingsTop.push({
+                    id: h.id,
+                    top: docEl ? docEl.getBoundingClientRect().top + scrollY - OFFSET : 0
+                });
             });
+            
             setPathData(path);
             setPathHeight(maxY + 10);
+            scrollDataRef.current = { headingsTop, itemY: itemMapY };
         };
 
-        // Small delay to ensure fonts/layout are stable
-        const timeoutId = setTimeout(updatePath, 100);
-        window.addEventListener('resize', updatePath);
+        const timeoutId = setTimeout(updatePathAndCache, 100);
+        window.addEventListener('resize', updatePathAndCache);
+
+        let resizeObserver: ResizeObserver | null = null;
+        if (typeof ResizeObserver !== 'undefined') {
+            resizeObserver = new ResizeObserver(() => updatePathAndCache());
+            resizeObserver.observe(document.body);
+        }
+
         return () => {
             clearTimeout(timeoutId);
-            window.removeEventListener('resize', updatePath);
+            window.removeEventListener('resize', updatePathAndCache);
+            if (resizeObserver) resizeObserver.disconnect();
         };
     }, [headings]);
 
-    // Scroll listener for SVG height and active state
+    // Fast scroll listener for smooth SVG interpolation
     useEffect(() => {
         if (headings.length === 0) return;
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    setActiveId(entry.target.id);
+        let ticking = false;
+
+        const updateScroll = () => {
+            const scrollY = window.scrollY;
+            const { headingsTop, itemY } = scrollDataRef.current;
+            if (headingsTop.length === 0) return;
+
+            let targetY = 0;
+            let currentActiveId = headingsTop[0].id;
+
+            if (scrollY < headingsTop[0].top) {
+                targetY = 0;
+                currentActiveId = '';
+            } else if (scrollY >= headingsTop[headingsTop.length - 1].top) {
+                const lastId = headingsTop[headingsTop.length - 1].id;
+                currentActiveId = lastId;
+                targetY = itemY[lastId] || 0;
+            } else {
+                for (let i = 0; i < headingsTop.length - 1; i++) {
+                    const curr = headingsTop[i];
+                    const next = headingsTop[i + 1];
+                    if (scrollY >= curr.top && scrollY < next.top) {
+                        currentActiveId = curr.id;
+                        const progress = (scrollY - curr.top) / (next.top - curr.top);
+                        const y1 = itemY[curr.id] || 0;
+                        const y2 = itemY[next.id] || 0;
+                        targetY = y1 + progress * (y2 - y1);
+                        break;
+                    }
                 }
-            });
-        }, { rootMargin: '-10% 0% -80% 0%', threshold: 0 });
+            }
 
-        headings.forEach(h => {
-            const el = document.getElementById(h.id);
-            if (el) observer.observe(el);
-        });
+            if (clipRectRef.current) {
+                clipRectRef.current.setAttribute('height', Math.max(0, targetY).toString());
+            }
+            setActiveId(currentActiveId);
+        };
 
-        return () => observer.disconnect();
+        const handleScroll = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    updateScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        const initTimeoutId = setTimeout(updateScroll, 150);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            clearTimeout(initTimeoutId);
+        };
     }, [headings]);
-
-    useEffect(() => {
-        if (!containerRef.current || !activeId) return;
-        const el = itemRefs.current[activeId];
-        if (el && clipRectRef.current) {
-            const cTop = containerRef.current.getBoundingClientRect().top;
-            const y = Math.max(0, el.getBoundingClientRect().top - cTop + el.getBoundingClientRect().height / 2);
-            clipRectRef.current.setAttribute('height', y.toString());
-        }
-    }, [activeId]);
 
     if (headings.length === 0) return null;
 
@@ -211,7 +269,7 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                         clipPath="url(#active-line-clip)"
                     />
                     <clipPath id="active-line-clip">
-                        <rect ref={clipRectRef} x="-10" y="-10" width="40" height="0" className="transition-all duration-300" />
+                        <rect ref={clipRectRef} x="-10" y="-10" width="40" height="0" />
                     </clipPath>
 
                     {/* Add small connection dots at each heading */}
