@@ -48,12 +48,12 @@ export default function HeroSection() {
                     className="flex flex-col gap-2 pt-4 lg:pt-0 text-left"
                     variants={fadeUpVariant}
                 >
-                    <h1 className='md:max-w-[640px] lg:max-w-[1440px]'>
+                    <h1 className='md:max-w-[640px] lg:max-w-[1440px] text-balance'>
                         Barth creates visual systems and digital experiences
                     </h1>
                 </motion.div>
                 <motion.div variants={fadeUpVariant}>
-                    <p className="body-m max-w-[380px] md:max-w-[640px] lg:max-w-[520px] text-[var(--content-secondary)]">
+                    <p className="body-m max-w-[380px] md:max-w-[640px] lg:max-w-[520px] text-[var(--content-secondary)] text-balance">
                         Explore my portfolio of web interactions, engineered solutions, and dynamic motion design that aims to inject joy into the digital world.
                     </p>
                 </motion.div>
