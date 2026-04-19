@@ -140,8 +140,8 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                     } else {
                         // Stay vertical on the previous track until r pixels before the target y
                         path += ` L ${lastPt.x} ${y - r}`;
-                        // One 90-degree arc into the new x track
-                        const sweep = x > lastPt.x ? 1 : 0;
+                        // Flip sweep: Indent (Right) is CCW (0) in SVG's Y-down world, Outdent (Left) is CW (1)
+                        const sweep = x > lastPt.x ? 0 : 1;
                         path += ` A ${r} ${r} 0 0 ${sweep} ${x} ${y}`;
                     }
                 }
