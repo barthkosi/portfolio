@@ -134,17 +134,15 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                 if (i === 0) {
                     path += `M ${x} ${y}`;
                 } else if (lastPt) {
-                    const y_mid = (lastPt.y + y) / 2;
                     const r = 8;
-                    const x_mid = (lastPt.x + x) / 2;
-
                     if (lastPt.x === x) {
                         path += ` L ${x} ${y}`;
                     } else {
-                        path += ` L ${lastPt.x} ${y_mid - r}`;
-                        path += ` Q ${lastPt.x} ${y_mid} ${x_mid} ${y_mid}`;
-                        path += ` Q ${x} ${y_mid} ${x} ${y_mid + r}`;
-                        path += ` L ${x} ${y}`;
+                        // Stay vertical on the previous track until r pixels before the target y
+                        path += ` L ${lastPt.x} ${y - r}`;
+                        // One 90-degree arc into the new x track
+                        const sweep = x > lastPt.x ? 1 : 0;
+                        path += ` A ${r} ${r} 0 0 ${sweep} ${x} ${y}`;
                     }
                 }
                 lastPt = { x, y };
