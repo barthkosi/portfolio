@@ -95,6 +95,7 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
 
     const [pathData, setPathData] = useState<string>('');
     const [pathHeight, setPathHeight] = useState<number>(0);
+    const [dotPositions, setDotPositions] = useState<{id: string, x: number, y: number}[]>([]);
 
     const scrollDataRef = useRef<{
         headingsTop: { id: string, top: number }[],
@@ -116,6 +117,7 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
             const OFFSET = 120;
             const headingsTop: { id: string, top: number }[] = [];
             const itemMapY: Record<string, number> = {};
+            const dots: {id: string, x: number, y: number}[] = [];
 
             headings.forEach((h, i) => {
                 const el = itemRefs.current[h.id];
@@ -127,6 +129,7 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                 itemMapY[h.id] = y;
 
                 const x = h.level === 1 ? 2 : h.level === 2 ? 10 : 18;
+                dots.push({ id: h.id, x, y });
 
                 if (i === 0) {
                     path += `M ${x} ${y}`;
@@ -146,6 +149,7 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
             
             setPathData(path);
             setPathHeight(maxY + 10);
+            setDotPositions(dots);
             scrollDataRef.current = { headingsTop, itemY: itemMapY };
         };
 
@@ -259,42 +263,37 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                         strokeLinejoin="round"
                     />
 
-                    <path
-                        d={pathData}
-                        fill="none"
-                        className="stroke-[var(--content-primary)]"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        clipPath="url(#active-line-clip)"
-                    />
+                    {/* Uncolored background dots */}
+                    {dotPositions.map(({ id, x, y }) => (
+                        <circle
+                            key={`dot-bg-${id}`}
+                            cx={x} cy={y} r="3"
+                            className="fill-[var(--background-primary)] stroke-[var(--border-primary)] stroke-2"
+                        />
+                    ))}
+
                     <clipPath id="active-line-clip">
                         <rect ref={clipRectRef} x="-10" y="-10" width="40" height="0" />
                     </clipPath>
 
-                    {/* Add small connection dots at each heading */}
-                    {headings.map((h, i) => {
-                        const el = itemRefs.current[h.id];
-                        if (!el || !containerRef.current) return null;
-                        const rect = el.getBoundingClientRect();
-                        const cTop = containerRef.current.getBoundingClientRect().top;
-                        const y = Math.max(0, rect.top - cTop + rect.height / 2);
-                        const x = h.level === 1 ? 2 : h.level === 2 ? 10 : 18;
-
-                        // Check if the current heading is before or equal to the active heading
-                        const activeIndex = headings.findIndex(h => h.id === activeId);
-                        const isPassed = i <= activeIndex;
-
-                        return (
+                    {/* Colored elements exactly masked by the clip height */}
+                    <g clipPath="url(#active-line-clip)">
+                        <path
+                            d={pathData}
+                            fill="none"
+                            className="stroke-[var(--content-primary)]"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        />
+                        {dotPositions.map(({ id, x, y }) => (
                             <circle
-                                key={`dot-${h.id}`}
-                                cx={x}
-                                cy={y}
-                                r="3"
-                                className={`transition-all duration-300 ${isPassed ? 'fill-[var(--content-primary)]' : 'fill-[var(--background-primary)] stroke-[var(--border-primary)] stroke-2'}`}
+                                key={`dot-active-${id}`}
+                                cx={x} cy={y} r="3"
+                                className="fill-[var(--content-primary)]"
                             />
-                        );
-                    })}
+                        ))}
+                    </g>
                 </svg>
             )}
 
