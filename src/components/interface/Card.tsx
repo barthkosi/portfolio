@@ -88,28 +88,33 @@ const CardMedia = ({
         if (isMounted.current) setStatus('error');
     };
 
+    const isAuto = aspectRatio === "auto";
     const containerAspectRatio = (status === 'loading' && shimmerAspectRatio) ? shimmerAspectRatio : aspectRatio;
-    
-    // Grayscale logic for locked state
+
+    // Media orientation and positioning logic
     const mediaClasses = cn(
-        "absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out",
         locked && "grayscale",
         status === 'ready' ? "opacity-100 scale-100" : "opacity-0 scale-105",
-        status === 'error' && "hidden"
+        status === 'error' && "hidden",
+        // If aspect ratio is auto, the media must be relative to push the container height
+        // Otherwise, it should fill the fixed-ratio container
+        (isAuto && status === 'ready') 
+            ? "relative w-full h-auto" 
+            : "absolute inset-0 w-full h-full object-cover",
+        "transition-all duration-700 ease-out"
     );
 
     return (
         <div 
             className={cn(
                 "relative overflow-hidden rounded-xl bg-[var(--background-secondary)] w-full transition-all duration-500",
-                containerAspectRatio === "auto" ? "" : containerAspectRatio,
-                isInsideList && !isInsideList ? "" : "" // Placeholder for variant specific classes
+                containerAspectRatio === "auto" ? "" : containerAspectRatio
             )}
             style={containerAspectRatio === "auto" ? { aspectRatio: "auto" } : { aspectRatio: containerAspectRatio }}
         >
             {locked && <LockedBadge />}
             
-            {/* Shimmer Overlay */}
+            {/* Shimmer Overlay - Always absolute to sit on top or fill the space */}
             <AnimatePresence>
                 {status === 'loading' && (
                     <motion.div 
@@ -122,7 +127,10 @@ const CardMedia = ({
 
             {/* Error State */}
             {status === 'error' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-[var(--background-secondary)] text-[var(--content-tertiary)] p-4 text-center">
+                <div className={cn(
+                    "flex items-center justify-center bg-[var(--background-secondary)] text-[var(--content-tertiary)] p-4 text-center",
+                    isAuto ? "aspect-square w-full" : "absolute inset-0"
+                )}>
                     <span className="label-s opacity-60">Failed to load media</span>
                 </div>
             )}
