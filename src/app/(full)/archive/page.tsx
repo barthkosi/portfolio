@@ -7,6 +7,17 @@ export const metadata: Metadata = {
     alternates: {
         canonical: "https://www.barthkosi.com/archive",
     },
+    openGraph: {
+        images: [
+            {
+                url: "https://res.cloudinary.com/barthkosi/image/upload/v3-archive-og.png",
+            },
+        ],
+    },
+    twitter: {
+        card: "summary_large_image",
+        images: ["https://res.cloudinary.com/barthkosi/image/upload/v3-archive-og.png"],
+    },
 };
 
 export default function ArchivePage() {
