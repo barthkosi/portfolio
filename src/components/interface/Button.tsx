@@ -1,5 +1,6 @@
 "use client";
 
+import { pressScale } from "@/lib/transitions"
 import { motion } from "motion/react"
 import Link from 'next/link'
 
@@ -87,6 +88,7 @@ export default function Button({
 }: ButtonProps) {
     const variantStyles = motionStyles[variant]
     const sizing = sizeStyles[size]
+    const pressMotion = pressScale({ hover: variantStyles.hover.scale })
 
     const baseClassName = [
         'appearance-none',
@@ -104,11 +106,13 @@ export default function Button({
     const motionConfig = {
         initial: variantStyles.base,
         animate: variantStyles.base,
-        whileHover: variantStyles.hover,
+        whileHover: {
+            ...variantStyles.hover,
+            ...pressMotion.whileHover,
+        },
+        whileTap: pressMotion.whileTap,
         transition: {
-            type: 'spring' as const,
-            stiffness: 260,
-            damping: 18,
+            ...pressMotion.transition,
             backgroundColor: { duration: 0.15 },
             borderColor: { duration: 0.15 },
             color: { duration: 0.1 },

@@ -18,6 +18,22 @@ export const springBouncy = physics.bouncy;
 export const springSnappy = physics.snappy;
 export const springBase = physics.snappy;
 
+type PressScaleOptions = {
+    hover?: number;
+    tap?: number;
+    transition?: Transition;
+};
+
+export const pressScale = ({
+    hover = 1.03,
+    tap = 0.97,
+    transition = springBase,
+}: PressScaleOptions = {}) => ({
+    whileHover: { scale: hover },
+    whileTap: { scale: tap },
+    transition,
+});
+
 const directions = {
     up: { y: DEFAULT_DISTANCE },
     down: { y: -DEFAULT_DISTANCE },

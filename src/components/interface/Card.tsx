@@ -1,6 +1,6 @@
 "use client";
 
-import { springBase } from "@/lib/transitions";
+import { pressScale } from "@/lib/transitions";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
@@ -208,6 +208,7 @@ export default function Card({
     const isExternal = link?.startsWith("http");
     const hoverScale = isList ? 1.01 : 1.03;
     const tapScale = isList ? 0.99 : 0.97;
+    const pressMotion = pressScale({ hover: hoverScale, tap: tapScale });
     const textOpacityStyle = locked ? { opacity: 0.4 } : undefined;
 
     const content = isAnyList ? (
@@ -275,9 +276,7 @@ export default function Card({
                 href={link}
                 target="_blank"
                 rel="noopener noreferrer"
-                whileHover={{ scale: hoverScale }}
-                whileTap={{ scale: tapScale }}
-                transition={springBase}
+                {...pressMotion}
                 className="w-full block cursor-pointer"
             >
                 {content}
@@ -287,9 +286,7 @@ export default function Card({
 
     return (
         <motion.div
-            whileHover={{ scale: hoverScale }}
-            whileTap={{ scale: tapScale }}
-            transition={springBase}
+            {...pressMotion}
             className="w-full block cursor-pointer"
         >
             <Link href={link}>{content}</Link>

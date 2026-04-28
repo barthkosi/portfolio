@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
 import Button from "@/components/interface/Button";
 import ChevronDown from "@/components/interface/ChevronDown";
-import { anim, physics } from "@/lib/transitions";
+import { anim, physics, pressScale } from "@/lib/transitions";
 import navData from "@/data/navigation.json";
 import socialData from "@/data/social-links.json";
 
@@ -17,6 +17,8 @@ export default function Nav() {
     const [showVault, setShowVault] = useState(false);
     const [showSocial, setShowSocial] = useState(false);
     const isOpen = menuState.isOpen && menuState.path === pathname;
+    const navLinkPressMotion = pressScale({ hover: 1.02, tap: 0.98 });
+    const navBrandPressMotion = pressScale({ hover: 1.02, tap: 0.98 });
 
     useEffect(() => {
         let wasMobile = window.innerWidth < 768;
@@ -74,26 +76,30 @@ export default function Nav() {
             />
 
             <div className="w-full relative flex flex-row justify-between items-center">
-                <Link
-                    href="/"
-                    className="flex flex-row items-center gap-2 text-[var(--content-primary)] hover:text-[var(--content-secondary)]"
-                >
-                    <Image
-                        src="https://res.cloudinary.com/barthkosi/image/upload/pfp.webp"
-                        alt="Barth logo"
-                        width={38}
-                        height={38}
-                        className="rounded-[8px] object-cover"
-                        priority
-                    />
-                    <div className="label-l">barth ✦</div>
-                </Link>
+                <motion.div {...navBrandPressMotion} className="origin-left">
+                    <Link
+                        href="/"
+                        className="flex flex-row items-center gap-2 text-[var(--content-primary)] hover:text-[var(--content-secondary)]"
+                    >
+                        <Image
+                            src="https://res.cloudinary.com/barthkosi/image/upload/pfp.webp"
+                            alt="Barth logo"
+                            width={38}
+                            height={38}
+                            className="rounded-[8px] object-cover"
+                            priority
+                        />
+                        <div className="label-l">barth</div>
+                    </Link>
+                </motion.div>
 
                 <div className="hidden md:flex label-s flex-row gap-6 text-[var(--content-secondary)] items-center">
                     {navData.main.map((item) => (
-                        <Link key={item.href} href={item.href} className="hover:text-[var(--content-primary)]">
-                            {item.label}
-                        </Link>
+                        <motion.div key={item.href} {...navLinkPressMotion} className="inline-flex">
+                            <Link href={item.href} className="hover:text-[var(--content-primary)]">
+                                {item.label}
+                            </Link>
+                        </motion.div>
                     ))}
 
                     <div
@@ -115,13 +121,14 @@ export default function Nav() {
                                     exit={anim.fadeDownBouncyBouncy.exit}
                                 >
                                     {navData.vault.map((item) => (
-                                        <Link
-                                            key={item.href}
-                                            href={item.href}
-                                            className="hover:text-[var(--content-secondary)] whitespace-nowrap py-1"
-                                        >
-                                            {item.label}
-                                        </Link>
+                                        <motion.div key={item.href} {...navLinkPressMotion} className="inline-flex w-full">
+                                            <Link
+                                                href={item.href}
+                                                className="hover:text-[var(--content-secondary)] whitespace-nowrap py-1"
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        </motion.div>
                                     ))}
                                 </motion.div>
                             )}
@@ -147,15 +154,16 @@ export default function Nav() {
                                     exit={anim.fadeDownBouncy.exit}
                                 >
                                     {socialData.map((item) => (
-                                        <a
+                                        <motion.a
                                             key={item.href}
+                                            {...navLinkPressMotion}
                                             href={item.href}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex flex-row gap-2 items-center hover:text-[var(--content-secondary)] py-1 whitespace-nowrap"
                                         >
                                             {item.label}
-                                        </a>
+                                        </motion.a>
                                     ))}
                                 </motion.div>
                             )}
@@ -234,9 +242,11 @@ export default function Nav() {
                                         visible: anim.fadeDownBouncyBouncy.visible,
                                     }}
                                 >
-                                    <Link href={item.href} onClick={closeMenu}>
-                                        {item.label}
-                                    </Link>
+                                    <motion.div {...navLinkPressMotion} className="inline-flex">
+                                        <Link href={item.href} onClick={closeMenu}>
+                                            {item.label}
+                                        </Link>
+                                    </motion.div>
                                 </motion.div>
                             ))}
                         </div>
@@ -258,9 +268,11 @@ export default function Nav() {
                                         visible: anim.fadeDownBouncyBouncy.visible,
                                     }}
                                 >
-                                    <Link href={item.href} onClick={closeMenu}>
-                                        {item.label}
-                                    </Link>
+                                    <motion.div {...navLinkPressMotion} className="inline-flex">
+                                        <Link href={item.href} onClick={closeMenu}>
+                                            {item.label}
+                                        </Link>
+                                    </motion.div>
                                 </motion.div>
                             ))}
                         </div>
@@ -282,9 +294,15 @@ export default function Nav() {
                                         visible: anim.fadeDownBouncyBouncy.visible,
                                     }}
                                 >
-                                    <a href={item.href} target="_blank" rel="noopener noreferrer">
+                                    <motion.a
+                                        {...navLinkPressMotion}
+                                        href={item.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex"
+                                    >
                                         {item.label}
-                                    </a>
+                                    </motion.a>
                                 </motion.div>
                             ))}
                         </div>
