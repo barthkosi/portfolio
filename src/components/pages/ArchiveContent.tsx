@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, useCallback, memo } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback, useLayoutEffect, memo } from "react";
 import Card from "@/components/interface/Card";
 import archive from "@/data/archive.json";
 import { AnimatePresence, motion, type Variants } from "motion/react";
@@ -177,6 +177,7 @@ export default function ArchiveContent() {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isMobile, setIsMobile] = useState(false);
     const [isGrabbing, setIsGrabbing] = useState(false);
+    const [readySceneKey, setReadySceneKey] = useState<string | null>(null);
 
     // Loading state: track total bytes and loaded bytes
     const [loadingState, setLoadingState] = useState<{
@@ -323,27 +324,72 @@ export default function ArchiveContent() {
         });
 
         return {
-            width: COLS * (ITEM_WIDTH + GAP),
+            width: COLS * ITEM_WIDTH + (COLS - 1) * GAP,
             height: Math.max(...columnHeights),
             columnHeights,
         };
     }, [positions, COLS, ITEM_WIDTH]);
 
-    // Initialize position (center content)
-    useEffect(() => {
-        if (dimensions.width > 0 && dimensions.height > 0) {
-            position.current = {
-                x: (window.innerWidth - dimensions.width) / 2,
-                y: (window.innerHeight - dimensions.height) / 2,
-            };
+    const sceneKey = useMemo(() => {
+        if (!positions || positions.length === 0 || dimensions.width <= 0 || dimensions.height <= 0) {
+            return null;
         }
-    }, [dimensions]);
+
+        return `${dimensions.width}-${dimensions.height}-${ITEM_WIDTH}-${positions.length}`;
+    }, [dimensions.height, dimensions.width, ITEM_WIDTH, positions]);
+
+    const applyTransforms = useCallback(() => {
+        if (!containerRef.current || !positions || positions.length === 0) {
+            return;
+        }
+
+        const children = containerRef.current.children;
+
+        for (let index = 0; index < children.length; index += 1) {
+            const item = children[index] as HTMLElement;
+            const pos = positions[index];
+
+            if (!pos) {
+                continue;
+            }
+
+            const colHeight = dimensions.columnHeights[pos.colIndex] || 0;
+            let currentX = (pos.x + position.current.x) % dimensions.width;
+            let currentY = (pos.y + position.current.y) % colHeight;
+
+            if (currentX < 0) currentX += dimensions.width;
+            if (currentY < 0) currentY += colHeight;
+            if (currentX > dimensions.width - ITEM_WIDTH) currentX -= dimensions.width;
+            if (currentY > colHeight - pos.height) currentY -= colHeight;
+
+            item.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+        }
+    }, [dimensions.columnHeights, dimensions.width, ITEM_WIDTH, positions]);
+
+    // Initialize the archive scene in its final centered state before showing it.
+    useLayoutEffect(() => {
+        if (!sceneKey || !positions || positions.length === 0 || dimensions.width <= 0 || dimensions.height <= 0) {
+            return;
+        }
+
+        position.current = {
+            x: (window.innerWidth - dimensions.width) / 2,
+            y: (window.innerHeight - dimensions.height) / 2,
+        };
+
+        applyTransforms();
+
+        const frameId = requestAnimationFrame(() => {
+            applyTransforms();
+            setReadySceneKey(sceneKey);
+        });
+
+        return () => cancelAnimationFrame(frameId);
+    }, [applyTransforms, dimensions, positions, sceneKey]);
 
     // Animation loop
     useEffect(() => {
         if (!positions || positions.length === 0) return;
-
-        const { width: TOTAL_WIDTH } = dimensions;
 
         const loop = () => {
             // Apply friction
@@ -354,36 +400,14 @@ export default function ArchiveContent() {
                 position.current.y += velocity.current.y;
             }
 
-            // Update transforms
-            if (containerRef.current) {
-                const children = containerRef.current.children;
-                for (let i = 0; i < children.length; i++) {
-                    const item = children[i] as HTMLElement;
-                    const pos = positions[i];
-                    if (!pos) continue;
-
-                    const colHeight =
-                        dimensions.columnHeights[pos.colIndex] || 0;
-                    let currentX = (pos.x + position.current.x) % TOTAL_WIDTH;
-                    let currentY = (pos.y + position.current.y) % colHeight;
-
-                    if (currentX < 0) currentX += TOTAL_WIDTH;
-                    if (currentY < 0) currentY += colHeight;
-                    if (currentX > TOTAL_WIDTH - ITEM_WIDTH)
-                        currentX -= TOTAL_WIDTH;
-                    if (currentY > colHeight - pos.height)
-                        currentY -= colHeight;
-
-                    item.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-                }
-            }
+            applyTransforms();
 
             requestAnimationFrame(loop);
         };
 
         const id = requestAnimationFrame(loop);
         return () => cancelAnimationFrame(id);
-    }, [positions, dimensions, ITEM_WIDTH]);
+    }, [positions, applyTransforms]);
 
     // Event handlers
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -456,45 +480,57 @@ export default function ArchiveContent() {
                         .archive-grab-cursor, .archive-grab-cursor * { cursor: ${CURSOR_GRAB} !important; }
                         .archive-grabbed-cursor, .archive-grabbed-cursor * { cursor: ${CURSOR_GRABBED} !important; }
                     `}</style>
-                    <div
-                        className={`w-full h-full overflow-visible relative touch-none ${
-                            isGrabbing
-                                ? "archive-grabbed-cursor"
-                                : "archive-grab-cursor"
-                        }`}
-                        onMouseDown={handleMouseDown}
-                        onMouseMove={handleMouseMove}
-                        onMouseUp={handleMouseEnd}
-                        onMouseLeave={handleMouseEnd}
-                        onTouchStart={handleTouchStart}
-                        onTouchMove={handleTouchMove}
-                        onTouchEnd={handleTouchEnd}
-                        onWheel={handleWheel}
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={readySceneKey === sceneKey ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                        style={{ transformOrigin: "center center" }}
+                        className="w-full h-full"
                     >
                         <div
-                            ref={containerRef}
-                            className="w-full h-full pointer-events-none overflow-visible"
+                            className={`w-full h-full overflow-visible relative touch-none ${
+                                isGrabbing
+                                    ? "archive-grabbed-cursor"
+                                    : "archive-grab-cursor"
+                            }`}
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseEnd}
+                            onMouseLeave={handleMouseEnd}
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
+                            onWheel={handleWheel}
                         >
-                            {positions?.map((pos) => (
-                                <div
-                                    key={pos.id}
-                                    className="absolute flex items-center justify-center overflow-visible"
-                                    style={{
-                                        width: `${pos.width}px`,
-                                        height: `${pos.height}px`,
-                                        top: 0,
-                                        left: 0,
-                                        willChange: "transform",
-                                    }}
-                                >
-                                    <Card image={pos.url} aspectRatio="auto" />
-                                </div>
-                            ))}
+                            <div
+                                ref={containerRef}
+                                className="w-full h-full pointer-events-none overflow-visible"
+                            >
+                                {positions?.map((pos) => (
+                                    <div
+                                        key={pos.id}
+                                        className="absolute flex items-center justify-center overflow-visible"
+                                        style={{
+                                            width: `${pos.width}px`,
+                                            height: `${pos.height}px`,
+                                            top: 0,
+                                            left: 0,
+                                            willChange: "transform",
+                                        }}
+                                    >
+                                        <Card
+                                            image={pos.url}
+                                            aspectRatio={`${pos.width} / ${pos.height}`}
+                                            shimmerAspectRatio={`${pos.width} / ${pos.height}`}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="absolute bottom-10 left-0 w-full text-center text-[var(--content-tertiary)] pointer-events-none select-none label-s">
+                                drag/scroll to explore
+                            </div>
                         </div>
-                        <div className="absolute bottom-10 left-0 w-full text-center text-[var(--content-tertiary)] pointer-events-none select-none label-s">
-                            drag/scroll to explore
-                        </div>
-                    </div>
+                    </motion.div>
                 </div>
             )}
         </AnimatePresence>

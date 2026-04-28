@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "motion/react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
@@ -585,7 +586,12 @@ export default function PostContent({
                 </div>
             )}
 
-            <div className={`relative flex flex-col items-center lg:items-start w-full p-4 md:p-8 mx-auto gap-8 ${isDefaultLayout ? "max-w-[720px]" : ""}`}>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                className={`relative flex flex-col items-center lg:items-start w-full p-4 md:p-8 mx-auto gap-8 ${isDefaultLayout ? "max-w-[720px]" : ""}`}
+            >
                 <div className="w-full flex flex-col gap-4 items-start md:items-center">
                     <h1 className="text-start md:text-center text-[var(--content-primary)]">{post.title}</h1>
                     <div className="flex flex-col items-start md:items-center gap-4 text-[var(--content-tertiary)] label-s">
@@ -656,7 +662,7 @@ export default function PostContent({
                         </div>
                     </div>
                 )}
-            </div>
+            </motion.div>
         </main>
     );
 }

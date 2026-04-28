@@ -98,13 +98,13 @@ export default function ContentIndex({
                     >
                         {itemsByYear.map(([year, yearItems]) => (
                             <div key={year} className="w-full flex flex-col md:flex-row gap-4 relative">
-                                <div className="md:w-[0px] shrink-0 z-[2]">
-                                    <span className="h3 text-[var(--content-primary)] [-webkit-text-stroke:0.4px_var(--background-primary)] sticky top-[134px] hidden md:block">
+                                <div className="md:w-[0px] shrink-0 relative z-20 pointer-events-none">
+                                    <span className="h3 text-[var(--content-primary)] [-webkit-text-stroke:0.4px_var(--background-primary)] sticky top-[134px] hidden md:block relative z-20">
                                         {year}
                                     </span>
                                 </div>
 
-                                <div className="w-full flex flex-col gap-4">
+                                <div className="w-full flex flex-col gap-4 relative z-0">
                                     <div className="md:hidden pb-2 select-none">
                                         <span className="h3 text-[var(--content-primary)]">{year}</span>
                                     </div>
