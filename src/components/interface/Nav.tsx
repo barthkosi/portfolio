@@ -4,23 +4,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/components/interface/Button";
-import SocialIcon from "@/components/interface/SocialIcon";
 import ChevronDown from "@/components/interface/ChevronDown";
 import { anim, physics } from "@/lib/transitions";
 import navData from "@/data/navigation.json";
 import socialData from "@/data/social-links.json";
 
 export default function Nav() {
-    const [isOpen, setIsOpen] = useState(false);
+    const pathname = usePathname();
+    const [menuState, setMenuState] = useState({ isOpen: false, path: pathname });
     const [showVault, setShowVault] = useState(false);
     const [showSocial, setShowSocial] = useState(false);
-    const pathname = usePathname();
-
-    useEffect(() => {
-        setIsOpen(false);
-    }, [pathname]);
+    const isOpen = menuState.isOpen && menuState.path === pathname;
 
     useEffect(() => {
         let wasMobile = window.innerWidth < 768;
@@ -29,31 +25,34 @@ export default function Nav() {
             const isMobile = window.innerWidth < 768;
 
             if (wasMobile && !isMobile) {
-                setIsOpen(false);
+                setMenuState({ isOpen: false, path: pathname });
             }
 
             wasMobile = isMobile;
         };
 
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [pathname]);
 
     useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
+        document.body.style.overflow = isOpen ? "hidden" : "unset";
 
         return () => {
-            document.body.style.overflow = 'unset';
+            document.body.style.overflow = "unset";
         };
     }, [isOpen]);
 
+    const closeMenu = () => setMenuState({ isOpen: false, path: pathname });
+    const toggleMenu = () =>
+        setMenuState((current) => ({
+            isOpen: !(current.isOpen && current.path === pathname),
+            path: pathname,
+        }));
+
     return (
         <motion.nav
-            className={`w-full flex flex-col ${isOpen ? 'h-screen' : 'h-[64px]'} md:h-[102px] p-4 md:p-8 items-start justify-between gap-6 sticky top-0 z-50 overflow-visible`}
+            className={`w-full flex flex-col ${isOpen ? "h-screen" : "h-[64px]"} md:h-[102px] p-4 md:p-8 items-start justify-between gap-6 sticky top-0 z-50 overflow-visible`}
             initial={anim.fadeDown.initial}
             animate={anim.fadeDown.animate}
             exit={anim.fadeDown.exit}
@@ -62,20 +61,23 @@ export default function Nav() {
                 className="absolute inset-0 pointer-events-none"
                 style={{
                     background: isOpen
-                        ? 'var(--background-primary)'
-                        : `linear-gradient(to bottom, var(--background-primary), var(--opacity-0))`,
+                        ? "var(--background-primary)"
+                        : "linear-gradient(to bottom, var(--background-primary), var(--opacity-0))",
                     maskImage: isOpen
-                        ? 'none'
-                        : 'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))',
+                        ? "none"
+                        : "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
                     WebkitMaskImage: isOpen
-                        ? 'none'
-                        : 'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))',
-                    transition: 'all 0.3s ease',
+                        ? "none"
+                        : "linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0))",
+                    transition: "all 0.3s ease",
                 }}
-            ></div>
+            />
 
             <div className="w-full relative flex flex-row justify-between items-center">
-                <Link href="/" className="flex flex-row items-center gap-2 text-[var(--content-primary)] hover:text-[var(--content-secondary)]">
+                <Link
+                    href="/"
+                    className="flex flex-row items-center gap-2 text-[var(--content-primary)] hover:text-[var(--content-secondary)]"
+                >
                     <Image
                         src="https://res.cloudinary.com/barthkosi/image/upload/pfp.webp"
                         alt="Barth logo"
@@ -84,10 +86,9 @@ export default function Nav() {
                         className="rounded-[8px] object-cover"
                         priority
                     />
-                    <div className="label-l">barth ✶</div>
+                    <div className="label-l">barth ✦</div>
                 </Link>
 
-                {/* Desktop Menu */}
                 <div className="hidden md:flex label-s flex-row gap-6 text-[var(--content-secondary)] items-center">
                     {navData.main.map((item) => (
                         <Link key={item.href} href={item.href} className="hover:text-[var(--content-primary)]">
@@ -95,7 +96,6 @@ export default function Nav() {
                         </Link>
                     ))}
 
-                    {/* Vault dropdown */}
                     <div
                         className="relative"
                         onMouseEnter={() => setShowVault(true)}
@@ -115,7 +115,11 @@ export default function Nav() {
                                     exit={anim.fadeDownBouncyBouncy.exit}
                                 >
                                     {navData.vault.map((item) => (
-                                        <Link key={item.href} href={item.href} className="hover:text-[var(--content-secondary)] whitespace-nowrap py-1">
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className="hover:text-[var(--content-secondary)] whitespace-nowrap py-1"
+                                        >
                                             {item.label}
                                         </Link>
                                     ))}
@@ -124,7 +128,6 @@ export default function Nav() {
                         </AnimatePresence>
                     </div>
 
-                    {/* Social dropdown */}
                     <div
                         className="relative"
                         onMouseEnter={() => setShowSocial(true)}
@@ -170,16 +173,11 @@ export default function Nav() {
                 </div>
 
                 <button
-                    onClick={() => setIsOpen(!isOpen)}
+                    onClick={toggleMenu}
                     className="md:hidden w-[38px] h-[38px] cursor-pointer flex items-center justify-center"
                     aria-label={isOpen ? "Close menu" : "Open menu"}
                 >
-                    <svg
-                        width="32"
-                        height="32"
-                        viewBox="0 0 32 32"
-                        fill="none"
-                    >
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                         <motion.path
                             d={isOpen ? "M8 8L25 25" : "M4 10L28 10"}
                             stroke="var(--content-primary)"
@@ -188,7 +186,7 @@ export default function Nav() {
                             fill="none"
                             initial={false}
                             animate={{
-                                d: isOpen ? "M8 8L25 25" : "M4 10L28 10"
+                                d: isOpen ? "M8 8L25 25" : "M4 10L28 10",
                             }}
                             transition={physics.bouncy}
                         />
@@ -200,7 +198,7 @@ export default function Nav() {
                             fill="none"
                             initial={false}
                             animate={{
-                                d: isOpen ? "M8 25L25 8" : "M4 22L28 22"
+                                d: isOpen ? "M8 25L25 8" : "M4 22L28 22",
                             }}
                             transition={{ duration: 0.3, ease: "easeInOut" }}
                         />
@@ -208,7 +206,6 @@ export default function Nav() {
                 </button>
             </div>
 
-            {/* Mobile Menu */}
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
@@ -227,7 +224,6 @@ export default function Nav() {
                             },
                         }}
                     >
-                        {/* Main links */}
                         <div className="flex flex-col gap-1">
                             {navData.main.map((item) => (
                                 <motion.div
@@ -238,12 +234,13 @@ export default function Nav() {
                                         visible: anim.fadeDownBouncyBouncy.visible,
                                     }}
                                 >
-                                    <Link href={item.href} onClick={() => setIsOpen(false)}>{item.label}</Link>
+                                    <Link href={item.href} onClick={closeMenu}>
+                                        {item.label}
+                                    </Link>
                                 </motion.div>
                             ))}
                         </div>
 
-                        {/* Vault links */}
                         <div className="flex flex-col gap-1">
                             <motion.div
                                 variants={{
@@ -261,12 +258,13 @@ export default function Nav() {
                                         visible: anim.fadeDownBouncyBouncy.visible,
                                     }}
                                 >
-                                    <Link href={item.href} onClick={() => setIsOpen(false)}>{item.label}</Link>
+                                    <Link href={item.href} onClick={closeMenu}>
+                                        {item.label}
+                                    </Link>
                                 </motion.div>
                             ))}
                         </div>
 
-                        {/* Social links */}
                         <div className="flex flex-col gap-1">
                             <motion.div
                                 variants={{
@@ -299,7 +297,7 @@ export default function Nav() {
                                     opacity: 1,
                                     scaleX: 1,
                                     originX: 0,
-                                    transition: physics.bouncy
+                                    transition: physics.bouncy,
                                 },
                             }}
                         >

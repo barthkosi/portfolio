@@ -1,42 +1,40 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import { motion } from "motion/react";
-import { Masonry, RenderComponentProps } from "masonic";
-import { springBouncy } from "@/lib/transitions";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { Masonry, type RenderComponentProps } from "masonic";
 import InfoBlock from "@/components/interface/InfoBlock";
 import Card from "@/components/interface/Card";
-import illustrations from "@/data/illustrations.json";
+import { useIsClient } from "@/hooks/useIsClient";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
+import illustrations from "@/data/illustrations.json";
+import { springBouncy } from "@/lib/transitions";
 
 type IllustrationItem = {
     id: string;
     image: string;
 };
 
-const IllustrationCard = ({
+function IllustrationCard({
     data,
     index,
     isVisible,
-}: RenderComponentProps<IllustrationItem> & { isVisible: boolean }) => (
-    <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-        transition={{ ...springBouncy, delay: index * 0.05 }}
-    >
-        <Card image={data.image} aspectRatio="auto" shimmerAspectRatio="aspect-[3/4]" />
-    </motion.div>
-);
+}: RenderComponentProps<IllustrationItem> & { isVisible: boolean }) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+            transition={{ ...springBouncy, delay: index * 0.05 }}
+        >
+            <Card image={data.image} aspectRatio="auto" shimmerAspectRatio="aspect-[3/4]" />
+        </motion.div>
+    );
+}
 
 export default function IllustrationsContent() {
+    const isClient = useIsClient();
     const [areImagesVisible, setAreImagesVisible] = useState(false);
     const { columnCount, gutter } = useResponsiveLayout();
-
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     const renderCard = useCallback(
         (props: RenderComponentProps<IllustrationItem>) => (
@@ -45,7 +43,9 @@ export default function IllustrationsContent() {
         [areImagesVisible]
     );
 
-    if (!mounted) return null;
+    if (!isClient) {
+        return null;
+    }
 
     return (
         <div className="flex flex-col w-full gap-7 lg:gap-8 h-auto items-center justify-center">
@@ -59,16 +59,14 @@ export default function IllustrationsContent() {
                 />
             </div>
             <div className="w-full">
-                {mounted && (
-                    <Masonry
-                        key={`${columnCount}-${gutter}`}
-                        items={illustrations}
-                        columnGutter={gutter}
-                        columnCount={columnCount}
-                        overscanBy={5}
-                        render={renderCard}
-                    />
-                )}
+                <Masonry
+                    key={`${columnCount}-${gutter}`}
+                    items={illustrations}
+                    columnGutter={gutter}
+                    columnCount={columnCount}
+                    overscanBy={5}
+                    render={renderCard}
+                />
             </div>
         </div>
     );

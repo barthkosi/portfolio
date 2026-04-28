@@ -4,6 +4,17 @@ import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
 import writingData from "@/data/home/writing.json";
 
+type HomeWritingItem = {
+    id: string;
+    image: string;
+    title: string;
+    description: string;
+    link: string;
+    locked?: boolean;
+};
+
+const homeWriting = writingData as HomeWritingItem[];
+
 export default function WritingSection() {
     return (
         <section className="overflow-visible flex flex-col lg:flex-row items-center gap-8 px-4 md:px-8 py-8 md:py-12">
@@ -22,7 +33,7 @@ export default function WritingSection() {
             </div>
 
             <div className="w-full flex flex-col gap-5 lg:gap-20">
-                {writingData.map((item, index) => (
+                {homeWriting.map((item, index) => (
                     <div
                         key={item.id}
                         className={index === 0 ? "lg:top-[134px] lg:sticky self-start" : "lg:top-[134px] sticky self-start"}
@@ -33,7 +44,7 @@ export default function WritingSection() {
                             description={item.description}
                             link={item.link}
                             variant="list-stacked"
-                            locked={"locked" in item && (item as any).locked}
+                            locked={item.locked}
                         />
                     </div>
                 ))}

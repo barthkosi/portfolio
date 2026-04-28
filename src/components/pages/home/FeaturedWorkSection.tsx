@@ -4,6 +4,19 @@ import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
 import featuredWork from "@/data/home/featuredWork.json";
 
+type FeaturedWorkItem = {
+    id: string;
+    image: string;
+    title: string;
+    description: string;
+    link: string;
+    tags?: string[];
+    aspectRatio?: string;
+    locked?: boolean;
+};
+
+const featuredWorkItems = featuredWork as FeaturedWorkItem[];
+
 export default function FeaturedWorkSection() {
     return (
         <section className="flex flex-col items-center px-4 md:px-8 py-8 md:py-12 gap-8">
@@ -11,9 +24,8 @@ export default function FeaturedWorkSection() {
                 <h2 className="h4">Featured Work</h2>
             </div>
 
-            {/* Row 1: Atoms + Explrar — equal halves */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full">
-                {featuredWork.slice(0, 2).map((item) => (
+                {featuredWorkItems.slice(0, 2).map((item) => (
                     <Card
                         key={item.id}
                         image={item.image}
@@ -21,16 +33,15 @@ export default function FeaturedWorkSection() {
                         description={item.description}
                         link={item.link}
                         tags={item.tags}
-                        aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
+                        aspectRatio={item.aspectRatio}
                         variant="list-stacked"
-                        locked={"locked" in item && (item as any).locked}
+                        locked={item.locked}
                     />
                 ))}
             </div>
 
-            {/* Row 2: remaining 3 items — equal thirds */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
-                {featuredWork.slice(2).map((item) => (
+                {featuredWorkItems.slice(2).map((item) => (
                     <Card
                         key={item.id}
                         image={item.image}
@@ -38,9 +49,9 @@ export default function FeaturedWorkSection() {
                         description={item.description}
                         link={item.link}
                         tags={item.tags}
-                        aspectRatio={item.aspectRatio as "16:9" | "2:3" | "auto" | undefined}
+                        aspectRatio={item.aspectRatio}
                         variant="list-stacked"
-                        locked={"locked" in item && (item as any).locked}
+                        locked={item.locked}
                     />
                 ))}
             </div>

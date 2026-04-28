@@ -1,38 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import ReactMarkdown from 'react-markdown';
-import React from 'react';
-import Card from '@/components/interface/Card';
-import { ContentItem, ContentType } from '@/lib/content';
-
-const MediaWrapper = ({ children, aspectRatio = '16/9' }: { children: React.ReactNode, aspectRatio?: string, type?: 'image' | 'video' }) => {
-    const [isLoaded, setIsLoaded] = useState(false);
-
-    return (
-        <div
-            className={`relative overflow-hidden rounded-[12px] w-full bg-[var(--background-secondary)] transition-all duration-300 ${!isLoaded ? 'shimmer-loading' : ''}`}
-            style={{ aspectRatio: isLoaded ? 'auto' : aspectRatio }}
-        >
-            <div className={`w-full transition-opacity duration-500 ${isLoaded ? 'opacity-100 h-auto' : 'opacity-0 h-full'}`}>
-                {React.isValidElement(children) ? React.cloneElement(children as React.ReactElement<any>, {
-                    onLoad: (e: any) => {
-                        setIsLoaded(true);
-                        if ((children.props as any).onLoad) (children.props as any).onLoad(e);
-                    },
-                    onLoadedData: (e: any) => {
-                        setIsLoaded(true);
-                        if ((children.props as any).onLoadedData) (children.props as any).onLoadedData(e);
-                    },
-                }) : children}
-            </div>
-        </div>
-    );
-};
-
-import Button from '@/components/interface/Button';
-import Link from 'next/link';
+import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import ReactMarkdown, { type Components } from "react-markdown";
+import Button from "@/components/interface/Button";
+import Card from "@/components/interface/Card";
+import type { ContentItem, ContentType } from "@/lib/content";
 
 interface PostContentProps {
     post: ContentItem;
@@ -48,216 +22,298 @@ interface HeadingItem {
     level: 1 | 2 | 3;
 }
 
-// Pre-process markdown: convert ::: blocks into ```row fenced code blocks
-const processContent = (content: string) => {
-    return content.replace(/^:::[ ]*\r?\n([\s\S]*?)^:::[ ]*$/gm, (_, block: string) => {
-        return '```row\n' + block.trim() + '\n```';
-    });
-};
+interface TocDot {
+    id: string;
+    x: number;
+    y: number;
+}
 
-// Slugify a heading text into a valid HTML id
-const slugify = (text: string): string =>
+interface ScrollData {
+    headingsTop: { id: string; top: number }[];
+    itemY: Record<string, number>;
+}
+
+interface MarkdownNodeLike {
+    type?: string;
+    tagName?: string;
+    children?: MarkdownNodeLike[];
+}
+
+interface MediaElementProps {
+    onLoad?: React.ReactEventHandler<HTMLElement>;
+    onLoadedData?: React.ReactEventHandler<HTMLVideoElement>;
+}
+
+const processContent = (content: string) =>
+    content.replace(/^:::[ ]*\r?\n([\s\S]*?)^:::[ ]*$/gm, (_, block: string) => {
+        return `\`\`\`row\n${block.trim()}\n\`\`\``;
+    });
+
+const slugify = (text: string) =>
     text
         .toLowerCase()
-        .replace(/[^\w\s-]/g, '')
+        .replace(/[^\w\s-]/g, "")
         .trim()
-        .replace(/[\s_]+/g, '-');
+        .replace(/[\s_]+/g, "-");
 
-// Extract H1/H2/H3 headings from raw markdown content
-const extractHeadings = (content: string): HeadingItem[] => {
-    // Exclude markdown code blocks so comments aren't parsed as headings
-    const safeContent = content.replace(/```[\s\S]*?```/g, '');
-    const lines = safeContent.split('\n');
-    const headings: HeadingItem[] = [];
-    for (const line of lines) {
-        const h1 = line.match(/^#\s+(.+)/);
-        const h2 = line.match(/^##\s+(.+)/);
-        const h3 = line.match(/^###\s+(.+)/);
-        if (h3) {
-            const text = h3[1].trim();
-            headings.push({ id: slugify(text), text, level: 3 });
-        } else if (h2) {
-            const text = h2[1].trim();
-            headings.push({ id: slugify(text), text, level: 2 });
-        } else if (h1) {
-            const text = h1[1].trim();
-            headings.push({ id: slugify(text), text, level: 1 });
-        }
+function extractText(node: ReactNode): string {
+    if (typeof node === "string" || typeof node === "number") {
+        return String(node);
     }
-    return headings;
-};
+
+    if (Array.isArray(node)) {
+        return node.map(extractText).join("");
+    }
+
+    if (node && typeof node === "object" && "props" in node) {
+        return extractText((node as ReactElement<{ children?: ReactNode }>).props.children);
+    }
+
+    return "";
+}
+
+function extractHeadings(content: string): HeadingItem[] {
+    const safeContent = content.replace(/```[\s\S]*?```/g, "");
+
+    return safeContent.split("\n").reduce<HeadingItem[]>((headings, line) => {
+        const h3 = line.match(/^###\s+(.+)/);
+        const h2 = line.match(/^##\s+(.+)/);
+        const h1 = line.match(/^#\s+(.+)/);
+
+        if (h3) {
+            headings.push({ id: slugify(h3[1].trim()), text: h3[1].trim(), level: 3 });
+        } else if (h2) {
+            headings.push({ id: slugify(h2[1].trim()), text: h2[1].trim(), level: 2 });
+        } else if (h1) {
+            headings.push({ id: slugify(h1[1].trim()), text: h1[1].trim(), level: 1 });
+        }
+
+        return headings;
+    }, []);
+}
+
+function isMediaParagraph(node: MarkdownNodeLike | undefined) {
+    const childNodes = node?.children ?? [];
+    return childNodes.length > 0 && childNodes.every((child) => child.type === "element" && child.tagName === "img");
+}
+
+function MediaWrapper({
+    children,
+    aspectRatio = "16/9",
+}: {
+    children: ReactElement<MediaElementProps>;
+    aspectRatio?: string;
+}) {
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    return (
+        <div
+            className={`relative overflow-hidden rounded-[12px] w-full bg-[var(--background-secondary)] transition-all duration-300 ${isLoaded ? "" : "shimmer-loading"}`}
+            style={{ aspectRatio: isLoaded ? "auto" : aspectRatio }}
+        >
+            <div className={`w-full transition-opacity duration-500 ${isLoaded ? "opacity-100 h-auto" : "opacity-0 h-full"}`}>
+                {children.type
+                    ? (
+                        <>
+                            {({
+                                ...children,
+                                props: {
+                                    ...children.props,
+                                    onLoad: (event: React.SyntheticEvent<HTMLElement>) => {
+                                        setIsLoaded(true);
+                                        children.props.onLoad?.(event);
+                                    },
+                                    onLoadedData: (event: React.SyntheticEvent<HTMLVideoElement>) => {
+                                        setIsLoaded(true);
+                                        children.props.onLoadedData?.(event);
+                                    },
+                                },
+                            } as ReactElement<MediaElementProps>)}
+                        </>
+                    )
+                    : children}
+            </div>
+        </div>
+    );
+}
 
 function TableOfContents({ headings }: { headings: HeadingItem[] }) {
-    const [activeId, setActiveId] = useState<string>('');
+    const [activeId, setActiveId] = useState("");
     const containerRef = useRef<HTMLElement>(null);
     const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
     const clipRectRef = useRef<SVGRectElement>(null);
+    const scrollDataRef = useRef<ScrollData>({ headingsTop: [], itemY: {} });
+    const [pathData, setPathData] = useState("");
+    const [pathHeight, setPathHeight] = useState(0);
+    const [dotPositions, setDotPositions] = useState<TocDot[]>([]);
 
-    const [pathData, setPathData] = useState<string>('');
-    const [pathHeight, setPathHeight] = useState<number>(0);
-    const [dotPositions, setDotPositions] = useState<{id: string, x: number, y: number}[]>([]);
-
-    const scrollDataRef = useRef<{
-        headingsTop: { id: string, top: number }[],
-        itemY: Record<string, number>
-    }>({ headingsTop: [], itemY: {} });
-
-    // Initial path generation and cache setup
     useEffect(() => {
-        if (!containerRef.current || headings.length === 0) return;
+        if (!containerRef.current || headings.length === 0) {
+            return;
+        }
 
         const updatePathAndCache = () => {
-            if (!containerRef.current || headings.length === 0) return;
+            if (!containerRef.current || headings.length === 0) {
+                return;
+            }
+
             const containerTop = containerRef.current.getBoundingClientRect().top;
-            let path = '';
-            let lastPt: { x: number, y: number } | null = null;
+            const scrollY = window.scrollY;
+            const offset = 120;
+            const headingsTop: { id: string; top: number }[] = [];
+            const itemY: Record<string, number> = {};
+            const dots: TocDot[] = [];
+            let path = "";
+            let lastPoint: { x: number; y: number } | null = null;
             let maxY = 0;
 
-            const scrollY = window.scrollY;
-            const OFFSET = 120;
-            const headingsTop: { id: string, top: number }[] = [];
-            const itemMapY: Record<string, number> = {};
-            const dots: {id: string, x: number, y: number}[] = [];
+            headings.forEach((heading, index) => {
+                const element = itemRefs.current[heading.id];
 
-            headings.forEach((h, i) => {
-                const el = itemRefs.current[h.id];
-                if (!el) return;
-                
-                const rect = el.getBoundingClientRect();
+                if (!element) {
+                    return;
+                }
+
+                const rect = element.getBoundingClientRect();
                 const y = Math.max(0, rect.top - containerTop + rect.height / 2);
+                const x = heading.level === 1 ? 2 : heading.level === 2 ? 10 : 18;
+
                 maxY = Math.max(maxY, y);
-                itemMapY[h.id] = y;
+                itemY[heading.id] = y;
+                dots.push({ id: heading.id, x, y });
 
-                const x = h.level === 1 ? 2 : h.level === 2 ? 10 : 18;
-                dots.push({ id: h.id, x, y });
-
-                if (i === 0) {
+                if (index === 0) {
                     path += `M ${x} ${y}`;
-                } else if (lastPt) {
-                    const r = 8;
-                    if (lastPt.x === x) {
+                } else if (lastPoint) {
+                    const radius = 8;
+
+                    if (lastPoint.x === x) {
                         path += ` L ${x} ${y}`;
                     } else {
-                        // Stay vertical on the previous track until r pixels before the target y
-                        path += ` L ${lastPt.x} ${y - r}`;
-                        // Flip sweep: Indent (Right) is CCW (0) in SVG's Y-down world, Outdent (Left) is CW (1)
-                        const sweep = x > lastPt.x ? 0 : 1;
-                        path += ` A ${r} ${r} 0 0 ${sweep} ${x} ${y}`;
+                        path += ` L ${lastPoint.x} ${y - radius}`;
+                        path += ` A ${radius} ${radius} 0 0 ${x > lastPoint.x ? 0 : 1} ${x} ${y}`;
                     }
                 }
-                lastPt = { x, y };
 
-                // Calculate absolute positions for scroll tracking
-                const docEl = document.getElementById(h.id);
+                lastPoint = { x, y };
+
+                const documentHeading = document.getElementById(heading.id);
                 headingsTop.push({
-                    id: h.id,
-                    top: docEl ? docEl.getBoundingClientRect().top + scrollY - OFFSET : 0
+                    id: heading.id,
+                    top: documentHeading
+                        ? documentHeading.getBoundingClientRect().top + scrollY - offset
+                        : 0,
                 });
             });
-            
+
             setPathData(path);
             setPathHeight(maxY + 10);
             setDotPositions(dots);
-            scrollDataRef.current = { headingsTop, itemY: itemMapY };
+            scrollDataRef.current = { headingsTop, itemY };
         };
 
-        const timeoutId = setTimeout(updatePathAndCache, 100);
-        window.addEventListener('resize', updatePathAndCache);
+        const timeoutId = window.setTimeout(updatePathAndCache, 100);
+        window.addEventListener("resize", updatePathAndCache);
 
-        let resizeObserver: ResizeObserver | null = null;
-        if (typeof ResizeObserver !== 'undefined') {
-            resizeObserver = new ResizeObserver(() => updatePathAndCache());
-            resizeObserver.observe(document.body);
-        }
+        const observer =
+            typeof ResizeObserver !== "undefined"
+                ? new ResizeObserver(() => updatePathAndCache())
+                : null;
+
+        observer?.observe(document.body);
 
         return () => {
-            clearTimeout(timeoutId);
-            window.removeEventListener('resize', updatePathAndCache);
-            if (resizeObserver) resizeObserver.disconnect();
+            window.clearTimeout(timeoutId);
+            window.removeEventListener("resize", updatePathAndCache);
+            observer?.disconnect();
         };
     }, [headings]);
 
-    // Fast scroll listener for smooth SVG interpolation
     useEffect(() => {
-        if (headings.length === 0) return;
+        if (headings.length === 0) {
+            return;
+        }
 
         let ticking = false;
 
         const updateScroll = () => {
             const scrollY = window.scrollY;
             const { headingsTop, itemY } = scrollDataRef.current;
-            if (headingsTop.length === 0) return;
+
+            if (headingsTop.length === 0) {
+                return;
+            }
 
             let targetY = 0;
             let currentActiveId = headingsTop[0].id;
-
-            // Check if we're near the bottom of the page to force the last heading active
             const isAtBottom = window.innerHeight + scrollY >= document.documentElement.scrollHeight - 100;
 
             if (scrollY < headingsTop[0].top && !isAtBottom) {
-                targetY = 0;
-                currentActiveId = '';
+                currentActiveId = "";
             } else if (isAtBottom || scrollY >= headingsTop[headingsTop.length - 1].top) {
-                const lastId = headingsTop[headingsTop.length - 1].id;
-                currentActiveId = lastId;
-                targetY = itemY[lastId] || 0;
+                currentActiveId = headingsTop[headingsTop.length - 1].id;
+                targetY = itemY[currentActiveId] || 0;
             } else {
-                for (let i = 0; i < headingsTop.length - 1; i++) {
-                    const curr = headingsTop[i];
-                    const next = headingsTop[i + 1];
-                    if (scrollY >= curr.top && scrollY < next.top) {
-                        currentActiveId = curr.id;
-                        const diff = next.top - curr.top;
-                        const progress = diff > 0 ? (scrollY - curr.top) / diff : 0;
-                        const y1 = itemY[curr.id] || 0;
-                        const y2 = itemY[next.id] || 0;
-                        targetY = y1 + progress * (y2 - y1);
+                for (let index = 0; index < headingsTop.length - 1; index += 1) {
+                    const current = headingsTop[index];
+                    const next = headingsTop[index + 1];
+
+                    if (scrollY >= current.top && scrollY < next.top) {
+                        currentActiveId = current.id;
+                        const distance = next.top - current.top;
+                        const progress = distance > 0 ? (scrollY - current.top) / distance : 0;
+                        const startY = itemY[current.id] || 0;
+                        const endY = itemY[next.id] || 0;
+                        targetY = startY + progress * (endY - startY);
                         break;
                     }
                 }
             }
 
-            if (clipRectRef.current) {
-                // Add 10 to account for the y="-10" offset of the clipPath rect
-                clipRectRef.current.setAttribute('height', Math.max(0, targetY + 10).toString());
-            }
+            clipRectRef.current?.setAttribute("height", String(Math.max(0, targetY + 10)));
             setActiveId(currentActiveId);
         };
 
         const handleScroll = () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    updateScroll();
-                    ticking = false;
-                });
-                ticking = true;
+            if (ticking) {
+                return;
             }
+
+            ticking = true;
+            window.requestAnimationFrame(() => {
+                updateScroll();
+                ticking = false;
+            });
         };
 
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        const initTimeoutId = setTimeout(updateScroll, 150);
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        const timeoutId = window.setTimeout(updateScroll, 150);
 
         return () => {
-            window.removeEventListener('scroll', handleScroll);
-            clearTimeout(initTimeoutId);
+            window.removeEventListener("scroll", handleScroll);
+            window.clearTimeout(timeoutId);
         };
     }, [headings]);
 
-    if (headings.length === 0) return null;
+    if (headings.length === 0) {
+        return null;
+    }
 
-    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-        e.preventDefault();
-        const el = document.getElementById(id);
-        if (el) {
-            const offset = 100;
-            const top = el.getBoundingClientRect().top + window.scrollY - offset;
-            window.scrollTo({ top, behavior: 'smooth' });
-            setActiveId(id);
+    const handleClick = (event: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+        event.preventDefault();
+        const element = document.getElementById(id);
+
+        if (!element) {
+            return;
         }
+
+        const top = element.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top, behavior: "smooth" });
+        setActiveId(id);
     };
 
     return (
-        <nav ref={containerRef as React.RefObject<HTMLDivElement>} className="relative flex flex-col gap-1 w-[200px] pl-6">
+        <nav ref={containerRef as React.RefObject<HTMLElement>} className="relative flex flex-col gap-1 w-[200px] pl-6">
             <span className="label-s text-[var(--content-tertiary)] mb-2 opacity-60 uppercase tracking-wider relative -left-6">
                 On this page
             </span>
@@ -265,7 +321,7 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
             {pathData && (
                 <svg
                     className="absolute top-0 left-0 pointer-events-none"
-                    style={{ width: 24, height: pathHeight + 10, overflow: 'visible' }}
+                    style={{ width: 24, height: pathHeight + 10, overflow: "visible" }}
                 >
                     <path
                         d={pathData}
@@ -276,11 +332,12 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                         strokeLinejoin="round"
                     />
 
-                    {/* Uncolored background dots */}
                     {dotPositions.map(({ id, x, y }) => (
                         <circle
                             key={`dot-bg-${id}`}
-                            cx={x} cy={y} r="3"
+                            cx={x}
+                            cy={y}
+                            r="3"
                             className="fill-[var(--background-primary)] stroke-[var(--border-primary)] stroke-2"
                         />
                     ))}
@@ -289,7 +346,6 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                         <rect ref={clipRectRef} x="-10" y="-10" width="40" height="0" />
                     </clipPath>
 
-                    {/* Colored elements exactly masked by the clip height */}
                     <g clipPath="url(#active-line-clip)">
                         <path
                             d={pathData}
@@ -302,7 +358,9 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
                         {dotPositions.map(({ id, x, y }) => (
                             <circle
                                 key={`dot-active-${id}`}
-                                cx={x} cy={y} r="3"
+                                cx={x}
+                                cy={y}
+                                r="3"
                                 className="fill-[var(--content-primary)]"
                             />
                         ))}
@@ -312,25 +370,23 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
 
             {headings.map(({ id, text, level }) => {
                 const isActive = activeId === id;
+
                 return (
                     <a
                         key={id}
-                        ref={(el) => { itemRefs.current[id] = el; }}
+                        ref={(element) => {
+                            itemRefs.current[id] = element;
+                        }}
                         href={`#${id}`}
-                        onClick={(e) => handleClick(e, id)}
-                        className={`
-                                group flex items-start py-1 transition-all duration-200 relative
-                                ${level === 2 ? 'pl-2' : level === 3 ? 'pl-4' : ''}
-                            `}
+                        onClick={(event) => handleClick(event, id)}
+                        className={`group flex items-start py-1 transition-all duration-200 relative ${level === 2 ? "pl-2" : level === 3 ? "pl-4" : ""}`}
                     >
                         <span
-                            className={`
-                                    label-s leading-snug transition-colors duration-200
-                                    ${isActive
-                                    ? 'text-[var(--content-primary)] font-medium'
-                                    : 'text-[var(--content-tertiary)] group-hover:text-[var(--content-secondary)]'
-                                }
-                                `}
+                            className={`label-s leading-snug transition-colors duration-200 ${
+                                isActive
+                                    ? "text-[var(--content-primary)] font-medium"
+                                    : "text-[var(--content-tertiary)] group-hover:text-[var(--content-secondary)]"
+                            }`}
                         >
                             {text}
                         </span>
@@ -341,19 +397,185 @@ function TableOfContents({ headings }: { headings: HeadingItem[] }) {
     );
 }
 
-export default function PostContent({ post, otherPosts, type, prevPost, nextPost }: PostContentProps) {
-    if (!post) return null;
+function PostNavigationLink({
+    direction,
+    href,
+}: {
+    direction: "previous" | "next";
+    href: string;
+}) {
+    return (
+        <Link
+            href={href}
+            className="flex flex-row label-m text-[var(--content-primary)] hover:text-[var(--content-secondary)] transition-colors"
+        >
+            {direction === "previous" && (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M11.7803 14.7803C12.0732 14.4874 12.0732 14.0126 11.7803 13.7197L8.06066 10L11.7803 6.28033C12.0732 5.98744 12.0732 5.51256 11.7803 5.21967C11.4874 4.92678 11.0126 4.92678 10.7197 5.21967L6.46967 9.46967C6.32902 9.61032 6.25 9.80109 6.25 10C6.25 10.1989 6.32902 10.3897 6.46967 10.5303L10.7197 14.7803C11.0126 15.0732 11.4874 15.0732 11.7803 14.7803Z" fill="currentColor" />
+                </svg>
+            )}
+            {direction === "previous" ? "Previous" : "Next"}
+            {direction === "next" && (
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fillRule="evenodd" clipRule="evenodd" d="M8.21967 14.7803C7.92678 14.4874 7.92678 14.0126 8.21967 13.7197L11.9393 10L8.21967 6.28033C7.92678 5.98744 7.92678 5.51256 8.21967 5.21967C8.51256 4.92678 8.98744 4.92678 9.28033 5.21967L13.5303 9.46967C13.671 9.61032 13.75 9.80109 13.75 10C13.75 10.1989 13.671 10.3897 13.5303 10.5303L9.28033 14.7803C8.98744 15.0732 8.51256 15.0732 8.21967 14.7803Z" fill="currentColor" />
+                </svg>
+            )}
+        </Link>
+    );
+}
 
-    const isDefaultLayout = post.layout !== 'full';
-    const headings = React.useMemo(() => 
-        isDefaultLayout ? extractHeadings(post.content || '') : [], 
+export default function PostContent({
+    post,
+    otherPosts,
+    type,
+    prevPost,
+    nextPost,
+}: PostContentProps) {
+    const isDefaultLayout = post.layout !== "full";
+    const headings = useMemo(
+        () => (isDefaultLayout ? extractHeadings(post.content || "") : []),
         [isDefaultLayout, post.content]
     );
-
-    const filteredOtherPosts = React.useMemo(() => 
-        otherPosts.filter(p => !p.locked),
+    const filteredOtherPosts = useMemo(
+        () => otherPosts.filter((otherPost) => !otherPost.locked),
         [otherPosts]
     );
+
+    const markdownComponents: Components = {
+        p: ({ node, children, ...props }) => {
+            if (isMediaParagraph(node as MarkdownNodeLike | undefined)) {
+                return <>{children}</>;
+            }
+
+            return (
+                <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>
+                    {children}
+                </p>
+            );
+        },
+        a: (props) => (
+            <a
+                className="blog-text mb-4 lg:mb-6 text-[var(--content-link)] hover:text-[var(--content-link-hover)] transition-colors"
+                {...props}
+            />
+        ),
+        img: ({ src = "", alt = "" }) => {
+            const source = String(src);
+
+            if (/\.(mp4|webm|mov)(\?.*)?$/i.test(source)) {
+                return (
+                    <figure className="mb-4 lg:mb-6">
+                        <MediaWrapper aspectRatio="16/9">
+                            <video
+                                src={source}
+                                className="w-full h-auto block"
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                            />
+                        </MediaWrapper>
+                        {alt ? <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption> : null}
+                    </figure>
+                );
+            }
+
+            if (source.includes("player.cloudinary.com/embed")) {
+                return (
+                    <figure className="mb-4 lg:mb-6">
+                        <MediaWrapper aspectRatio="16/9">
+                            <iframe
+                                src={source}
+                                title={alt || "Embedded media"}
+                                className="w-full aspect-video block"
+                                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                                allowFullScreen
+                            />
+                        </MediaWrapper>
+                        {alt ? <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption> : null}
+                    </figure>
+                );
+            }
+
+            return (
+                <figure className="mb-4 lg:mb-6">
+                    <MediaWrapper aspectRatio="3/2">
+                        <img src={source} alt={alt} className="w-full h-auto block" />
+                    </MediaWrapper>
+                    {alt ? <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption> : null}
+                </figure>
+            );
+        },
+        h1: ({ children, ...props }) => {
+            const id = slugify(extractText(children));
+            return (
+                <h1 id={id} className="blogh1 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>
+                    {children}
+                </h1>
+            );
+        },
+        h2: ({ children, ...props }) => {
+            const id = slugify(extractText(children));
+            return (
+                <h2 id={id} className="blogh2 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>
+                    {children}
+                </h2>
+            );
+        },
+        h3: ({ children, ...props }) => {
+            const id = slugify(extractText(children));
+            return (
+                <h3 id={id} className="blogh3 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>
+                    {children}
+                </h3>
+            );
+        },
+        ul: (props) => <ul className="list-disc pl-6 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
+        ol: (props) => <ol className="list-decimal pl-6 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
+        li: (props) => <li className="mb-4 lg:mb-6 pl-1" {...props} />,
+        blockquote: (props) => (
+            <blockquote className="border-l-5 border-[var(--border-primary)] pl-3 mb-6 text-[var(--content-tertiary)]" {...props} />
+        ),
+        pre: ({ children }) => {
+            const firstChild = children && Array.isArray(children) ? children[0] : children;
+
+            if (
+                firstChild &&
+                typeof firstChild === "object" &&
+                "props" in firstChild
+            ) {
+                const codeElement = firstChild as ReactElement<{ className?: string; children?: ReactNode }>;
+
+                if (codeElement.props.className === "language-row") {
+                    const raw = extractText(codeElement.props.children).trim();
+                    const matches = Array.from(raw.matchAll(/!\[(.*?)\]\((.*?)\)/g));
+
+                    if (matches.length > 0) {
+                        return (
+                            <div className={`flex flex-col md:flex-row gap-4 lg:gap-6 mb-4 lg:mb-6 ${post.layout !== "full" ? "lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]" : ""}`}>
+                                {matches.map((match, index) => (
+                                    <div key={`${match[2]}-${index}`} className="flex-1 min-w-0">
+                                        <figure>
+                                            <div className="rounded-[12px] overflow-hidden">
+                                                <img className="w-full h-auto block" src={match[2]} alt={match[1]} />
+                                            </div>
+                                            {match[1] ? (
+                                                <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">
+                                                    {match[1]}
+                                                </figcaption>
+                                            ) : null}
+                                        </figure>
+                                    </div>
+                                ))}
+                            </div>
+                        );
+                    }
+                }
+            }
+
+            return <pre>{children}</pre>;
+        },
+    };
 
     return (
         <main className="flex flex-col">
@@ -363,26 +585,32 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                 </div>
             )}
 
-            <div className={`relative flex flex-col items-center lg:items-start w-full p-4 md:p-8 mx-auto gap-8 ${isDefaultLayout ? 'max-w-[720px]' : ''}`}>
-
+            <div className={`relative flex flex-col items-center lg:items-start w-full p-4 md:p-8 mx-auto gap-8 ${isDefaultLayout ? "max-w-[720px]" : ""}`}>
                 <div className="w-full flex flex-col gap-4 items-start md:items-center">
                     <h1 className="text-start md:text-center text-[var(--content-primary)]">{post.title}</h1>
                     <div className="flex flex-col items-start md:items-center gap-4 text-[var(--content-tertiary)] label-s">
                         <div className="flex flex-col items-start md:items-center gap-2">
-                            <span className='label-m' suppressHydrationWarning>
-                                {post.date ? new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                            <span className="label-m" suppressHydrationWarning>
+                                {post.date
+                                    ? new Date(post.date).toLocaleDateString(undefined, {
+                                          year: "numeric",
+                                          month: "long",
+                                          day: "numeric",
+                                      })
+                                    : ""}
                             </span>
                         </div>
-                        <div className="flex flex-wrap gap-1">
-                            {post.tags && post.tags.length > 0 && post.tags.map(tag => (
-                                <span key={tag} className='px-4 py-2 rounded-xl border-[var(--border-primary)] border-[0.4px]'>{tag}</span>
-                            ))}
-                        </div>
+                        {post.tags && post.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                                {post.tags.map((tag) => (
+                                    <span key={tag} className="px-4 py-2 rounded-xl border-[var(--border-primary)] border-[0.4px]">
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                         {post.buttonText && post.buttonLink && (
-                            <Button
-                                href={post.buttonLink}
-                                openInNewTab
-                            >
+                            <Button href={post.buttonLink} openInNewTab>
                                 {post.buttonText}
                             </Button>
                         )}
@@ -390,127 +618,12 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                 </div>
 
                 <div className="relative w-full">
-                    <article className={`w-full ${post.layout === 'full' ? '' : 'max-w-[640px]'}`}>
-                        <ReactMarkdown
-                            components={{
-                                p: ({ node, children, ...rest }) => {
-                                    const childNodes = (node as any)?.children ?? [];
-                                    const isMediaOnly = childNodes.length > 0 && childNodes.every(
-                                        (child: any) => child.type === 'element' && child.tagName === 'img'
-                                    );
-                                    if (isMediaOnly) return <>{children}</>;
-                                    return <p className="blog-text mb-4 lg:mb-6 text-[var(--content-primary)]" {...rest}>{children}</p>;
-                                },
-                                a: (props) => <a className="blog-text mb-4 lg:mb-6 text-[var(--content-link)] hover:text-[var(--content-link-hover)] transition-colors" {...props} />,
-                                img: (props) => {
-                                    const src = String(props.src || '');
-                                    const alt = props.alt || '';
-                                    if (src.match(/\.(mp4|webm|mov)(\?.*)?$/i)) {
-                                        return (
-                                            <figure className="mb-4 lg:mb-6">
-                                                <MediaWrapper aspectRatio="16/9" type="video">
-                                                    <video
-                                                        src={src}
-                                                        className="w-full h-auto block"
-                                                        autoPlay
-                                                        loop
-                                                        muted
-                                                        playsInline
-                                                    />
-                                                </MediaWrapper>
-                                                {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
-                                            </figure>
-                                        );
-                                    }
-                                    if (src.includes('player.cloudinary.com/embed')) {
-                                        return (
-                                            <figure className="mb-4 lg:mb-6">
-                                                <MediaWrapper aspectRatio="16/9" type="video">
-                                                    <iframe
-                                                        src={src}
-                                                        className="w-full aspect-video block"
-                                                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                                                        allowFullScreen
-                                                    />
-                                                </MediaWrapper>
-                                                {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
-                                            </figure>
-                                        );
-                                    }
-                                    return (
-                                        <figure className="mb-4 lg:mb-6">
-                                            <MediaWrapper aspectRatio="3/2" type="image">
-                                                <img className="w-full h-auto block" {...props} />
-                                            </MediaWrapper>
-                                            {alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption>}
-                                        </figure>
-                                    );
-                                },
-                                h1: ({ children, ...props }) => {
-                                    const text = typeof children === 'string' ? children : String(children);
-                                    const id = slugify(text);
-                                    return <h1 id={id} className="blogh1 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>{children}</h1>;
-                                },
-                                h2: ({ children, ...props }) => {
-                                    const text = typeof children === 'string' ? children : String(children);
-                                    const id = slugify(text);
-                                    return <h2 id={id} className="blogh2 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>{children}</h2>;
-                                },
-                                h3: ({ children, ...props }) => {
-                                    const text = typeof children === 'string' ? children : String(children);
-                                    const id = slugify(text);
-                                    return <h3 id={id} className="blogh3 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props}>{children}</h3>;
-                                },
-                                ul: (props) => <ul className="list-disc pl-6 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
-                                ol: (props) => <ol className="list-decimal pl-6 mb-4 lg:mb-6 text-[var(--content-primary)]" {...props} />,
-                                li: (props) => <li className="mb-4 lg:mb-6 pl-1" {...props} />,
-                                blockquote: (props) => <blockquote className="border-l-5 border-[var(--border-primary)] pl-3 mb-6 text-[var(--content-tertiary)]" {...props} />,
-                                pre: ({ children }) => {
-                                    const child = React.Children.toArray(children)[0];
-                                    if (React.isValidElement(child)) {
-                                        const codeProps = child.props as any;
-                                        if (codeProps.className === 'language-row') {
-                                            // Safely extract string content
-                                            const extractString = (node: any): string => {
-                                                if (typeof node === 'string') return node;
-                                                if (Array.isArray(node)) return node.map(extractString).join('');
-                                                if (React.isValidElement(node)) return extractString((node.props as any).children);
-                                                return '';
-                                            };
-                                            const raw = extractString(codeProps.children).trim();
-                                            const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
-                                            const images: { alt: string; src: string }[] = [];
-                                            let match;
-                                            while ((match = imageRegex.exec(raw)) !== null) {
-                                                images.push({ alt: match[1], src: match[2] });
-                                            }
-                                            if (images.length > 0) {
-                                                return (
-                                                    <div className={`flex flex-col md:flex-row gap-4 lg:gap-6 mb-4 lg:mb-6 ${post.layout !== 'full' ? 'lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]' : ''}`}>
-                                                        {images.map((img, i) => (
-                                                            <div key={i} className="flex-1 min-w-0">
-                                                                <figure>
-                                                                    <div className="rounded-[12px] overflow-hidden">
-                                                                        <img className="w-full h-auto block" src={img.src} alt={img.alt} />
-                                                                    </div>
-                                                                    {img.alt && <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{img.alt}</figcaption>}
-                                                                </figure>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                );
-                                            }
-                                        }
-                                    }
-                                    return <pre>{children}</pre>;
-                                },
-                            }}
-                        >
+                    <article className={`w-full ${post.layout === "full" ? "" : "max-w-[640px]"}`}>
+                        <ReactMarkdown components={markdownComponents}>
                             {processContent(post.content || "")}
                         </ReactMarkdown>
                     </article>
 
-                    {/* Sticky TOC — desktop only, default layout only */}
                     {isDefaultLayout && headings.length > 0 && (
                         <aside className="hidden xl:block absolute top-0 left-[100%] ml-8 w-[200px] h-full pointer-events-none">
                             <div className="sticky top-[120px] pt-[8px] pointer-events-auto">
@@ -521,41 +634,21 @@ export default function PostContent({ post, otherPosts, type, prevPost, nextPost
                 </div>
 
                 <div className="w-full flex justify-between items-center pt-4 md:pt-6 border-t border-[var(--border-primary)]">
-                    {prevPost ? (
-                        <Link
-                            href={`/${type}/${prevPost.slug}`}
-                            className="flex flex-row label-m text-[var(--content-primary)] hover:text-[var(--content-secondary)] transition-colors"
-                        >
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path fillRule="evenodd" clipRule="evenodd" d="M11.7803 14.7803C12.0732 14.4874 12.0732 14.0126 11.7803 13.7197L8.06066 10L11.7803 6.28033C12.0732 5.98744 12.0732 5.51256 11.7803 5.21967C11.4874 4.92678 11.0126 4.92678 10.7197 5.21967L6.46967 9.46967C6.32902 9.61032 6.25 9.80109 6.25 10C6.25 10.1989 6.32902 10.3897 6.46967 10.5303L10.7197 14.7803C11.0126 15.0732 11.4874 15.0732 11.7803 14.7803Z" fill="currentColor" />
-                            </svg>
-                            Previous
-                        </Link>
-                    ) : <span />}
-                    {nextPost ? (
-                        <Link
-                            href={`/${type}/${nextPost.slug}`}
-                            className="flex flex-row label-m text-[var(--content-primary)] hover:text-[var(--content-secondary)] transition-colors"
-                        >
-                            Next
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path fillRule="evenodd" clipRule="evenodd" d="M8.21967 14.7803C7.92678 14.4874 7.92678 14.0126 8.21967 13.7197L11.9393 10L8.21967 6.28033C7.92678 5.98744 7.92678 5.51256 8.21967 5.21967C8.51256 4.92678 8.98744 4.92678 9.28033 5.21967L13.5303 9.46967C13.671 9.61032 13.75 9.80109 13.75 10C13.75 10.1989 13.671 10.3897 13.5303 10.5303L9.28033 14.7803C8.98744 15.0732 8.51256 15.0732 8.21967 14.7803Z" fill="currentColor" />
-                            </svg>
-                        </Link>
-                    ) : <span />}
+                    {prevPost ? <PostNavigationLink direction="previous" href={`/${type}/${prevPost.slug}`} /> : <span />}
+                    {nextPost ? <PostNavigationLink direction="next" href={`/${type}/${nextPost.slug}`} /> : <span />}
                 </div>
 
                 {filteredOtherPosts.length > 0 && (
                     <div className="w-full flex flex-col gap-5">
                         <h3 className="h4 text-[var(--content-primary)]">More {type}</h3>
                         <div className="flex flex-col gap-4">
-                            {filteredOtherPosts.map(p => (
+                            {filteredOtherPosts.map((otherPost) => (
                                 <Card
-                                    key={p.slug}
-                                    image={p.coverImage || ""}
-                                    title={p.title}
-                                    description={p.description}
-                                    link={`/${type}/${p.slug}`}
+                                    key={otherPost.slug}
+                                    image={otherPost.coverImage || ""}
+                                    title={otherPost.title}
+                                    description={otherPost.description}
+                                    link={`/${type}/${otherPost.slug}`}
                                     variant="list"
                                     aspectRatio="aspect-video"
                                 />
