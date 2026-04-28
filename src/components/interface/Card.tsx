@@ -21,6 +21,27 @@ type CardProps = {
 type LoadingStatus = "loading" | "ready" | "error";
 
 const isVideoUrl = (url: string) => /\.(mp4|webm|ogg|mov|avi|ogv)(\?.*)?$/i.test(url);
+const DEFAULT_SHIMMER_ASPECT_RATIO = "3 / 2";
+
+function normalizeAspectRatio(aspectRatio?: string) {
+    if (!aspectRatio || aspectRatio === "auto") {
+        return aspectRatio;
+    }
+
+    if (aspectRatio === "aspect-video") {
+        return "16 / 9";
+    }
+
+    if (aspectRatio.startsWith("aspect-[")) {
+        return aspectRatio.slice(8, -1).replace(":", " / ");
+    }
+
+    if (aspectRatio.includes(":")) {
+        return aspectRatio.replace(":", " / ");
+    }
+
+    return aspectRatio;
+}
 
 const LockIcon = () => (
     <svg
@@ -66,8 +87,12 @@ function CardMedia({
     const isMounted = useRef(true);
     const isVideo = isVideoUrl(image);
     const isAuto = aspectRatio === "auto";
+    const normalizedAspectRatio = normalizeAspectRatio(aspectRatio);
+    const normalizedShimmerAspectRatio = normalizeAspectRatio(shimmerAspectRatio);
     const containerAspectRatio =
-        status === "loading" && shimmerAspectRatio ? shimmerAspectRatio : aspectRatio;
+        status === "loading"
+            ? normalizedShimmerAspectRatio || (isAuto ? DEFAULT_SHIMMER_ASPECT_RATIO : normalizedAspectRatio)
+            : normalizedAspectRatio;
 
     useEffect(() => {
         isMounted.current = true;
@@ -100,11 +125,8 @@ function CardMedia({
 
     return (
         <div
-            className={cn(
-                "relative overflow-hidden rounded-xl bg-[var(--background-secondary)] w-full transition-all duration-500",
-                containerAspectRatio === "auto" ? "" : containerAspectRatio
-            )}
-            style={containerAspectRatio === "auto" ? { aspectRatio: "auto" } : { aspectRatio: containerAspectRatio }}
+            className="relative overflow-hidden rounded-xl bg-[var(--background-secondary)] w-full transition-all duration-500"
+            style={containerAspectRatio === "auto" ? undefined : { aspectRatio: containerAspectRatio }}
         >
             {locked && <LockedBadge />}
 
@@ -185,6 +207,7 @@ export default function Card({
     const isAnyList = isList || isStacked;
     const isExternal = link?.startsWith("http");
     const hoverScale = isList ? 1.01 : 1.03;
+    const tapScale = isList ? 0.99 : 0.97;
     const textOpacityStyle = locked ? { opacity: 0.4 } : undefined;
 
     const content = isAnyList ? (
@@ -253,6 +276,7 @@ export default function Card({
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: hoverScale }}
+                whileTap={{ scale: tapScale }}
                 transition={springBase}
                 className="w-full block cursor-pointer"
             >
@@ -264,6 +288,7 @@ export default function Card({
     return (
         <motion.div
             whileHover={{ scale: hoverScale }}
+            whileTap={{ scale: tapScale }}
             transition={springBase}
             className="w-full block cursor-pointer"
         >

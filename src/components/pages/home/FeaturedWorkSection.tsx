@@ -34,6 +34,7 @@ export default function FeaturedWorkSection() {
                         link={item.link}
                         tags={item.tags}
                         aspectRatio={item.aspectRatio}
+                        shimmerAspectRatio={item.aspectRatio === "auto" ? "3 / 2" : item.aspectRatio}
                         variant="list-stacked"
                         locked={item.locked}
                     />
@@ -50,6 +51,7 @@ export default function FeaturedWorkSection() {
                         link={item.link}
                         tags={item.tags}
                         aspectRatio={item.aspectRatio}
+                        shimmerAspectRatio={item.aspectRatio === "auto" ? "3 / 2" : item.aspectRatio}
                         variant="list-stacked"
                         locked={item.locked}
                     />

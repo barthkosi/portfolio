@@ -36,7 +36,7 @@ export default function WritingSection() {
                 {homeWriting.map((item, index) => (
                     <div
                         key={item.id}
-                        className={index === 0 ? "lg:top-[134px] lg:sticky self-start" : "lg:top-[134px] sticky self-start"}
+                        className={index === 0 ? "w-full lg:top-[134px] lg:sticky self-start" : "w-full lg:top-[134px] sticky self-start"}
                     >
                         <Card
                             image={item.image}
