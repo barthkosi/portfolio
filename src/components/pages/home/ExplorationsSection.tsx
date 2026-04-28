@@ -4,6 +4,17 @@ import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
 import explorations from "@/data/home/explorations.json";
 
+type HomeExplorationItem = {
+    id: string;
+    image: string;
+    title: string;
+    description: string;
+    link: string;
+    locked?: boolean;
+};
+
+const homeExplorations = explorations as HomeExplorationItem[];
+
 export default function ExplorationsSection() {
     return (
         <section className="flex flex-col items-center px-4 md:px-8 py-8 md:py-12 gap-8">
@@ -13,7 +24,7 @@ export default function ExplorationsSection() {
             </div>
 
             <div className="w-full flex flex-col md:flex-row gap-5">
-                {explorations.map((item) => (
+                {homeExplorations.map((item) => (
                     <div key={item.id} className="w-full">
                         <Card
                             image={item.image}
@@ -21,7 +32,7 @@ export default function ExplorationsSection() {
                             description={item.description}
                             link={item.link}
                             variant="list-stacked"
-                            locked={"locked" in item && (item as any).locked}
+                            locked={item.locked}
                         />
                     </div>
                 ))}

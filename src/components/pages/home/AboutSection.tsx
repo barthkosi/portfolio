@@ -9,7 +9,11 @@ export default function AboutSection() {
                 <h6>About Me</h6>
             </div>
             <ScrollReveal className="w-full md:col-span-2">
-                I'm obsessed with the 'why' behind digital experiences. For me, good design isn't about shipping features—it's about removing friction and rejecting manipulation. I want to build software that feels human, helpful, and properly optimized for the individual. The long term goal is simple: turn these ideas into a framework that others can use to build better, kinder tools.
+                I&apos;m obsessed with the &apos;why&apos; behind digital experiences. For me, good design
+                isn&apos;t about shipping features, it&apos;s about removing friction and rejecting
+                manipulation. I want to build software that feels human, helpful, and properly optimized
+                for the individual. The long term goal is simple: turn these ideas into a framework that
+                others can use to build better, kinder tools.
             </ScrollReveal>
         </section>
     );
