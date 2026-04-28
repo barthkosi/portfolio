@@ -99,7 +99,7 @@ export default function ContentIndex({
                         {itemsByYear.map(([year, yearItems]) => (
                             <div key={year} className="w-full flex flex-col md:flex-row gap-4 relative">
                                 <div className="md:w-[0px] shrink-0 z-[2]">
-                                    <span className="h3 text-[var(--content-primary)] sticky top-[134px] hidden md:block">
+                                    <span className="h3 text-[var(--content-primary)] [-webkit-text-stroke:0.4px_var(--background-primary)] sticky top-[134px] hidden md:block">
                                         {year}
                                     </span>
                                 </div>
