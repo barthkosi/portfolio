@@ -5,6 +5,7 @@ import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import DisableZoom from "@/components/DisableZoom";
+import ContextMenu from "@/components/interface/ContextMenu";
 import {
     SITE_DESCRIPTION,
     SITE_NAME,
@@ -129,6 +130,7 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
+                    <ContextMenu />
                     <ScrollToTop />
                     <DisableZoom />
                     <SmoothScrollProvider>{children}</SmoothScrollProvider>
