@@ -166,6 +166,11 @@
     @apply border-border outline-ring/50;
   }
 
+  html {
+    touch-action: manipulation;
+    -ms-touch-action: manipulation;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-family-body);
