@@ -4,6 +4,7 @@ import "./globals.css";
 import SmoothScrollProvider from "@/components/SmoothScrollProvider";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import DisableZoom from "@/components/DisableZoom";
 import {
     SITE_DESCRIPTION,
     SITE_NAME,
@@ -126,6 +127,7 @@ export default function RootLayout({
                     disableTransitionOnChange
                 >
                     <ScrollToTop />
+                    <DisableZoom />
                     <SmoothScrollProvider>{children}</SmoothScrollProvider>
                 </ThemeProvider>
             </body>
