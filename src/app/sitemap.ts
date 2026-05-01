@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next'
 import { getContent } from '@/lib/content'
+import { SITE_URL } from '@/lib/site'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://barthkosi.com'
+    const baseUrl = SITE_URL
 
     // Static pages
     const staticPages: MetadataRoute.Sitemap = [

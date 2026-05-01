@@ -44,6 +44,9 @@ export const metadata: Metadata = {
     keywords: [
         "product design",
         "frontend developer",
+        "design engineer",
+        "creative engineering",
+        "interactive design",
         "UI design",
         "motion design",
         "web design",

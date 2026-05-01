@@ -1,19 +1,18 @@
 import { Metadata } from "next";
 import { getContent, getAllTags } from "@/lib/content";
 import WorkContent from "@/components/pages/WorkContent";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
     title: "Work",
     description: "These entries document my process of building and refining tools that serve a purpose.",
     alternates: {
-        canonical: "https://www.barthkosi.com/work",
+        canonical: `${SITE_URL}/work`,
     },
     openGraph: {
-        images: [
-            {
-                url: "https://res.cloudinary.com/barthkosi/image/upload/v3-work-og.webp",
-            },
-        ],
+        title: "Work | Barth Kosi",
+        description: "These entries document my process of building and refining tools that serve a purpose.",
+        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v3-work-og.webp" }],
     },
 };
 

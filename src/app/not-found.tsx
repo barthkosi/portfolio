@@ -1,10 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Metadata } from "next";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-    title: "barthkosi - 404",
-    description: "Page Not Found",
+    title: "404",
+    description: "Oops! The page you're looking for doesn't exist. It might have been moved or deleted.",
+    alternates: {
+        canonical: `${SITE_URL}/404`,
+    },
 };
 
 export default function NotFound() {

@@ -1,20 +1,24 @@
 import { Metadata } from "next";
 import HomeContent from "@/components/pages/HomeContent";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-    title: "barthkosi - design & engineering",
-    description: "Barth creates visual systems and digital experiences. Explore my portfolio of web interactions, engineered solutions, and dynamic motion design.",
+    title: "Design & Engineering",
+    description: "Barth Kosi creates visual systems and digital experiences. Explore my portfolio of web interactions, engineered solutions, and dynamic motion design.",
+    alternates: {
+        canonical: SITE_URL,
+    },
     openGraph: {
         type: "website",
-        url: "https://barthkosi.com",
-        title: "barthkosi - design & engineering",
-        description: "Design & Development",
+        url: SITE_URL,
+        title: "Barth Kosi - Design & Engineering",
+        description: "Barth Kosi creates visual systems and digital experiences. Explore my portfolio of web interactions, engineered solutions, and dynamic motion design.",
         images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/opengraph.webp" }],
     },
     twitter: {
         card: "summary_large_image",
-        description: "Design & Development",
-        title: "barthkosi - design & engineering",
+        title: "Barth Kosi - Design & Engineering",
+        description: "Barth Kosi creates visual systems and digital experiences. Explore my portfolio of web interactions, engineered solutions, and dynamic motion design.",
         images: ["https://res.cloudinary.com/barthkosi/image/upload/opengraph.webp"],
     },
 };
