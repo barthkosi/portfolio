@@ -44,14 +44,13 @@
         "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-showcase-1.avif",
         "title": "Bookworm",
         "description": "A fully customizable graphic interface for manga and comics.",
-        "link": "",
+        "link": "/work/bookworm",
         "tags": [
             "UI/UX",
             "Branding"
         ],
         "aspectRatio": "auto",
-        "colSpan": 2,
-        "locked": true
+        "colSpan": 2
     },
     {
         "id": "x402",
