@@ -154,5 +154,41 @@
     {
         "id": "replacement",
         "image": "https://res.cloudinary.com/barthkosi/image/upload/replacement.webp"
+    },
+    {
+        "id": "x402-cover",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-cover.avif"
+    },
+    {
+        "id": "x402-banner",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-banner.avif"
+    },
+    {
+        "id": "x402-01",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-01.webp"
+    },
+    {
+        "id": "x402-02",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-02.webp"
+    },
+    {
+        "id": "x402-03",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-03.webp"
+    },
+    {
+        "id": "x402-04",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-04.webp"
+    },
+    {
+        "id": "x402-05",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-05.webp"
+    },
+    {
+        "id": "x402-06",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-06.webp"
+    },
+    {
+        "id": "x402-07",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-07.avif"
     }
 ]
