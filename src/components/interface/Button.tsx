@@ -52,7 +52,7 @@ const motionStyles: Record<ButtonVariant, {
     primary: {
         base: {
             backgroundColor: 'var(--background-inverse)',
-            borderColor: 'transparent',
+            borderColor: 'rgba(0, 0, 0, 0)',
             color: 'var(--content-primary-inverse)',
         },
         hover: {
@@ -65,7 +65,7 @@ const motionStyles: Record<ButtonVariant, {
     secondary: {
         base: {
             backgroundColor: 'var(--background-secondary)',
-            borderColor: 'transparent',
+            borderColor: 'rgba(0, 0, 0, 0)',
             color: 'var(--content-primary)',
         },
         hover: {

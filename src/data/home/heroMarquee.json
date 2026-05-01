@@ -1,7 +1,7 @@
 [
     {
         "id": "1",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756281622/bookworm.avif",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bookworm.avif",
         "alt": "Bookworms app UI design – reading tracker interface"
     },
     {
@@ -11,27 +11,32 @@
     },
     {
         "id": "3",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756360901/atoms_-_3_memhte.avif",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/atoms-3.avif",
         "alt": "Atoms design system component exploration – variant 3"
     },
     {
         "id": "4",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756360900/atoms_-_2_nu2b6z.avif",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/atoms-2.avif",
         "alt": "Atoms design system component exploration – variant 2"
     },
     {
+        "id": "atoms-1",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/atoms-1.avif",
+        "alt": "Atoms design system component exploration – variant 1"
+    },
+    {
         "id": "5",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756360408/Screens_rhp8oe.avif",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/opt-2.webp",
         "alt": "Product UI screens layout design"
     },
     {
         "id": "6",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756360410/Screens-1_vf2tnw.avif",
-        "alt": "Product UI screens layout design – alternate view"
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/opt-1.webp",
+        "alt": "Atoms - Opt 1"
     },
     {
         "id": "7",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1756281200/polarcam_bmcbvy.avif",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/polarcam-1.avif",
         "alt": "Polarcam app UI design – camera interface concept"
     },
     {
