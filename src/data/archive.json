@@ -190,5 +190,37 @@
     {
         "id": "x402-07",
         "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-07.avif"
+    },
+    {
+        "id": "x402-filtered",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-filtered.webp"
+    },
+    {
+        "id": "bw-cover-avif",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-cover.avif"
+    },
+    {
+        "id": "bw-logo-avif",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-logo.avif"
+    },
+    {
+        "id": "bookworm-01",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bookworm-01.webp"
+    },
+    {
+        "id": "bookworm-02",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bookworm-02.webp"
+    },
+    {
+        "id": "bw-collections-01",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-collections-01.webp"
+    },
+    {
+        "id": "bw-collections-02",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-collections-02.webp"
+    },
+    {
+        "id": "bookworm-03",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bookworm-03.avif"
     }
 ]
