@@ -324,7 +324,7 @@ export default function ArchiveContent() {
         });
 
         return {
-            width: COLS * ITEM_WIDTH + (COLS - 1) * GAP,
+            width: COLS * (ITEM_WIDTH + GAP),
             height: Math.max(...columnHeights),
             columnHeights,
         };
