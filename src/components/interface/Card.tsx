@@ -278,6 +278,9 @@ export default function Card({
                 rel="noopener noreferrer"
                 {...pressMotion}
                 className="w-full block cursor-pointer"
+                data-context="card"
+                data-card-link={link}
+                data-card-title={title}
             >
                 {content}
             </motion.a>
@@ -288,6 +291,9 @@ export default function Card({
         <motion.div
             {...pressMotion}
             className="w-full block cursor-pointer"
+            data-context="card"
+            data-card-link={link}
+            data-card-title={title}
         >
             <Link href={link}>{content}</Link>
         </motion.div>
