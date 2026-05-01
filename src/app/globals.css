@@ -177,16 +177,26 @@
     cursor: url('/cursors/Cursor.png'), auto;
   }
 
+  /* Custom Cursors */
   a,
   button,
-  link {
+  .cursor-pointer {
+    cursor: url('/cursors/Cursor Pointer.png'), pointer !important;
+  }
+
+  /* Ensure descendants of pointer elements also show the pointer to prevent flickering */
+  .cursor-pointer * {
+    cursor: url('/cursors/Cursor Pointer.png'), pointer !important;
+  }
+
+  /* Reset for non-interactive areas if needed, but body covers it */
+  html {
     cursor: url('/cursors/Cursor.png'), auto;
   }
 
-  a:hover,
-  button:hover,
-  link:hover {
-    cursor: url('/cursors/Cursor Pointer.png'), pointer;
+  .force-pointer-cursor,
+  .force-pointer-cursor * {
+    cursor: url('/cursors/Cursor Pointer.png'), pointer !important;
   }
 
   ::selection {
