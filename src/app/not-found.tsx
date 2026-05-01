@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Button from "@/components/interface/Button";
 import Image from "next/image";
 import { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
@@ -27,9 +27,9 @@ export default function NotFound() {
                 <p className="body-l mb-8 max-w-md">
                     Oops! The page you&apos;re looking for doesn&apos;t exist. It might have been moved or deleted.
                 </p>
-                <Link href="/" className="label-m rounded-[var(--radius-md)] border-[0.44px] border-[var(--border-primary)] bg-[var(--background-secondary)] text-[var(--content-primary)] hover:bg-[var(--background-tertiary)] px-4 py-2 transition-colors">
+                <Button to="/" variant="secondary">
                     Go to Home
-                </Link>
+                </Button>
             </div>
         </div>
     );

@@ -54,11 +54,11 @@
         "locked": true
     },
     {
-        "id": "lillup",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/lillup.avif",
-        "title": "Lillup",
-        "description": "Engineering the digital twin infrastructure for human capital. The future of workforce intelligence.",
-        "link": "",
+        "id": "x402",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-cover.avif",
+        "title": "x402",
+        "description": "Self hosted x402 facilitator.",
+        "link": "/work/x402",
         "tags": [
             "UX Design"
         ],
