@@ -587,9 +587,9 @@ export default function PostContent({
                                 {matches.map((match, index) => (
                                     <div key={`${match[2]}-${index}`} className="flex-1 min-w-0">
                                         <figure>
-                                            <div className="rounded-[12px] overflow-hidden">
+                                            <MediaWrapper aspectRatio="3/2">
                                                 <img className="w-full h-auto block" src={match[2]} alt={match[1]} />
-                                            </div>
+                                            </MediaWrapper>
                                             {match[1] ? (
                                                 <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">
                                                     {match[1]}
