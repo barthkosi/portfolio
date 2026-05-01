@@ -12,9 +12,13 @@ tags: ["UI/UX" , "Product Design"]
 
 ![](https://res.cloudinary.com/barthkosi/image/upload/bookworm-02.webp)
 
+## Collections
+
 :::
-![](https://res.cloudinary.com/barthkosi/image/upload/bw-collections-01.webp)
-![](https://res.cloudinary.com/barthkosi/image/upload/bw-collections-02.webp)
+![View of the collections page](https://res.cloudinary.com/barthkosi/image/upload/bw-collections-01.webp)
+![Automated collection of DC Comics](https://res.cloudinary.com/barthkosi/image/upload/bw-collections-02.webp)
 :::
 
-![](https://res.cloudinary.com/barthkosi/image/upload/bookworm-03.webp)
+## Searching and filtering
+
+![Full database search with conditional filters](https://res.cloudinary.com/barthkosi/image/upload/bookworm-03.avif)
