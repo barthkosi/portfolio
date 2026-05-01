@@ -436,6 +436,25 @@ function PostNavigationLink({
     );
 }
 
+function formatDateWithOrdinal(dateString: string) {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString("en-US", { month: "long" });
+    const year = date.getFullYear();
+    
+    const getOrdinalSuffix = (n: number) => {
+        if (n > 3 && n < 21) return "th";
+        switch (n % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    };
+
+    return `${day}${getOrdinalSuffix(day)} ${month}, ${year}`;
+}
+
 export default function PostContent({
     post,
     otherPosts,
@@ -608,13 +627,7 @@ export default function PostContent({
                     <div className="flex flex-col items-start md:items-center gap-4 text-[var(--content-tertiary)] label-s">
                         <div className="flex flex-col items-start md:items-center gap-2">
                             <span className="label-m" suppressHydrationWarning>
-                                {post.date
-                                    ? new Date(post.date).toLocaleDateString(undefined, {
-                                          year: "numeric",
-                                          month: "long",
-                                          day: "numeric",
-                                      })
-                                    : ""}
+                                {post.date ? formatDateWithOrdinal(post.date) : ""}
                             </span>
                         </div>
                         {post.tags && post.tags.length > 0 && (
