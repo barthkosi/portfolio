@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Work | Barth Kosi",
         description: "These entries document my process of building and refining tools that serve a purpose.",
-        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v3-work-og.webp" }],
+        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v3-work-og.avif" }],
     },
 };
 

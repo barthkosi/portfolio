@@ -15,7 +15,7 @@ export default function NotFound() {
     return (
         <div className="w-fill flex flex-col lg:flex-row gap-8 lg:gap-0 items-center justify-center h-[calc(100vh-96px)] lg:h-[calc(100vh-166px)] px-4 text-[var(--content-primary)]">
             <Image
-                src="https://res.cloudinary.com/barthkosi/image/upload/portfolio-404.webp"
+                src="https://res.cloudinary.com/barthkosi/image/upload/portfolio-404.avif"
                 alt="404"
                 width={900}
                 height={600}

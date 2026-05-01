@@ -14,7 +14,7 @@
     },
     {
         "id": "explrar",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/explrar-logo.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/explrar-logo.avif",
         "title": "Explrar",
         "description": "An AI powered trip planner and document organizer",
         "link": "",
@@ -28,7 +28,7 @@
     },
     {
         "id": "sui-axelar",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/sui-image-v1.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/sui-image-v1.avif",
         "title": "Sui x Axelar event graphics",
         "description": "Posters and event banners for the sui x axelar event in Lagos, NG.",
         "link": "",
@@ -41,7 +41,7 @@
     },
     {
         "id": "bookworm",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-showcase-1.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-showcase-1.avif",
         "title": "Bookworm",
         "description": "A fully customizable graphic interface for manga and comics.",
         "link": "",
@@ -55,7 +55,7 @@
     },
     {
         "id": "lillup",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/lillup.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/lillup.avif",
         "title": "Lillup",
         "description": "Engineering the digital twin infrastructure for human capital. The future of workforce intelligence.",
         "link": "",

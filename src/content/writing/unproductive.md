@@ -2,8 +2,8 @@
 title: "Productivity as performance"
 date: "2025-11-22"
 description: "The intricacies of perfomative success"
-coverImage: "https://res.cloudinary.com/barthkosi/image/upload/unproductive.webp"
-bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/unproductive.webp"
+coverImage: "https://res.cloudinary.com/barthkosi/image/upload/unproductive.avif"
+bannerImage: "https://res.cloudinary.com/barthkosi/image/upload/unproductive.avif"
 tags: ["Self"]
 ---
 

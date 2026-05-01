@@ -2,7 +2,7 @@
 title: "SpectraPay"
 date: "2026-03-06" 
 description: "Coming Soon"
-coverImage: "https://res.cloudinary.com/barthkosi/image/upload/spectrapay.webp"
+coverImage: "https://res.cloudinary.com/barthkosi/image/upload/spectrapay.avif"
 bannerImage: ""
 locked: true
 tags: ["Fintech", "Product Design"]

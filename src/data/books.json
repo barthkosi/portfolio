@@ -1,14 +1,14 @@
 [
     {
         "id": "the-brand-gap",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-brand-gap.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-brand-gap.avif",
         "title": "The Brand Gap",
         "author": "Marty Neumeier",
         "link": "https://www.goodreads.com/book/show/290733"
     },
     {
         "id": "steal-like-an-artist",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/steal-like-an-artist.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/steal-like-an-artist.avif",
         "title": "Steal Like an Artist",
         "author": "Austin Kleon",
         "link": "https://www.goodreads.com/book/show/13099738"
@@ -29,63 +29,63 @@
     },
     {
         "id": "the-design-of-everyday-things",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-design-of-everyday-things.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-design-of-everyday-things.avif",
         "title": "The Design of Everyday Things",
         "author": "Don Norman",
         "link": "https://www.goodreads.com/book/show/85686691"
     },
     {
         "id": "penguin-highway",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/penguin-highway-cover.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/penguin-highway-cover.avif",
         "title": "Penguin Highway",
         "author": "Tomihiko Morimi",
         "link": "https://www.goodreads.com/book/show/41825397"
     },
     {
         "id": "the-creative-act",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/The-Creative-Act-A-Way-of-Being.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/The-Creative-Act-A-Way-of-Being.avif",
         "title": "The Creative Act A Way of Being",
         "author": "Rick Rubin",
         "link": "https://www.goodreads.com/book/show/60965426"
     },
     {
         "id": "my-sister-the-serial-killer",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/My-Sister%2C-the-Serial-Killer.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/My-Sister%2C-the-Serial-Killer.avif",
         "title": "My Sister, the Serial Killer",
         "author": "Oyinkan Braithwaite",
         "link": "https://www.goodreads.com/book/show/38819868"
     },
     {
         "id": "no-longer-human",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/no-longer-human.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/no-longer-human.avif",
         "title": "No Longer Human",
         "author": "Osamu Dazai",
         "link": "https://www.goodreads.com/book/show/194746"
     },
     {
         "id": "all-tomorrows",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/all-tomorrows.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/all-tomorrows.avif",
         "title": "All Tomorrows: The Myriad Species and Mixed Fortunes of Man",
         "author": "Nemo Ramjet",
         "link": "https://www.goodreads.com/book/show/16143402"
     },
     {
         "id": "show-your-work",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/show-your-work.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/show-your-work.avif",
         "title": "Show Your Work!",
         "author": "Austin Kleon",
         "link": "https://www.goodreads.com/book/show/18290401"
     },
     {
         "id": "essentialism",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/essentialism.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/essentialism.avif",
         "title": "Essentialism",
         "author": "Greg McKeown",
         "link": "https://www.goodreads.com/book/show/19776547"
     },
     {
         "id": "native-son",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/native-son.webp",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/native-son.avif",
         "title": "Native Son",
         "author": "Richard Wright",
         "link": "https://www.goodreads.com/book/show/15622"

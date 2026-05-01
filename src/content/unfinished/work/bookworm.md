@@ -4,7 +4,7 @@ date: "2025-03-06"
 layout: full
 locked: true
 description: "Coming Soon"
-coverImage: "https://res.cloudinary.com/barthkosi/image/upload/bw-cover.webp"
+coverImage: "https://res.cloudinary.com/barthkosi/image/upload/bw-cover.avif"
 bannerImage: ""
 tags: ["UI/UX" , "Product Design"]
 ---

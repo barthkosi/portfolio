@@ -82,7 +82,7 @@ export default function Nav() {
                         className="flex flex-row items-center gap-2 text-[var(--content-primary)] hover:text-[var(--content-secondary)]"
                     >
                         <Image
-                            src="https://res.cloudinary.com/barthkosi/image/upload/pfp.webp"
+                            src="https://res.cloudinary.com/barthkosi/image/upload/pfp.avif"
                             alt="Barth logo"
                             width={38}
                             height={38}

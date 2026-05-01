@@ -11,15 +11,15 @@ buttonLink: "https://liquidglassexploration.framer.website/"
 
 During the pre-iOS 26 beta hype cycle I experimented with liquid glass in the browser using Unicorn Studio.
 
-![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-ring.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-ring.avif)
 
 The tool’s high level of granularity makes it easy to fine-tune how the glass looks and reacts to different backgrounds, allowing for deep manipulation of shape and light refraction.
 
 ![](https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-preview-video-2025.webm)
 
-![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-1-2025.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-1-2025.avif)
 
-![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-2-2025.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-2-2025.avif)
 
 ### Finished product
 
