@@ -13,6 +13,7 @@ import {
     SITE_TITLE,
     SITE_URL,
 } from "@/lib/site";
+import { Analytics } from "@vercel/analytics/next";
 
 const instrumentSans = Instrument_Sans({
     subsets: ["latin"],
@@ -135,6 +136,7 @@ export default function RootLayout({
                     <DisableZoom />
                     <SmoothScrollProvider>{children}</SmoothScrollProvider>
                 </ThemeProvider>
+                <Analytics />
             </body>
         </html>
     );
