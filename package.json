@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "enrich:archive": "node scripts/enrich-archive.mjs"
   },
   "dependencies": {
+    "cloudinary": "^2.10.0",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
     "konva": "^10.3.0",

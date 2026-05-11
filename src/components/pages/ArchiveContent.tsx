@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import Konva from "konva";
-import archive from "@/data/archive.json";
+import archiveData from "@/data/archive.json";
 
 /* -------------------------------------------------------------------------- */
 /*                                    Config                                  */
@@ -25,6 +25,8 @@ const TOUCH_PINCH_SENSITIVITY = 1.35;
 const SCALE_EASING = 0.18;
 const TRACKPAD_PINCH_END_DELAY = 120;
 
+const LAZY_LOAD_OVERSCAN = 600;
+
 const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
 const CURSOR_GRABBED =
     "url('/cursors/Cursor Grabbed.png') 12 12, grabbing";
@@ -38,22 +40,31 @@ type Point = {
     y: number;
 };
 
-type SourceImage = {
+type ArchiveItem = {
     id: string;
-    src: string;
-    image: HTMLImageElement;
+    image: string;
+    publicId: string;
+    width: number;
+    height: number;
     aspectRatio: number;
+    color: string;
 };
 
 type Tile = {
-    kImg: Konva.Image;
-    source: SourceImage;
+    item: ArchiveItem;
+    placeholder: Konva.Rect;
+    imageNode: Konva.Image | null;
+    imageElement: HTMLImageElement | null;
+    loadState: "idle" | "loading" | "loaded" | "error";
+    generation: number;
     baseX: number;
     baseY: number;
     width: number;
     height: number;
     colIndex: number;
 };
+
+const archive = archiveData as ArchiveItem[];
 
 /* -------------------------------------------------------------------------- */
 /*                                  Utilities                                 */
@@ -106,38 +117,18 @@ const normalizeWheelDelta = (
     }
 };
 
-const dedupeBySource = (images: SourceImage[]) => {
-    const seen = new Set<string>();
-
-    return images.filter((image) => {
-        if (seen.has(image.src)) return false;
-
-        seen.add(image.src);
-        return true;
-    });
-};
-
-const loadImage = (
-    item: (typeof archive)[number]
-): Promise<SourceImage | null> =>
-    new Promise((resolve) => {
-        const image = new Image();
-
-        image.onload = () => {
-            resolve({
-                id: item.id,
-                src: item.image,
-                image,
-                aspectRatio: image.naturalHeight / image.naturalWidth,
-            });
-        };
-
-        image.onerror = () => {
-            resolve(null);
-        };
-
-        image.src = item.image;
-    });
+const intersectsViewport = (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    viewportWidth: number,
+    viewportHeight: number
+) =>
+    x + width >= -LAZY_LOAD_OVERSCAN &&
+    x <= viewportWidth + LAZY_LOAD_OVERSCAN &&
+    y + height >= -LAZY_LOAD_OVERSCAN &&
+    y <= viewportHeight + LAZY_LOAD_OVERSCAN;
 
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
@@ -171,8 +162,9 @@ export default function ArchiveContent() {
         let totalWidth = 0;
         let colHeights: number[] = [];
 
-        let sourceImages: SourceImage[] = [];
         const tiles: Tile[] = [];
+        let tileGeneration = 0;
+        let isMounted = true;
 
         let hasCenteredInitialView = false;
         let isDragging = false;
@@ -188,6 +180,8 @@ export default function ArchiveContent() {
         let pinchStartDistance = 0;
         let pinchStartScale = scale;
 
+        const imageCache = new Map<string, Promise<HTMLImageElement>>();
+
         /* ------------------------------------------------------------------ */
         /*                                Layout                              */
         /* ------------------------------------------------------------------ */
@@ -200,32 +194,37 @@ export default function ArchiveContent() {
 
         const clearTiles = () => {
             for (const tile of tiles) {
-                tile.kImg.destroy();
+                tile.placeholder.destroy();
+                tile.imageNode?.destroy();
             }
 
             tiles.length = 0;
         };
 
-        const createTile = (source: SourceImage) => {
+        const createTile = (item: ArchiveItem) => {
             const colIndex = getShortestColumnIndex(colHeights);
             const width = itemWidth;
-            const height = width * source.aspectRatio;
+            const height = width * item.aspectRatio;
             const baseX = colIndex * (itemWidth + GAP);
             const baseY = colHeights[colIndex];
 
-            const kImg = new Konva.Image({
-                image: source.image,
+            const placeholder = new Konva.Rect({
                 x: baseX,
                 y: baseY,
                 width,
                 height,
+                fill: item.color || "#111111",
             });
 
-            layer.add(kImg);
+            layer.add(placeholder);
 
             tiles.push({
-                kImg,
-                source,
+                item,
+                placeholder,
+                imageNode: null,
+                imageElement: null,
+                loadState: "idle",
+                generation: tileGeneration,
                 baseX,
                 baseY,
                 width,
@@ -255,8 +254,7 @@ export default function ArchiveContent() {
         };
 
         const buildTiles = () => {
-            if (sourceImages.length === 0) return;
-
+            tileGeneration += 1;
             clearTiles();
 
             const columnCount = getRequiredColumnCount();
@@ -264,8 +262,8 @@ export default function ArchiveContent() {
             totalWidth = columnCount * (itemWidth + GAP);
             colHeights = Array(columnCount).fill(0);
 
-            for (const image of sourceImages) {
-                createTile(image);
+            for (const item of archive) {
+                createTile(item);
             }
 
             centerInitialView();
@@ -274,12 +272,78 @@ export default function ArchiveContent() {
         };
 
         /* ------------------------------------------------------------------ */
+        /*                                Images                              */
+        /* ------------------------------------------------------------------ */
+
+        const loadImage = (src: string) => {
+            const cached = imageCache.get(src);
+
+            if (cached) return cached;
+
+            const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+                const image = new Image();
+
+                image.onload = () => resolve(image);
+                image.onerror = reject;
+                image.src = src;
+            });
+
+            imageCache.set(src, promise);
+            return promise;
+        };
+
+        const loadTileImage = async (tile: Tile) => {
+            if (tile.loadState !== "idle") return;
+
+            tile.loadState = "loading";
+            const generation = tile.generation;
+
+            try {
+                const image = await loadImage(tile.item.image);
+
+                if (!isMounted || generation !== tileGeneration) return;
+
+                tile.imageElement = image;
+                tile.imageNode = new Konva.Image({
+                    image,
+                    opacity: 0,
+                });
+
+                layer.add(tile.imageNode);
+                tile.loadState = "loaded";
+
+                tile.imageNode.to({
+                    opacity: 1,
+                    duration: 0.18,
+                });
+
+                applyTransforms();
+            } catch {
+                if (!isMounted || generation !== tileGeneration) return;
+
+                tile.loadState = "error";
+            }
+        };
+
+        /* ------------------------------------------------------------------ */
         /*                              Rendering                             */
         /* ------------------------------------------------------------------ */
 
         const applyTransforms = () => {
+            const viewportWidth = stage.width();
+            const viewportHeight = stage.height();
+
             for (const tile of tiles) {
-                const { kImg, baseX, baseY, width, height, colIndex } = tile;
+                const {
+                    placeholder,
+                    imageNode,
+                    baseX,
+                    baseY,
+                    width,
+                    height,
+                    colIndex,
+                } = tile;
+
                 const colHeight = colHeights[colIndex];
 
                 if (!colHeight) continue;
@@ -290,15 +354,42 @@ export default function ArchiveContent() {
                 if (x > totalWidth - width) x -= totalWidth;
                 if (y > colHeight - height) y -= colHeight;
 
-                kImg.position({
-                    x: x * scale,
-                    y: y * scale,
-                });
+                const screenX = x * scale;
+                const screenY = y * scale;
+                const screenWidth = width * scale;
+                const screenHeight = height * scale;
 
-                kImg.size({
-                    width: width * scale,
-                    height: height * scale,
-                });
+                const position = {
+                    x: screenX,
+                    y: screenY,
+                };
+
+                const size = {
+                    width: screenWidth,
+                    height: screenHeight,
+                };
+
+                placeholder.position(position);
+                placeholder.size(size);
+
+                if (imageNode) {
+                    imageNode.position(position);
+                    imageNode.size(size);
+                }
+
+                if (
+                    tile.loadState === "idle" &&
+                    intersectsViewport(
+                        screenX,
+                        screenY,
+                        screenWidth,
+                        screenHeight,
+                        viewportWidth,
+                        viewportHeight
+                    )
+                ) {
+                    void loadTileImage(tile);
+                }
             }
 
             layer.batchDraw();
@@ -355,7 +446,6 @@ export default function ArchiveContent() {
 
         const startAnimation = () => {
             if (animationFrameId !== null) return;
-
             animationFrameId = requestAnimationFrame(animate);
         };
 
@@ -367,7 +457,7 @@ export default function ArchiveContent() {
         };
 
         /* ------------------------------------------------------------------ */
-        /*                               Input                                */
+        /*                                Input                               */
         /* ------------------------------------------------------------------ */
 
         const handlePointerStart = () => {
@@ -528,18 +618,6 @@ export default function ArchiveContent() {
         /*                              Lifecycle                             */
         /* ------------------------------------------------------------------ */
 
-        const initialise = async () => {
-            const loadedImages = await Promise.all(archive.map(loadImage));
-
-            sourceImages = dedupeBySource(
-                loadedImages.filter(
-                    (image): image is SourceImage => image !== null
-                )
-            );
-
-            buildTiles();
-        };
-
         stage.on("mousedown touchstart", handlePointerStart);
         stage.on("mousemove touchmove", handlePointerMove);
         stage.on("mouseup mouseleave touchend", handlePointerEnd);
@@ -554,9 +632,11 @@ export default function ArchiveContent() {
 
         container.style.cursor = CURSOR_GRAB;
 
-        void initialise();
+        buildTiles();
 
         return () => {
+            isMounted = false;
+            tileGeneration += 1;
             stopAnimation();
 
             if (trackpadPinchTimeout !== null) {
