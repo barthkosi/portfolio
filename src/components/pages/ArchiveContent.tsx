@@ -5,9 +5,17 @@ import { motion } from "motion/react";
 import Konva from "konva";
 import archive from "@/data/archive.json";
 
+/* -------------------------------------------------------------------------- */
+/*                                    Config                                  */
+/* -------------------------------------------------------------------------- */
+
 const GAP = 32;
-const MAX_SCALE = 1.5;
+const DESKTOP_ITEM_WIDTH = 400;
+const MOBILE_ITEM_WIDTH = 200;
+const MOBILE_BREAKPOINT = 768;
+
 const MIN_SCALE = 0.5;
+const MAX_SCALE = 1.5;
 
 const DRAG_DECELERATION = 0.92;
 const WHEEL_IMPULSE = 0.18;
@@ -20,6 +28,15 @@ const TRACKPAD_PINCH_END_DELAY = 120;
 const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
 const CURSOR_GRABBED =
     "url('/cursors/Cursor Grabbed.png') 12 12, grabbing";
+
+/* -------------------------------------------------------------------------- */
+/*                                    Types                                   */
+/* -------------------------------------------------------------------------- */
+
+type Point = {
+    x: number;
+    y: number;
+};
 
 type SourceImage = {
     id: string;
@@ -38,30 +55,103 @@ type Tile = {
     colIndex: number;
 };
 
+/* -------------------------------------------------------------------------- */
+/*                                  Utilities                                 */
+/* -------------------------------------------------------------------------- */
+
+const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
+const positiveModulo = (value: number, divisor: number) => {
+    const remainder = value % divisor;
+    return remainder < 0 ? remainder + divisor : remainder;
+};
+
+const getItemWidth = () =>
+    window.innerWidth < MOBILE_BREAKPOINT
+        ? MOBILE_ITEM_WIDTH
+        : DESKTOP_ITEM_WIDTH;
+
+const getShortestColumnIndex = (heights: number[]) => {
+    let shortestIndex = 0;
+
+    for (let index = 1; index < heights.length; index++) {
+        if (heights[index] < heights[shortestIndex]) {
+            shortestIndex = index;
+        }
+    }
+
+    return shortestIndex;
+};
+
+const getTouchDistance = (touches: TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+
+    return Math.hypot(dx, dy);
+};
+
+const normalizeWheelDelta = (
+    delta: number,
+    deltaMode: number,
+    pageSize: number
+) => {
+    switch (deltaMode) {
+        case WheelEvent.DOM_DELTA_LINE:
+            return delta * 16;
+        case WheelEvent.DOM_DELTA_PAGE:
+            return delta * pageSize;
+        default:
+            return delta;
+    }
+};
+
+const dedupeBySource = (images: SourceImage[]) => {
+    const seen = new Set<string>();
+
+    return images.filter((image) => {
+        if (seen.has(image.src)) return false;
+
+        seen.add(image.src);
+        return true;
+    });
+};
+
+const loadImage = (
+    item: (typeof archive)[number]
+): Promise<SourceImage | null> =>
+    new Promise((resolve) => {
+        const image = new Image();
+
+        image.onload = () => {
+            resolve({
+                id: item.id,
+                src: item.image,
+                image,
+                aspectRatio: image.naturalHeight / image.naturalWidth,
+            });
+        };
+
+        image.onerror = () => {
+            resolve(null);
+        };
+
+        image.src = item.image;
+    });
+
+/* -------------------------------------------------------------------------- */
+/*                                  Component                                 */
+/* -------------------------------------------------------------------------- */
+
 export default function ArchiveContent() {
     const containerRef = useRef<HTMLDivElement>(null);
-
-    const [isMobile, setIsMobile] = useState(false);
     const [sceneReady, setSceneReady] = useState(false);
 
     useEffect(() => {
-        const check = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-
-        check();
-        window.addEventListener("resize", check);
-
-        return () => window.removeEventListener("resize", check);
-    }, []);
-
-    useEffect(() => {
-        if (!containerRef.current) return;
-
-        setSceneReady(false);
-
         const container = containerRef.current;
-        const ITEM_WIDTH = isMobile ? 200 : 400;
+        if (!container) return;
+
+        let itemWidth = getItemWidth();
 
         const stage = new Konva.Stage({
             container,
@@ -72,48 +162,55 @@ export default function ArchiveContent() {
         const layer = new Konva.Layer();
         stage.add(layer);
 
+        const offset: Point = { x: 0, y: 0 };
+        let velocity: Point = { x: 0, y: 0 };
+
         let scale = 1;
         let targetScale = 1;
-
-        const offset = {
-            x: 0,
-            y: 0,
-        };
 
         let totalWidth = 0;
         let colHeights: number[] = [];
 
-        const sourceImages: SourceImage[] = [];
+        let sourceImages: SourceImage[] = [];
         const tiles: Tile[] = [];
 
-        let hasSetInitialPosition = false;
+        let hasCenteredInitialView = false;
+        let isDragging = false;
 
-        // ---------------------------------
-        // Layout helpers
-        // ---------------------------------
+        let lastPointer: Point = { x: 0, y: 0 };
+        let animationFrameId: number | null = null;
 
-        const getRequiredCols = () => {
-            const visibleWorldWidthAtMinScale = stage.width() / MIN_SCALE;
+        let trackpadPinchStartScale = scale;
+        let accumulatedTrackpadPinchDelta = 0;
+        let trackpadPinchTimeout: ReturnType<typeof setTimeout> | null =
+            null;
 
-            return (
-                Math.ceil(
-                    visibleWorldWidthAtMinScale / (ITEM_WIDTH + GAP)
-                ) + 2
-            );
+        let pinchStartDistance = 0;
+        let pinchStartScale = scale;
+
+        /* ------------------------------------------------------------------ */
+        /*                                Layout                              */
+        /* ------------------------------------------------------------------ */
+
+        const getRequiredColumnCount = () => {
+            const visibleWidthAtMinScale = stage.width() / MIN_SCALE;
+
+            return Math.ceil(visibleWidthAtMinScale / (itemWidth + GAP)) + 2;
         };
 
         const clearTiles = () => {
-            tiles.forEach(({ kImg }) => kImg.destroy());
+            for (const tile of tiles) {
+                tile.kImg.destroy();
+            }
+
             tiles.length = 0;
         };
 
-        const addTile = (source: SourceImage) => {
-            const colIndex = colHeights.indexOf(Math.min(...colHeights));
-
-            const width = ITEM_WIDTH;
+        const createTile = (source: SourceImage) => {
+            const colIndex = getShortestColumnIndex(colHeights);
+            const width = itemWidth;
             const height = width * source.aspectRatio;
-
-            const baseX = colIndex * (ITEM_WIDTH + GAP);
+            const baseX = colIndex * (itemWidth + GAP);
             const baseY = colHeights[colIndex];
 
             const kImg = new Konva.Image({
@@ -139,8 +236,8 @@ export default function ArchiveContent() {
             colHeights[colIndex] += height + GAP;
         };
 
-        const centerInitialViewOnFirstImage = () => {
-            if (hasSetInitialPosition || tiles.length === 0) return;
+        const centerInitialView = () => {
+            if (hasCenteredInitialView || tiles.length === 0) return;
 
             const firstTile = tiles[0];
 
@@ -154,7 +251,7 @@ export default function ArchiveContent() {
                 firstTile.baseY -
                 firstTile.height / 2;
 
-            hasSetInitialPosition = true;
+            hasCenteredInitialView = true;
         };
 
         const buildTiles = () => {
@@ -162,149 +259,76 @@ export default function ArchiveContent() {
 
             clearTiles();
 
-            const cols = getRequiredCols();
+            const columnCount = getRequiredColumnCount();
 
-            totalWidth = cols * (ITEM_WIDTH + GAP);
-            colHeights = Array(cols).fill(0);
+            totalWidth = columnCount * (itemWidth + GAP);
+            colHeights = Array(columnCount).fill(0);
 
-            // Lay out each unique image once.
-            sourceImages.forEach(addTile);
+            for (const image of sourceImages) {
+                createTile(image);
+            }
 
-            centerInitialViewOnFirstImage();
+            centerInitialView();
             applyTransforms();
-
-            // Trigger the entrance animation only after the real scene exists.
             setSceneReady(true);
         };
 
-        // ---------------------------------
-        // Transform / wrapping
-        // ---------------------------------
+        /* ------------------------------------------------------------------ */
+        /*                              Rendering                             */
+        /* ------------------------------------------------------------------ */
 
         const applyTransforms = () => {
-            tiles.forEach((tile) => {
-                const {
-                    kImg,
-                    baseX,
-                    baseY,
-                    width,
-                    height,
-                    colIndex,
-                } = tile;
-
+            for (const tile of tiles) {
+                const { kImg, baseX, baseY, width, height, colIndex } = tile;
                 const colHeight = colHeights[colIndex];
 
-                if (!colHeight) return;
+                if (!colHeight) continue;
 
-                let wx = (baseX + offset.x) % totalWidth;
-                let wy = (baseY + offset.y) % colHeight;
+                let x = positiveModulo(baseX + offset.x, totalWidth);
+                let y = positiveModulo(baseY + offset.y, colHeight);
 
-                if (wx < 0) wx += totalWidth;
-                if (wy < 0) wy += colHeight;
+                if (x > totalWidth - width) x -= totalWidth;
+                if (y > colHeight - height) y -= colHeight;
 
-                if (wx > totalWidth - width) wx -= totalWidth;
-                if (wy > colHeight - height) wy -= colHeight;
+                kImg.position({
+                    x: x * scale,
+                    y: y * scale,
+                });
 
-                kImg.x(wx * scale);
-                kImg.y(wy * scale);
-                kImg.width(width * scale);
-                kImg.height(height * scale);
-            });
+                kImg.size({
+                    width: width * scale,
+                    height: height * scale,
+                });
+            }
 
             layer.batchDraw();
         };
 
-        // ---------------------------------
-        // Image loading
-        // ---------------------------------
+        const zoomToPoint = (nextScale: number, point: Point) => {
+            offset.x += point.x * (1 / nextScale - 1 / scale);
+            offset.y += point.y * (1 / nextScale - 1 / scale);
+            scale = nextScale;
+        };
 
-        let loadedCount = 0;
-
-        const loadedByIndex: Array<SourceImage | undefined> = new Array(
-            archive.length
-        );
-
-        archive.forEach((item, index) => {
-            const img = new Image();
-
-            img.onload = () => {
-                loadedByIndex[index] = {
-                    id: item.id,
-                    src: item.image,
-                    image: img,
-                    aspectRatio: img.naturalHeight / img.naturalWidth,
-                };
-
-                loadedCount++;
-
-                if (loadedCount === archive.length) {
-                    const orderedImages = loadedByIndex.filter(
-                        (image): image is SourceImage => image !== undefined
-                    );
-
-                    const seenSources = new Set<string>();
-
-                    sourceImages.push(
-                        ...orderedImages.filter((image) => {
-                            if (seenSources.has(image.src)) return false;
-
-                            seenSources.add(image.src);
-                            return true;
-                        })
-                    );
-
-                    buildTiles();
-                }
+        const getZoomPoint = (): Point =>
+            stage.getPointerPosition() ?? {
+                x: stage.width() / 2,
+                y: stage.height() / 2,
             };
 
-            img.src = item.image;
-        });
-
-        // ---------------------------------
-        // Shared animation / momentum system
-        // ---------------------------------
-
-        let isDragging = false;
-
-        let lastMouse = {
-            x: 0,
-            y: 0,
-        };
-
-        let velocity = {
-            x: 0,
-            y: 0,
-        };
-
-        let rafId: number | null = null;
-
-        const zoomToPoint = (
-            newScale: number,
-            px: number,
-            py: number
-        ) => {
-            offset.x += px * (1 / newScale - 1 / scale);
-            offset.y += py * (1 / newScale - 1 / scale);
-            scale = newScale;
-        };
+        /* ------------------------------------------------------------------ */
+        /*                              Animation                             */
+        /* ------------------------------------------------------------------ */
 
         const animate = () => {
-            let needsAnotherFrame = false;
+            let shouldContinue = false;
 
             if (Math.abs(targetScale - scale) > 0.0001) {
                 const nextScale =
                     scale + (targetScale - scale) * SCALE_EASING;
 
-                const pointer = stage.getPointerPosition();
-
-                const zoomPoint = pointer ?? {
-                    x: stage.width() / 2,
-                    y: stage.height() / 2,
-                };
-
-                zoomToPoint(nextScale, zoomPoint.x, zoomPoint.y);
-
-                needsAnotherFrame = true;
+                zoomToPoint(nextScale, getZoomPoint());
+                shouldContinue = true;
             }
 
             if (
@@ -317,107 +341,71 @@ export default function ArchiveContent() {
                 offset.x += velocity.x;
                 offset.y += velocity.y;
 
-                needsAnotherFrame = true;
+                shouldContinue = true;
             } else {
                 velocity = { x: 0, y: 0 };
             }
 
             applyTransforms();
 
-            if (needsAnotherFrame) {
-                rafId = requestAnimationFrame(animate);
-            } else {
-                rafId = null;
-            }
+            animationFrameId = shouldContinue
+                ? requestAnimationFrame(animate)
+                : null;
         };
 
         const startAnimation = () => {
-            if (rafId !== null) return;
-            rafId = requestAnimationFrame(animate);
+            if (animationFrameId !== null) return;
+
+            animationFrameId = requestAnimationFrame(animate);
         };
 
         const stopAnimation = () => {
-            if (rafId !== null) {
-                cancelAnimationFrame(rafId);
-                rafId = null;
-            }
+            if (animationFrameId === null) return;
+
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
         };
 
-        // ---------------------------------
-        // Dragging
-        // ---------------------------------
+        /* ------------------------------------------------------------------ */
+        /*                               Input                                */
+        /* ------------------------------------------------------------------ */
 
-        stage.on("mousedown touchstart", () => {
+        const handlePointerStart = () => {
             isDragging = true;
             stopAnimation();
 
-            const pos = stage.getPointerPosition();
-            if (!pos) return;
+            const pointer = stage.getPointerPosition();
+            if (!pointer) return;
 
-            lastMouse = {
-                x: pos.x,
-                y: pos.y,
-            };
-
-            velocity = {
-                x: 0,
-                y: 0,
-            };
+            lastPointer = pointer;
+            velocity = { x: 0, y: 0 };
 
             container.style.cursor = CURSOR_GRABBED;
-        });
+        };
 
-        stage.on("mousemove touchmove", () => {
+        const handlePointerMove = () => {
             if (!isDragging) return;
 
-            const pos = stage.getPointerPosition();
-            if (!pos) return;
+            const pointer = stage.getPointerPosition();
+            if (!pointer) return;
 
-            const dx = (pos.x - lastMouse.x) / scale;
-            const dy = (pos.y - lastMouse.y) / scale;
+            const dx = (pointer.x - lastPointer.x) / scale;
+            const dy = (pointer.y - lastPointer.y) / scale;
 
             offset.x += dx;
             offset.y += dy;
 
-            velocity = {
-                x: dx,
-                y: dy,
-            };
-
-            lastMouse = {
-                x: pos.x,
-                y: pos.y,
-            };
+            velocity = { x: dx, y: dy };
+            lastPointer = pointer;
 
             applyTransforms();
-        });
+        };
 
-        stage.on("mouseup mouseleave touchend", () => {
+        const handlePointerEnd = () => {
             isDragging = false;
             container.style.cursor = CURSOR_GRAB;
             startAnimation();
-        });
-
-        // ---------------------------------
-        // Wheel helpers
-        // ---------------------------------
-
-        const normalizeWheelDelta = (
-            delta: number,
-            deltaMode: number
-        ) => {
-            if (deltaMode === 0) return delta;
-            if (deltaMode === 1) return delta * 16;
-            return delta * stage.height();
         };
-
-        // ---------------------------------
-        // Wheel / desktop trackpad
-        // ---------------------------------
-
-        let trackpadPinchStartScale = scale;
-        let accumulatedTrackpadPinchDelta = 0;
-        let trackpadPinchTimeout: ReturnType<typeof setTimeout> | null = null;
 
         const endTrackpadPinchGesture = () => {
             trackpadPinchStartScale = targetScale;
@@ -425,12 +413,11 @@ export default function ArchiveContent() {
             trackpadPinchTimeout = null;
         };
 
-        stage.on("wheel", (e: Konva.KonvaEventObject<WheelEvent>) => {
-            e.evt.preventDefault();
+        const handleWheel = (event: Konva.KonvaEventObject<WheelEvent>) => {
+            const wheelEvent = event.evt;
+            wheelEvent.preventDefault();
 
-            const evt = e.evt;
-
-            if (evt.ctrlKey) {
+            if (wheelEvent.ctrlKey) {
                 velocity = { x: 0, y: 0 };
 
                 if (trackpadPinchTimeout === null) {
@@ -438,18 +425,16 @@ export default function ArchiveContent() {
                     accumulatedTrackpadPinchDelta = 0;
                 }
 
-                accumulatedTrackpadPinchDelta += evt.deltaY;
+                accumulatedTrackpadPinchDelta += wheelEvent.deltaY;
 
-                targetScale = Math.max(
+                targetScale = clamp(
+                    trackpadPinchStartScale *
+                        Math.exp(
+                            -accumulatedTrackpadPinchDelta *
+                                TRACKPAD_ZOOM_SENSITIVITY
+                        ),
                     MIN_SCALE,
-                    Math.min(
-                        MAX_SCALE,
-                        trackpadPinchStartScale *
-                            Math.exp(
-                                -accumulatedTrackpadPinchDelta *
-                                    TRACKPAD_ZOOM_SENSITIVITY
-                            )
-                    )
+                    MAX_SCALE
                 );
 
                 if (trackpadPinchTimeout !== null) {
@@ -465,103 +450,111 @@ export default function ArchiveContent() {
                 return;
             }
 
-            const rawDeltaX = normalizeWheelDelta(
-                evt.deltaX,
-                evt.deltaMode
+            const deltaX = normalizeWheelDelta(
+                wheelEvent.deltaX,
+                wheelEvent.deltaMode,
+                stage.width()
             );
 
-            const rawDeltaY = normalizeWheelDelta(
-                evt.deltaY,
-                evt.deltaMode
+            const deltaY = normalizeWheelDelta(
+                wheelEvent.deltaY,
+                wheelEvent.deltaMode,
+                stage.height()
             );
 
-            let wheelX = rawDeltaX;
-            let wheelY = rawDeltaY;
+            const wheelX = wheelEvent.shiftKey
+                ? deltaX || deltaY
+                : deltaX;
 
-            if (evt.shiftKey) {
-                wheelX = rawDeltaX !== 0 ? rawDeltaX : rawDeltaY;
-                wheelY = 0;
-            }
+            const wheelY = wheelEvent.shiftKey ? 0 : deltaY;
 
             velocity.x -= (wheelX / scale) * WHEEL_IMPULSE;
             velocity.y -= (wheelY / scale) * WHEEL_IMPULSE;
 
             startAnimation();
-        });
+        };
 
-        // ---------------------------------
-        // Mobile pinch zoom
-        // ---------------------------------
+        const handlePinchMove = (event: TouchEvent) => {
+            if (event.touches.length !== 2) return;
 
-        let pinchStartDist = 0;
-        let pinchStartScale = scale;
-
-        const onPinchMove = (e: TouchEvent) => {
-            if (e.touches.length !== 2) return;
-
-            e.preventDefault();
-
+            event.preventDefault();
             velocity = { x: 0, y: 0 };
 
-            const dx =
-                e.touches[0].clientX -
-                e.touches[1].clientX;
+            const distance = getTouchDistance(event.touches);
 
-            const dy =
-                e.touches[0].clientY -
-                e.touches[1].clientY;
-
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (!pinchStartDist) {
-                pinchStartDist = dist;
+            if (!pinchStartDistance) {
+                pinchStartDistance = distance;
                 pinchStartScale = targetScale;
                 return;
             }
 
-            const gestureRatio = dist / pinchStartDist;
+            const gestureRatio = distance / pinchStartDistance;
 
-            targetScale = Math.min(
-                MAX_SCALE,
-                Math.max(
-                    MIN_SCALE,
-                    pinchStartScale *
-                        Math.pow(gestureRatio, TOUCH_PINCH_SENSITIVITY)
-                )
+            targetScale = clamp(
+                pinchStartScale *
+                    Math.pow(gestureRatio, TOUCH_PINCH_SENSITIVITY),
+                MIN_SCALE,
+                MAX_SCALE
             );
 
             startAnimation();
         };
 
-        const onPinchEnd = () => {
-            pinchStartDist = 0;
+        const handlePinchEnd = () => {
+            pinchStartDistance = 0;
             pinchStartScale = targetScale;
         };
 
-        container.addEventListener("touchmove", onPinchMove, {
-            passive: false,
-        });
+        /* ------------------------------------------------------------------ */
+        /*                               Resize                               */
+        /* ------------------------------------------------------------------ */
 
-        container.addEventListener("touchend", onPinchEnd);
+        const handleResize = () => {
+            stage.size({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
 
-        // ---------------------------------
-        // Resize
-        // ---------------------------------
+            const nextItemWidth = getItemWidth();
 
-        const onResize = () => {
-            stage.width(window.innerWidth);
-            stage.height(window.innerHeight);
+            if (nextItemWidth !== itemWidth) {
+                itemWidth = nextItemWidth;
+            }
 
             buildTiles();
         };
 
-        window.addEventListener("resize", onResize);
+        /* ------------------------------------------------------------------ */
+        /*                              Lifecycle                             */
+        /* ------------------------------------------------------------------ */
 
-        // ---------------------------------
-        // Init / cleanup
-        // ---------------------------------
+        const initialise = async () => {
+            const loadedImages = await Promise.all(archive.map(loadImage));
+
+            sourceImages = dedupeBySource(
+                loadedImages.filter(
+                    (image): image is SourceImage => image !== null
+                )
+            );
+
+            buildTiles();
+        };
+
+        stage.on("mousedown touchstart", handlePointerStart);
+        stage.on("mousemove touchmove", handlePointerMove);
+        stage.on("mouseup mouseleave touchend", handlePointerEnd);
+        stage.on("wheel", handleWheel);
+
+        container.addEventListener("touchmove", handlePinchMove, {
+            passive: false,
+        });
+        container.addEventListener("touchend", handlePinchEnd);
+
+        window.addEventListener("resize", handleResize);
 
         container.style.cursor = CURSOR_GRAB;
+
+        void initialise();
 
         return () => {
             stopAnimation();
@@ -570,14 +563,14 @@ export default function ArchiveContent() {
                 clearTimeout(trackpadPinchTimeout);
             }
 
-            window.removeEventListener("resize", onResize);
+            window.removeEventListener("resize", handleResize);
 
-            container.removeEventListener("touchmove", onPinchMove);
-            container.removeEventListener("touchend", onPinchEnd);
+            container.removeEventListener("touchmove", handlePinchMove);
+            container.removeEventListener("touchend", handlePinchEnd);
 
             stage.destroy();
         };
-    }, [isMobile]);
+    }, []);
 
     return (
         <motion.div
