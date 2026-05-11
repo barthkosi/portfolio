@@ -108,6 +108,14 @@ const getTouchDistance = (touches: TouchList) => {
     return Math.hypot(dx, dy);
 };
 
+const getTouchCenter = (touches: TouchList): Point => ({
+    x: (touches[0].clientX + touches[1].clientX) / 2,
+    y: (touches[0].clientY + touches[1].clientY) / 2,
+});
+
+const isMultiTouchEvent = (event: MouseEvent | TouchEvent) =>
+    "touches" in event && event.touches.length > 1;
+
 const normalizeWheelDelta = (
     delta: number,
     deltaMode: number,
@@ -523,7 +531,14 @@ export default function ArchiveContent() {
         /*                                Input                               */
         /* ------------------------------------------------------------------ */
 
-        const handlePointerStart = () => {
+        const handlePointerStart = (
+            event: Konva.KonvaEventObject<MouseEvent | TouchEvent>
+        ) => {
+            if (isMultiTouchEvent(event.evt)) {
+                isDragging = false;
+                return;
+            }
+
             isDragging = true;
             stopAnimation();
 
@@ -536,7 +551,13 @@ export default function ArchiveContent() {
             container.style.cursor = CURSOR_GRABBED;
         };
 
-        const handlePointerMove = () => {
+        const handlePointerMove = (
+            event: Konva.KonvaEventObject<MouseEvent | TouchEvent>
+        ) => {
+            if (isMultiTouchEvent(event.evt)) {
+                return;
+            }
+
             if (!isDragging) return;
 
             const pointer = stage.getPointerPosition();
@@ -631,31 +652,36 @@ export default function ArchiveContent() {
             if (event.touches.length !== 2) return;
 
             event.preventDefault();
+            stopAnimation();
             velocity = { x: 0, y: 0 };
+            isDragging = false;
 
             const distance = getTouchDistance(event.touches);
 
             if (!pinchStartDistance) {
                 pinchStartDistance = distance;
-                pinchStartScale = targetScale;
+                pinchStartScale = scale;
                 return;
             }
 
             const gestureRatio = distance / pinchStartDistance;
 
-            targetScale = clamp(
+            const nextScale = clamp(
                 pinchStartScale *
                     Math.pow(gestureRatio, TOUCH_PINCH_SENSITIVITY),
                 MIN_SCALE,
                 MAX_SCALE
             );
 
-            startAnimation();
+            targetScale = nextScale;
+            zoomToPoint(nextScale, getTouchCenter(event.touches));
+            applyTransforms();
         };
 
         const handlePinchEnd = () => {
             pinchStartDistance = 0;
-            pinchStartScale = targetScale;
+            targetScale = scale;
+            pinchStartScale = scale;
         };
 
         /* ------------------------------------------------------------------ */
