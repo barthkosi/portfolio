@@ -10,6 +10,7 @@
     "enrich:archive": "node scripts/enrich-archive.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "cloudinary": "^2.10.0",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
