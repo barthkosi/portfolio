@@ -26,6 +26,7 @@ const SCALE_EASING = 0.18;
 const TRACKPAD_PINCH_END_DELAY = 120;
 
 const LAZY_LOAD_OVERSCAN = 600;
+const MAX_CONCURRENT_IMAGE_LOADS = 3;
 
 const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
 const CURSOR_GRABBED =
@@ -55,13 +56,18 @@ type Tile = {
     placeholder: Konva.Rect;
     imageNode: Konva.Image | null;
     imageElement: HTMLImageElement | null;
-    loadState: "idle" | "loading" | "loaded" | "error";
+    loadState: "idle" | "queued" | "loading" | "loaded" | "error";
     generation: number;
     baseX: number;
     baseY: number;
     width: number;
     height: number;
     colIndex: number;
+};
+
+type LoadCandidate = {
+    tile: Tile;
+    distanceFromCenter: number;
 };
 
 const archive = archiveData as ArchiveItem[];
@@ -181,6 +187,8 @@ export default function ArchiveContent() {
         let pinchStartScale = scale;
 
         const imageCache = new Map<string, Promise<HTMLImageElement>>();
+        const imageLoadQueue: Tile[] = [];
+        let activeImageLoads = 0;
 
         /* ------------------------------------------------------------------ */
         /*                                Layout                              */
@@ -193,6 +201,8 @@ export default function ArchiveContent() {
         };
 
         const clearTiles = () => {
+            imageLoadQueue.length = 0;
+
             for (const tile of tiles) {
                 tile.placeholder.destroy();
                 tile.imageNode?.destroy();
@@ -293,7 +303,7 @@ export default function ArchiveContent() {
         };
 
         const loadTileImage = async (tile: Tile) => {
-            if (tile.loadState !== "idle") return;
+            if (tile.loadState !== "queued") return;
 
             tile.loadState = "loading";
             const generation = tile.generation;
@@ -325,6 +335,49 @@ export default function ArchiveContent() {
             }
         };
 
+        const processImageLoadQueue = () => {
+            while (
+                activeImageLoads < MAX_CONCURRENT_IMAGE_LOADS &&
+                imageLoadQueue.length > 0
+            ) {
+                const tile = imageLoadQueue.shift();
+
+                if (!tile) continue;
+
+                if (
+                    !isMounted ||
+                    tile.generation !== tileGeneration ||
+                    tile.loadState !== "queued"
+                ) {
+                    continue;
+                }
+
+                activeImageLoads += 1;
+
+                void loadTileImage(tile).finally(() => {
+                    activeImageLoads -= 1;
+                    processImageLoadQueue();
+                });
+            }
+        };
+
+        const queueTileImages = (candidates: LoadCandidate[]) => {
+            if (candidates.length === 0) return;
+
+            candidates.sort(
+                (a, b) => a.distanceFromCenter - b.distanceFromCenter
+            );
+
+            for (const { tile } of candidates) {
+                if (tile.loadState !== "idle") continue;
+
+                tile.loadState = "queued";
+                imageLoadQueue.push(tile);
+            }
+
+            processImageLoadQueue();
+        };
+
         /* ------------------------------------------------------------------ */
         /*                              Rendering                             */
         /* ------------------------------------------------------------------ */
@@ -332,6 +385,9 @@ export default function ArchiveContent() {
         const applyTransforms = () => {
             const viewportWidth = stage.width();
             const viewportHeight = stage.height();
+            const viewportCenterX = viewportWidth / 2;
+            const viewportCenterY = viewportHeight / 2;
+            const loadCandidates: LoadCandidate[] = [];
 
             for (const tile of tiles) {
                 const {
@@ -388,10 +444,17 @@ export default function ArchiveContent() {
                         viewportHeight
                     )
                 ) {
-                    void loadTileImage(tile);
+                    loadCandidates.push({
+                        tile,
+                        distanceFromCenter: Math.hypot(
+                            screenX + screenWidth / 2 - viewportCenterX,
+                            screenY + screenHeight / 2 - viewportCenterY
+                        ),
+                    });
                 }
             }
 
+            queueTileImages(loadCandidates);
             layer.batchDraw();
         };
 
