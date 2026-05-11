@@ -1,568 +1,738 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, useCallback, useLayoutEffect, memo } from "react";
-import Card from "@/components/interface/Card";
-import archive from "@/data/archive.json";
-import { AnimatePresence, motion, type Variants } from "motion/react";
+import { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
+import Konva from "konva";
+import archiveData from "@/data/archive.json";
+
+/* -------------------------------------------------------------------------- */
+/*                                    Config                                  */
+/* -------------------------------------------------------------------------- */
 
 const GAP = 32;
+const DESKTOP_ITEM_WIDTH = 400;
+const MOBILE_ITEM_WIDTH = 200;
+const MOBILE_BREAKPOINT = 768;
+
+const MIN_SCALE = 0.5;
+const MAX_SCALE = 1.5;
+
+const DRAG_DECELERATION = 0.92;
+const WHEEL_IMPULSE = 0.18;
+
+const TRACKPAD_ZOOM_SENSITIVITY = 0.0015;
+const TOUCH_PINCH_SENSITIVITY = 1.35;
+const SCALE_EASING = 0.18;
+const TRACKPAD_PINCH_END_DELAY = 120;
+
+const LAZY_LOAD_OVERSCAN = 600;
+const MAX_CONCURRENT_IMAGE_LOADS = 3;
+
 const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
-const CURSOR_GRABBED = "url('/cursors/Cursor Grabbed.png') 12 12, grabbing";
-const MIN_COLS = 4;
+const CURSOR_GRABBED =
+    "url('/cursors/Cursor Grabbed.png') 12 12, grabbing";
 
-// === TYPES ===
+/* -------------------------------------------------------------------------- */
+/*                                    Types                                   */
+/* -------------------------------------------------------------------------- */
 
-type ArchiveItem = (typeof archive)[number];
-
-type LoadedAsset = {
-    id: string;
-    url: string;
-    width: number;
-    height: number;
-    isVideo: boolean;
-    error?: boolean;
-};
-
-type AssetPosition = {
-    id: string;
+type Point = {
     x: number;
     y: number;
+};
+
+type ArchiveItem = {
+    id: string;
+    image: string;
+    publicId: string;
     width: number;
     height: number;
-    url: string;
+    aspectRatio: number;
+    color: string;
+};
+
+type Tile = {
+    item: ArchiveItem;
+    placeholder: Konva.Rect;
+    imageNode: Konva.Image | null;
+    imageElement: HTMLImageElement | null;
+    loadState: "idle" | "queued" | "loading" | "loaded" | "error";
+    generation: number;
+    baseX: number;
+    baseY: number;
+    width: number;
+    height: number;
     colIndex: number;
 };
 
-// === UTILITIES ===
-
-const isVideoUrl = (url: string): boolean => {
-    const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".ogv"];
-    return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
+type LoadCandidate = {
+    tile: Tile;
+    distanceFromCenter: number;
 };
 
-/**
- * Fetch a resource as a blob with progress tracking.
- * Uses a single request (no HEAD) to avoid round trips.
- */
-async function fetchAsBlob(
-    url: string,
-    onProgress?: (loaded: number, total: number) => void
-): Promise<Blob> {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+const archive = archiveData as ArchiveItem[];
 
-    const contentLength = parseInt(
-        response.headers.get("content-length") || "0",
-        10
-    );
-    if (!response.body) {
-        const blob = await response.blob();
-        onProgress?.(blob.size, blob.size);
-        return blob;
+/* -------------------------------------------------------------------------- */
+/*                                  Utilities                                 */
+/* -------------------------------------------------------------------------- */
+
+const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+
+const positiveModulo = (value: number, divisor: number) => {
+    const remainder = value % divisor;
+    return remainder < 0 ? remainder + divisor : remainder;
+};
+
+const getItemWidth = () =>
+    window.innerWidth < MOBILE_BREAKPOINT
+        ? MOBILE_ITEM_WIDTH
+        : DESKTOP_ITEM_WIDTH;
+
+const getShortestColumnIndex = (heights: number[]) => {
+    let shortestIndex = 0;
+
+    for (let index = 1; index < heights.length; index++) {
+        if (heights[index] < heights[shortestIndex]) {
+            shortestIndex = index;
+        }
     }
 
-    const reader = response.body.getReader();
-    const chunks: Uint8Array[] = [];
-    let loaded = 0;
+    return shortestIndex;
+};
 
-    try {
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-            loaded += value.length;
-            onProgress?.(loaded, contentLength || loaded);
-        }
-    } catch (err) {
-        reader.cancel();
-        throw err;
+const getTouchDistance = (touches: TouchList) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+
+    return Math.hypot(dx, dy);
+};
+
+const normalizeWheelDelta = (
+    delta: number,
+    deltaMode: number,
+    pageSize: number
+) => {
+    switch (deltaMode) {
+        case WheelEvent.DOM_DELTA_LINE:
+            return delta * 16;
+        case WheelEvent.DOM_DELTA_PAGE:
+            return delta * pageSize;
+        default:
+            return delta;
     }
+};
 
-    return new Blob(chunks as BlobPart[]);
-}
+const intersectsViewport = (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    viewportWidth: number,
+    viewportHeight: number
+) =>
+    x + width >= -LAZY_LOAD_OVERSCAN &&
+    x <= viewportWidth + LAZY_LOAD_OVERSCAN &&
+    y + height >= -LAZY_LOAD_OVERSCAN &&
+    y <= viewportHeight + LAZY_LOAD_OVERSCAN;
 
-/**
- * Get dimensions from a blob URL.
- * For images: decode via Image.
- * For videos: create video element and measure.
- */
-async function measureAsset(
-    blobUrl: string,
-    isVideo: boolean
-): Promise<{ width: number; height: number }> {
-    return new Promise((resolve, reject) => {
-        if (isVideo) {
-            const video = document.createElement("video");
-            video.onloadedmetadata = () => {
-                resolve({
-                    width: video.videoWidth,
-                    height: video.videoHeight,
-                });
-                video.remove();
-            };
-            video.onerror = () => {
-                video.remove();
-                reject(new Error("Video measurement failed"));
-            };
-            video.src = blobUrl;
-        } else {
-            const img = new Image();
-            img.onload = () => {
-                resolve({ width: img.naturalWidth, height: img.naturalHeight });
-                img.remove();
-            };
-            img.onerror = () => {
-                img.remove();
-                reject(new Error("Image measurement failed"));
-            };
-            img.src = blobUrl;
-        }
-    });
-}
-
-/**
- * Load and measure a single asset.
- * Returns dimensions in a normalized format.
- */
-async function loadAsset(
-    item: ArchiveItem,
-    onProgress?: (loaded: number, total: number) => void
-): Promise<LoadedAsset> {
-    try {
-        const blob = await fetchAsBlob(item.image, onProgress);
-        const blobUrl = URL.createObjectURL(blob);
-
-        try {
-            const { width, height } = await measureAsset(
-                blobUrl,
-                isVideoUrl(item.image)
-            );
-
-            return {
-                id: item.id,
-                url: blobUrl,
-                width,
-                height,
-                isVideo: isVideoUrl(item.image),
-            };
-        } catch (err) {
-            console.error(`Measurement failed for ${item.id}:`, err);
-            // Fallback: assume square
-            URL.revokeObjectURL(blobUrl);
-            return {
-                id: item.id,
-                url: item.image,
-                width: 400,
-                height: 400,
-                isVideo: isVideoUrl(item.image),
-                error: true,
-            };
-        }
-    } catch (err) {
-        console.error(`Load failed for ${item.id}:`, err);
-        return {
-            id: item.id,
-            url: item.image,
-            width: 400,
-            height: 400,
-            isVideo: isVideoUrl(item.image),
-            error: true,
-        };
-    }
-}
-
-// === MAIN COMPONENT ===
+/* -------------------------------------------------------------------------- */
+/*                                  Component                                 */
+/* -------------------------------------------------------------------------- */
 
 export default function ArchiveContent() {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [isMobile, setIsMobile] = useState(false);
-    const [isGrabbing, setIsGrabbing] = useState(false);
-    const [readySceneKey, setReadySceneKey] = useState<string | null>(null);
+    const [sceneReady, setSceneReady] = useState(false);
 
-    // Loading state: track total bytes and loaded bytes
-    const [loadingState, setLoadingState] = useState<{
-        isLoading: boolean;
-        loaded: number;
-        total: number;
-    }>({
-        isLoading: true,
-        loaded: 0,
-        total: 0,
-    });
-
-    // All loaded assets (populated once all measuring is complete)
-    const [loadedAssets, setLoadedAssets] = useState<LoadedAsset[]>([]);
-
-    // Refs for drag/pan interaction
-    const position = useRef({ x: 0, y: 0 });
-    const velocity = useRef({ x: 0, y: 0 });
-    const lastMouse = useRef({ x: 0, y: 0 });
-    const isDragging = useRef(false);
-
-    // Detect mobile
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile();
-        window.addEventListener("resize", checkMobile);
-        return () => window.removeEventListener("resize", checkMobile);
-    }, []);
+        const container = containerRef.current;
+        if (!container) return;
 
-    // Load all assets (fetch + measure)
-    useEffect(() => {
-        let cancelled = false;
-        let totalBytes = 0;
-        let loadedBytes = 0;
+        let itemWidth = getItemWidth();
 
-        const loadAll = async () => {
-            const promises = archive.map((item, index) =>
-                loadAsset(item, (loaded, total) => {
-                    // Update progress
-                    if (total > 0) {
-                        totalBytes = Math.max(totalBytes, total);
-                        loadedBytes += loaded;
-                        if (!cancelled) {
-                            setLoadingState((prev) => ({
-                                ...prev,
-                                loaded: loadedBytes,
-                                total: totalBytes,
-                            }));
-                        }
-                    }
-                })
-            );
+        const stage = new Konva.Stage({
+            container,
+            width: window.innerWidth,
+            height: window.innerHeight,
+        });
 
-            try {
-                const assets = await Promise.all(promises);
-                if (!cancelled) {
-                    setLoadedAssets(assets);
-                    // Delay hiding the loader slightly for polish
-                    setTimeout(() => {
-                        if (!cancelled) {
-                            setLoadingState((prev) => ({
-                                ...prev,
-                                isLoading: false,
-                            }));
-                        }
-                    }, 200);
-                }
-            } catch (err) {
-                console.error("Asset loading failed:", err);
-                if (!cancelled) {
-                    setLoadingState((prev) => ({
-                        ...prev,
-                        isLoading: false,
-                    }));
-                }
+        const layer = new Konva.Layer();
+        stage.add(layer);
+
+        const offset: Point = { x: 0, y: 0 };
+        let velocity: Point = { x: 0, y: 0 };
+
+        let scale = 1;
+        let targetScale = 1;
+
+        let totalWidth = 0;
+        let colHeights: number[] = [];
+
+        const tiles: Tile[] = [];
+        let tileGeneration = 0;
+        let isMounted = true;
+
+        let hasCenteredInitialView = false;
+        let isDragging = false;
+
+        let lastPointer: Point = { x: 0, y: 0 };
+        let animationFrameId: number | null = null;
+
+        let trackpadPinchStartScale = scale;
+        let accumulatedTrackpadPinchDelta = 0;
+        let trackpadPinchTimeout: ReturnType<typeof setTimeout> | null =
+            null;
+
+        let pinchStartDistance = 0;
+        let pinchStartScale = scale;
+
+        const imageCache = new Map<string, Promise<HTMLImageElement>>();
+        const imageLoadQueue: Tile[] = [];
+        let activeImageLoads = 0;
+
+        /* ------------------------------------------------------------------ */
+        /*                                Layout                              */
+        /* ------------------------------------------------------------------ */
+
+        const getRequiredColumnCount = () => {
+            const visibleWidthAtMinScale = stage.width() / MIN_SCALE;
+
+            return Math.ceil(visibleWidthAtMinScale / (itemWidth + GAP)) + 2;
+        };
+
+        const clearTiles = () => {
+            imageLoadQueue.length = 0;
+
+            for (const tile of tiles) {
+                tile.placeholder.destroy();
+                tile.imageNode?.destroy();
             }
+
+            tiles.length = 0;
         };
 
-        loadAll();
-        return () => {
-            cancelled = true;
-        };
-    }, []);
+        const createTile = (item: ArchiveItem) => {
+            const colIndex = getShortestColumnIndex(colHeights);
+            const width = itemWidth;
+            const height = width * item.aspectRatio;
+            const baseX = colIndex * (itemWidth + GAP);
+            const baseY = colHeights[colIndex];
 
-    // Cleanup blob URLs on unmount or when assets change
-    useEffect(() => {
-        return () => {
-            loadedAssets.forEach((asset) => {
-                if (asset.url.startsWith("blob:")) {
-                    URL.revokeObjectURL(asset.url);
-                }
+            const placeholder = new Konva.Rect({
+                x: baseX,
+                y: baseY,
+                width,
+                height,
+                fill: item.color || "#111111",
             });
-        };
-    }, [loadedAssets]);
 
-    // Calculate layout
-    const ITEM_WIDTH = isMobile ? 250 : 400;
-    const COLS = Math.max(MIN_COLS, Math.ceil(Math.sqrt(archive.length)));
+            layer.add(placeholder);
 
-    const positions = useMemo<AssetPosition[] | null>(() => {
-        if (loadedAssets.length === 0) return null;
-
-        // Build masonry layout
-        const columnHeights: number[] = Array(COLS).fill(0);
-        const positions: AssetPosition[] = [];
-
-        loadedAssets.forEach((asset) => {
-            // Find the shortest column
-            const colIndex = columnHeights.indexOf(Math.min(...columnHeights));
-            const x = colIndex * (ITEM_WIDTH + GAP);
-            const y = columnHeights[colIndex];
-
-            // Scale height to match ITEM_WIDTH
-            const scaledHeight = (asset.height / asset.width) * ITEM_WIDTH;
-
-            positions.push({
-                id: asset.id,
-                x,
-                y,
-                width: ITEM_WIDTH,
-                height: scaledHeight,
-                url: asset.url,
+            tiles.push({
+                item,
+                placeholder,
+                imageNode: null,
+                imageElement: null,
+                loadState: "idle",
+                generation: tileGeneration,
+                baseX,
+                baseY,
+                width,
+                height,
                 colIndex,
             });
 
-            columnHeights[colIndex] += scaledHeight + GAP;
-        });
+            colHeights[colIndex] += height + GAP;
+        };
 
-        return positions;
-    }, [loadedAssets, ITEM_WIDTH, COLS]);
+        const centerInitialView = () => {
+            if (hasCenteredInitialView || tiles.length === 0) return;
 
-    // Calculate total dimensions
-    const dimensions = useMemo(() => {
-        if (!positions || positions.length === 0) {
-            return { width: 0, height: 0, columnHeights: Array(COLS).fill(0) };
-        }
+            const firstTile = tiles[0];
 
-        const columnHeights: number[] = Array(COLS).fill(0);
-        positions.forEach((pos) => {
-            columnHeights[pos.colIndex] = Math.max(
-                columnHeights[pos.colIndex],
-                pos.y + pos.height + GAP
+            offset.x =
+                stage.width() / (2 * scale) -
+                firstTile.baseX -
+                firstTile.width / 2;
+
+            offset.y =
+                stage.height() / (2 * scale) -
+                firstTile.baseY -
+                firstTile.height / 2;
+
+            hasCenteredInitialView = true;
+        };
+
+        const buildTiles = () => {
+            tileGeneration += 1;
+            clearTiles();
+
+            const columnCount = getRequiredColumnCount();
+
+            totalWidth = columnCount * (itemWidth + GAP);
+            colHeights = Array(columnCount).fill(0);
+
+            for (const item of archive) {
+                createTile(item);
+            }
+
+            centerInitialView();
+            applyTransforms();
+            setSceneReady(true);
+        };
+
+        /* ------------------------------------------------------------------ */
+        /*                                Images                              */
+        /* ------------------------------------------------------------------ */
+
+        const loadImage = (src: string) => {
+            const cached = imageCache.get(src);
+
+            if (cached) return cached;
+
+            const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+                const image = new Image();
+
+                image.onload = () => resolve(image);
+                image.onerror = reject;
+                image.src = src;
+            });
+
+            imageCache.set(src, promise);
+            return promise;
+        };
+
+        const loadTileImage = async (tile: Tile) => {
+            if (tile.loadState !== "queued") return;
+
+            tile.loadState = "loading";
+            const generation = tile.generation;
+
+            try {
+                const image = await loadImage(tile.item.image);
+
+                if (!isMounted || generation !== tileGeneration) return;
+
+                tile.imageElement = image;
+                tile.imageNode = new Konva.Image({
+                    image,
+                    opacity: 0,
+                });
+
+                layer.add(tile.imageNode);
+                tile.loadState = "loaded";
+
+                tile.imageNode.to({
+                    opacity: 1,
+                    duration: 0.18,
+                });
+
+                applyTransforms();
+            } catch {
+                if (!isMounted || generation !== tileGeneration) return;
+
+                tile.loadState = "error";
+            }
+        };
+
+        const processImageLoadQueue = () => {
+            while (
+                activeImageLoads < MAX_CONCURRENT_IMAGE_LOADS &&
+                imageLoadQueue.length > 0
+            ) {
+                const tile = imageLoadQueue.shift();
+
+                if (!tile) continue;
+
+                if (
+                    !isMounted ||
+                    tile.generation !== tileGeneration ||
+                    tile.loadState !== "queued"
+                ) {
+                    continue;
+                }
+
+                activeImageLoads += 1;
+
+                void loadTileImage(tile).finally(() => {
+                    activeImageLoads -= 1;
+                    processImageLoadQueue();
+                });
+            }
+        };
+
+        const queueTileImages = (candidates: LoadCandidate[]) => {
+            if (candidates.length === 0) return;
+
+            candidates.sort(
+                (a, b) => a.distanceFromCenter - b.distanceFromCenter
             );
-        });
 
-        return {
-            width: COLS * (ITEM_WIDTH + GAP),
-            height: Math.max(...columnHeights),
-            columnHeights,
-        };
-    }, [positions, COLS, ITEM_WIDTH]);
+            for (const { tile } of candidates) {
+                if (tile.loadState !== "idle") continue;
 
-    const sceneKey = useMemo(() => {
-        if (!positions || positions.length === 0 || dimensions.width <= 0 || dimensions.height <= 0) {
-            return null;
-        }
-
-        return `${dimensions.width}-${dimensions.height}-${ITEM_WIDTH}-${positions.length}`;
-    }, [dimensions.height, dimensions.width, ITEM_WIDTH, positions]);
-
-    const applyTransforms = useCallback(() => {
-        if (!containerRef.current || !positions || positions.length === 0) {
-            return;
-        }
-
-        const children = containerRef.current.children;
-
-        for (let index = 0; index < children.length; index += 1) {
-            const item = children[index] as HTMLElement;
-            const pos = positions[index];
-
-            if (!pos) {
-                continue;
+                tile.loadState = "queued";
+                imageLoadQueue.push(tile);
             }
 
-            const colHeight = dimensions.columnHeights[pos.colIndex] || 0;
-            let currentX = (pos.x + position.current.x) % dimensions.width;
-            let currentY = (pos.y + position.current.y) % colHeight;
-
-            if (currentX < 0) currentX += dimensions.width;
-            if (currentY < 0) currentY += colHeight;
-            if (currentX > dimensions.width - ITEM_WIDTH) currentX -= dimensions.width;
-            if (currentY > colHeight - pos.height) currentY -= colHeight;
-
-            item.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-        }
-    }, [dimensions.columnHeights, dimensions.width, ITEM_WIDTH, positions]);
-
-    // Initialize the archive scene in its final centered state before showing it.
-    useLayoutEffect(() => {
-        if (!sceneKey || !positions || positions.length === 0 || dimensions.width <= 0 || dimensions.height <= 0) {
-            return;
-        }
-
-        position.current = {
-            x: (window.innerWidth - dimensions.width) / 2,
-            y: (window.innerHeight - dimensions.height) / 2,
+            processImageLoadQueue();
         };
 
-        applyTransforms();
+        /* ------------------------------------------------------------------ */
+        /*                              Rendering                             */
+        /* ------------------------------------------------------------------ */
 
-        const frameId = requestAnimationFrame(() => {
-            applyTransforms();
-            setReadySceneKey(sceneKey);
-        });
+        const applyTransforms = () => {
+            const viewportWidth = stage.width();
+            const viewportHeight = stage.height();
+            const viewportCenterX = viewportWidth / 2;
+            const viewportCenterY = viewportHeight / 2;
+            const loadCandidates: LoadCandidate[] = [];
 
-        return () => cancelAnimationFrame(frameId);
-    }, [applyTransforms, dimensions, positions, sceneKey]);
+            for (const tile of tiles) {
+                const {
+                    placeholder,
+                    imageNode,
+                    baseX,
+                    baseY,
+                    width,
+                    height,
+                    colIndex,
+                } = tile;
 
-    // Animation loop
-    useEffect(() => {
-        if (!positions || positions.length === 0) return;
+                const colHeight = colHeights[colIndex];
 
-        const loop = () => {
-            // Apply friction
-            if (!isDragging.current) {
-                velocity.current.x *= 0.92;
-                velocity.current.y *= 0.92;
-                position.current.x += velocity.current.x;
-                position.current.y += velocity.current.y;
+                if (!colHeight) continue;
+
+                let x = positiveModulo(baseX + offset.x, totalWidth);
+                let y = positiveModulo(baseY + offset.y, colHeight);
+
+                if (x > totalWidth - width) x -= totalWidth;
+                if (y > colHeight - height) y -= colHeight;
+
+                const screenX = x * scale;
+                const screenY = y * scale;
+                const screenWidth = width * scale;
+                const screenHeight = height * scale;
+
+                const position = {
+                    x: screenX,
+                    y: screenY,
+                };
+
+                const size = {
+                    width: screenWidth,
+                    height: screenHeight,
+                };
+
+                placeholder.position(position);
+                placeholder.size(size);
+
+                if (imageNode) {
+                    imageNode.position(position);
+                    imageNode.size(size);
+                }
+
+                if (
+                    tile.loadState === "idle" &&
+                    intersectsViewport(
+                        screenX,
+                        screenY,
+                        screenWidth,
+                        screenHeight,
+                        viewportWidth,
+                        viewportHeight
+                    )
+                ) {
+                    loadCandidates.push({
+                        tile,
+                        distanceFromCenter: Math.hypot(
+                            screenX + screenWidth / 2 - viewportCenterX,
+                            screenY + screenHeight / 2 - viewportCenterY
+                        ),
+                    });
+                }
+            }
+
+            queueTileImages(loadCandidates);
+            layer.batchDraw();
+        };
+
+        const zoomToPoint = (nextScale: number, point: Point) => {
+            offset.x += point.x * (1 / nextScale - 1 / scale);
+            offset.y += point.y * (1 / nextScale - 1 / scale);
+            scale = nextScale;
+        };
+
+        const getZoomPoint = (): Point =>
+            stage.getPointerPosition() ?? {
+                x: stage.width() / 2,
+                y: stage.height() / 2,
+            };
+
+        /* ------------------------------------------------------------------ */
+        /*                              Animation                             */
+        /* ------------------------------------------------------------------ */
+
+        const animate = () => {
+            let shouldContinue = false;
+
+            if (Math.abs(targetScale - scale) > 0.0001) {
+                const nextScale =
+                    scale + (targetScale - scale) * SCALE_EASING;
+
+                zoomToPoint(nextScale, getZoomPoint());
+                shouldContinue = true;
+            }
+
+            if (
+                Math.abs(velocity.x) >= 0.01 ||
+                Math.abs(velocity.y) >= 0.01
+            ) {
+                velocity.x *= DRAG_DECELERATION;
+                velocity.y *= DRAG_DECELERATION;
+
+                offset.x += velocity.x;
+                offset.y += velocity.y;
+
+                shouldContinue = true;
+            } else {
+                velocity = { x: 0, y: 0 };
             }
 
             applyTransforms();
 
-            requestAnimationFrame(loop);
+            animationFrameId = shouldContinue
+                ? requestAnimationFrame(animate)
+                : null;
         };
 
-        const id = requestAnimationFrame(loop);
-        return () => cancelAnimationFrame(id);
-    }, [positions, applyTransforms]);
+        const startAnimation = () => {
+            if (animationFrameId !== null) return;
+            animationFrameId = requestAnimationFrame(animate);
+        };
 
-    // Event handlers
-    const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        isDragging.current = true;
-        lastMouse.current = { x: e.clientX, y: e.clientY };
-        velocity.current = { x: 0, y: 0 };
-        setIsGrabbing(true);
+        const stopAnimation = () => {
+            if (animationFrameId === null) return;
+
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        };
+
+        /* ------------------------------------------------------------------ */
+        /*                                Input                               */
+        /* ------------------------------------------------------------------ */
+
+        const handlePointerStart = () => {
+            isDragging = true;
+            stopAnimation();
+
+            const pointer = stage.getPointerPosition();
+            if (!pointer) return;
+
+            lastPointer = pointer;
+            velocity = { x: 0, y: 0 };
+
+            container.style.cursor = CURSOR_GRABBED;
+        };
+
+        const handlePointerMove = () => {
+            if (!isDragging) return;
+
+            const pointer = stage.getPointerPosition();
+            if (!pointer) return;
+
+            const dx = (pointer.x - lastPointer.x) / scale;
+            const dy = (pointer.y - lastPointer.y) / scale;
+
+            offset.x += dx;
+            offset.y += dy;
+
+            velocity = { x: dx, y: dy };
+            lastPointer = pointer;
+
+            applyTransforms();
+        };
+
+        const handlePointerEnd = () => {
+            isDragging = false;
+            container.style.cursor = CURSOR_GRAB;
+            startAnimation();
+        };
+
+        const endTrackpadPinchGesture = () => {
+            trackpadPinchStartScale = targetScale;
+            accumulatedTrackpadPinchDelta = 0;
+            trackpadPinchTimeout = null;
+        };
+
+        const handleWheel = (event: Konva.KonvaEventObject<WheelEvent>) => {
+            const wheelEvent = event.evt;
+            wheelEvent.preventDefault();
+
+            if (wheelEvent.ctrlKey) {
+                velocity = { x: 0, y: 0 };
+
+                if (trackpadPinchTimeout === null) {
+                    trackpadPinchStartScale = targetScale;
+                    accumulatedTrackpadPinchDelta = 0;
+                }
+
+                accumulatedTrackpadPinchDelta += wheelEvent.deltaY;
+
+                targetScale = clamp(
+                    trackpadPinchStartScale *
+                        Math.exp(
+                            -accumulatedTrackpadPinchDelta *
+                                TRACKPAD_ZOOM_SENSITIVITY
+                        ),
+                    MIN_SCALE,
+                    MAX_SCALE
+                );
+
+                if (trackpadPinchTimeout !== null) {
+                    clearTimeout(trackpadPinchTimeout);
+                }
+
+                trackpadPinchTimeout = setTimeout(
+                    endTrackpadPinchGesture,
+                    TRACKPAD_PINCH_END_DELAY
+                );
+
+                startAnimation();
+                return;
+            }
+
+            const deltaX = normalizeWheelDelta(
+                wheelEvent.deltaX,
+                wheelEvent.deltaMode,
+                stage.width()
+            );
+
+            const deltaY = normalizeWheelDelta(
+                wheelEvent.deltaY,
+                wheelEvent.deltaMode,
+                stage.height()
+            );
+
+            const wheelX = wheelEvent.shiftKey
+                ? deltaX || deltaY
+                : deltaX;
+
+            const wheelY = wheelEvent.shiftKey ? 0 : deltaY;
+
+            velocity.x -= (wheelX / scale) * WHEEL_IMPULSE;
+            velocity.y -= (wheelY / scale) * WHEEL_IMPULSE;
+
+            startAnimation();
+        };
+
+        const handlePinchMove = (event: TouchEvent) => {
+            if (event.touches.length !== 2) return;
+
+            event.preventDefault();
+            velocity = { x: 0, y: 0 };
+
+            const distance = getTouchDistance(event.touches);
+
+            if (!pinchStartDistance) {
+                pinchStartDistance = distance;
+                pinchStartScale = targetScale;
+                return;
+            }
+
+            const gestureRatio = distance / pinchStartDistance;
+
+            targetScale = clamp(
+                pinchStartScale *
+                    Math.pow(gestureRatio, TOUCH_PINCH_SENSITIVITY),
+                MIN_SCALE,
+                MAX_SCALE
+            );
+
+            startAnimation();
+        };
+
+        const handlePinchEnd = () => {
+            pinchStartDistance = 0;
+            pinchStartScale = targetScale;
+        };
+
+        /* ------------------------------------------------------------------ */
+        /*                               Resize                               */
+        /* ------------------------------------------------------------------ */
+
+        const handleResize = () => {
+            stage.size({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+
+            const nextItemWidth = getItemWidth();
+
+            if (nextItemWidth !== itemWidth) {
+                itemWidth = nextItemWidth;
+            }
+
+            buildTiles();
+        };
+
+        /* ------------------------------------------------------------------ */
+        /*                              Lifecycle                             */
+        /* ------------------------------------------------------------------ */
+
+        stage.on("mousedown touchstart", handlePointerStart);
+        stage.on("mousemove touchmove", handlePointerMove);
+        stage.on("mouseup mouseleave touchend", handlePointerEnd);
+        stage.on("wheel", handleWheel);
+
+        container.addEventListener("touchmove", handlePinchMove, {
+            passive: false,
+        });
+        container.addEventListener("touchend", handlePinchEnd);
+
+        window.addEventListener("resize", handleResize);
+
+        container.style.cursor = CURSOR_GRAB;
+
+        buildTiles();
+
+        return () => {
+            isMounted = false;
+            tileGeneration += 1;
+            stopAnimation();
+
+            if (trackpadPinchTimeout !== null) {
+                clearTimeout(trackpadPinchTimeout);
+            }
+
+            window.removeEventListener("resize", handleResize);
+
+            container.removeEventListener("touchmove", handlePinchMove);
+            container.removeEventListener("touchend", handlePinchEnd);
+
+            stage.destroy();
+        };
     }, []);
-
-    const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        if (!isDragging.current) return;
-        const dx = e.clientX - lastMouse.current.x;
-        const dy = e.clientY - lastMouse.current.y;
-        position.current.x += dx;
-        position.current.y += dy;
-        velocity.current = { x: dx, y: dy };
-        lastMouse.current = { x: e.clientX, y: e.clientY };
-    }, []);
-
-    const handleMouseEnd = useCallback(() => {
-        isDragging.current = false;
-        setIsGrabbing(false);
-    }, []);
-
-    const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        isDragging.current = true;
-        lastMouse.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        velocity.current = { x: 0, y: 0 };
-        setIsGrabbing(true);
-    }, []);
-
-    const handleTouchMove = useCallback((e: React.TouchEvent) => {
-        if (!isDragging.current) return;
-        const dx = e.touches[0].clientX - lastMouse.current.x;
-        const dy = e.touches[0].clientY - lastMouse.current.y;
-        position.current.x += dx;
-        position.current.y += dy;
-        velocity.current = { x: dx, y: dy };
-        lastMouse.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }, []);
-
-    const handleTouchEnd = useCallback(() => {
-        isDragging.current = false;
-        setIsGrabbing(false);
-    }, []);
-
-    const handleWheel = useCallback((e: React.WheelEvent) => {
-        velocity.current.x -= e.deltaX * 0.1;
-        velocity.current.y -= e.deltaY * 0.1;
-    }, []);
-
-    const percent =
-        loadingState.total > 0
-            ? Math.min(100, (loadingState.loaded / loadingState.total) * 100)
-            : 0;
 
     return (
-        <AnimatePresence mode="wait">
-            {loadingState.isLoading ? (
-                <div
-                    key="loader"
-                    className="w-full h-full flex items-center justify-center p-4"
-                >
-                    <Loader percent={percent} />
-                </div>
-            ) : (
-                <div key="content" className="w-full h-full">
-                    <style>{`
-                        .archive-grab-cursor, .archive-grab-cursor * { cursor: ${CURSOR_GRAB} !important; }
-                        .archive-grabbed-cursor, .archive-grabbed-cursor * { cursor: ${CURSOR_GRABBED} !important; }
-                    `}</style>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={readySceneKey === sceneKey ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                        style={{ transformOrigin: "center center" }}
-                        className="w-full h-full"
-                    >
-                        <div
-                            className={`w-full h-full overflow-visible relative touch-none ${
-                                isGrabbing
-                                    ? "archive-grabbed-cursor"
-                                    : "archive-grab-cursor"
-                            }`}
-                            onMouseDown={handleMouseDown}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseEnd}
-                            onMouseLeave={handleMouseEnd}
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                            onWheel={handleWheel}
-                        >
-                            <div
-                                ref={containerRef}
-                                className="w-full h-full pointer-events-none overflow-visible"
-                            >
-                                {positions?.map((pos) => (
-                                    <div
-                                        key={pos.id}
-                                        className="absolute flex items-center justify-center overflow-visible"
-                                        style={{
-                                            width: `${pos.width}px`,
-                                            height: `${pos.height}px`,
-                                            top: 0,
-                                            left: 0,
-                                            willChange: "transform",
-                                        }}
-                                    >
-                                        <Card
-                                            image={pos.url}
-                                            aspectRatio={`${pos.width} / ${pos.height}`}
-                                            shimmerAspectRatio={`${pos.width} / ${pos.height}`}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="absolute bottom-10 left-0 w-full text-center text-[var(--content-tertiary)] pointer-events-none select-none label-s">
-                                drag/scroll to explore
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
-        </AnimatePresence>
+        <motion.div
+            initial={false}
+            animate={
+                sceneReady
+                    ? { opacity: 1, scale: 1 }
+                    : { opacity: 0, scale: 0.8 }
+            }
+            transition={{
+                duration: 0.4,
+                ease: [0.23, 1, 0.32, 1],
+            }}
+            className="w-full h-full origin-center"
+        >
+            <div
+                ref={containerRef}
+                className="w-full h-full overflow-hidden touch-none"
+            />
+        </motion.div>
     );
 }
-
-// === LOADER COMPONENT ===
-
-const loaderVariants: Variants = {
-    initial: { opacity: 0 },
-    animate: {
-        opacity: 1,
-        transition: { delay: 0.3, duration: 0.5, ease: [0.23, 1, 0.32, 1] },
-    },
-    exit: { opacity: 0, transition: { duration: 0.3 } },
-};
-
-const Loader = memo(({ percent }: { percent: number }) => (
-    <motion.div
-        variants={loaderVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        className="flex flex-col items-center gap-4 w-full max-w-[400px] p-1 bg-[var(--background-secondary)] rounded-full"
-    >
-        <div className="w-full h-[8px] bg-[var(--background-secondary)] rounded-full overflow-hidden">
-            <div
-                className="h-full bg-[var(--content-primary)] rounded-full transition-all duration-150 ease-out"
-                style={{ width: `${percent}%`, minWidth: "8px" }}
-            />
-        </div>
-    </motion.div>
-));
-
-Loader.displayName = "Loader";
