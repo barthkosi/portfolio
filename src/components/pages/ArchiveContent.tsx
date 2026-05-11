@@ -1,568 +1,602 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, useCallback, useLayoutEffect, memo } from "react";
-import Card from "@/components/interface/Card";
+import { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
+import Konva from "konva";
 import archive from "@/data/archive.json";
-import { AnimatePresence, motion, type Variants } from "motion/react";
 
 const GAP = 32;
+const MAX_SCALE = 1.5;
+const MIN_SCALE = 0.5;
+
+const DRAG_DECELERATION = 0.92;
+const WHEEL_IMPULSE = 0.18;
+
+const TRACKPAD_ZOOM_SENSITIVITY = 0.0015;
+const TOUCH_PINCH_SENSITIVITY = 1.35;
+const SCALE_EASING = 0.18;
+const TRACKPAD_PINCH_END_DELAY = 120;
+
 const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
-const CURSOR_GRABBED = "url('/cursors/Cursor Grabbed.png') 12 12, grabbing";
-const MIN_COLS = 4;
+const CURSOR_GRABBED =
+    "url('/cursors/Cursor Grabbed.png') 12 12, grabbing";
 
-// === TYPES ===
-
-type ArchiveItem = (typeof archive)[number];
-
-type LoadedAsset = {
+type SourceImage = {
     id: string;
-    url: string;
-    width: number;
-    height: number;
-    isVideo: boolean;
-    error?: boolean;
+    src: string;
+    image: HTMLImageElement;
+    aspectRatio: number;
 };
 
-type AssetPosition = {
-    id: string;
-    x: number;
-    y: number;
+type Tile = {
+    kImg: Konva.Image;
+    source: SourceImage;
+    baseX: number;
+    baseY: number;
     width: number;
     height: number;
-    url: string;
     colIndex: number;
 };
 
-// === UTILITIES ===
-
-const isVideoUrl = (url: string): boolean => {
-    const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".ogv"];
-    return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
-};
-
-/**
- * Fetch a resource as a blob with progress tracking.
- * Uses a single request (no HEAD) to avoid round trips.
- */
-async function fetchAsBlob(
-    url: string,
-    onProgress?: (loaded: number, total: number) => void
-): Promise<Blob> {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
-
-    const contentLength = parseInt(
-        response.headers.get("content-length") || "0",
-        10
-    );
-    if (!response.body) {
-        const blob = await response.blob();
-        onProgress?.(blob.size, blob.size);
-        return blob;
-    }
-
-    const reader = response.body.getReader();
-    const chunks: Uint8Array[] = [];
-    let loaded = 0;
-
-    try {
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-            loaded += value.length;
-            onProgress?.(loaded, contentLength || loaded);
-        }
-    } catch (err) {
-        reader.cancel();
-        throw err;
-    }
-
-    return new Blob(chunks as BlobPart[]);
-}
-
-/**
- * Get dimensions from a blob URL.
- * For images: decode via Image.
- * For videos: create video element and measure.
- */
-async function measureAsset(
-    blobUrl: string,
-    isVideo: boolean
-): Promise<{ width: number; height: number }> {
-    return new Promise((resolve, reject) => {
-        if (isVideo) {
-            const video = document.createElement("video");
-            video.onloadedmetadata = () => {
-                resolve({
-                    width: video.videoWidth,
-                    height: video.videoHeight,
-                });
-                video.remove();
-            };
-            video.onerror = () => {
-                video.remove();
-                reject(new Error("Video measurement failed"));
-            };
-            video.src = blobUrl;
-        } else {
-            const img = new Image();
-            img.onload = () => {
-                resolve({ width: img.naturalWidth, height: img.naturalHeight });
-                img.remove();
-            };
-            img.onerror = () => {
-                img.remove();
-                reject(new Error("Image measurement failed"));
-            };
-            img.src = blobUrl;
-        }
-    });
-}
-
-/**
- * Load and measure a single asset.
- * Returns dimensions in a normalized format.
- */
-async function loadAsset(
-    item: ArchiveItem,
-    onProgress?: (loaded: number, total: number) => void
-): Promise<LoadedAsset> {
-    try {
-        const blob = await fetchAsBlob(item.image, onProgress);
-        const blobUrl = URL.createObjectURL(blob);
-
-        try {
-            const { width, height } = await measureAsset(
-                blobUrl,
-                isVideoUrl(item.image)
-            );
-
-            return {
-                id: item.id,
-                url: blobUrl,
-                width,
-                height,
-                isVideo: isVideoUrl(item.image),
-            };
-        } catch (err) {
-            console.error(`Measurement failed for ${item.id}:`, err);
-            // Fallback: assume square
-            URL.revokeObjectURL(blobUrl);
-            return {
-                id: item.id,
-                url: item.image,
-                width: 400,
-                height: 400,
-                isVideo: isVideoUrl(item.image),
-                error: true,
-            };
-        }
-    } catch (err) {
-        console.error(`Load failed for ${item.id}:`, err);
-        return {
-            id: item.id,
-            url: item.image,
-            width: 400,
-            height: 400,
-            isVideo: isVideoUrl(item.image),
-            error: true,
-        };
-    }
-}
-
-// === MAIN COMPONENT ===
-
 export default function ArchiveContent() {
     const containerRef = useRef<HTMLDivElement>(null);
+
     const [isMobile, setIsMobile] = useState(false);
-    const [isGrabbing, setIsGrabbing] = useState(false);
-    const [readySceneKey, setReadySceneKey] = useState<string | null>(null);
+    const [sceneReady, setSceneReady] = useState(false);
 
-    // Loading state: track total bytes and loaded bytes
-    const [loadingState, setLoadingState] = useState<{
-        isLoading: boolean;
-        loaded: number;
-        total: number;
-    }>({
-        isLoading: true,
-        loaded: 0,
-        total: 0,
-    });
-
-    // All loaded assets (populated once all measuring is complete)
-    const [loadedAssets, setLoadedAssets] = useState<LoadedAsset[]>([]);
-
-    // Refs for drag/pan interaction
-    const position = useRef({ x: 0, y: 0 });
-    const velocity = useRef({ x: 0, y: 0 });
-    const lastMouse = useRef({ x: 0, y: 0 });
-    const isDragging = useRef(false);
-
-    // Detect mobile
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768);
-        checkMobile();
-        window.addEventListener("resize", checkMobile);
-        return () => window.removeEventListener("resize", checkMobile);
+        const check = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+
+        check();
+        window.addEventListener("resize", check);
+
+        return () => window.removeEventListener("resize", check);
     }, []);
 
-    // Load all assets (fetch + measure)
     useEffect(() => {
-        let cancelled = false;
-        let totalBytes = 0;
-        let loadedBytes = 0;
+        if (!containerRef.current) return;
 
-        const loadAll = async () => {
-            const promises = archive.map((item, index) =>
-                loadAsset(item, (loaded, total) => {
-                    // Update progress
-                    if (total > 0) {
-                        totalBytes = Math.max(totalBytes, total);
-                        loadedBytes += loaded;
-                        if (!cancelled) {
-                            setLoadingState((prev) => ({
-                                ...prev,
-                                loaded: loadedBytes,
-                                total: totalBytes,
-                            }));
-                        }
-                    }
-                })
+        setSceneReady(false);
+
+        const container = containerRef.current;
+        const ITEM_WIDTH = isMobile ? 200 : 400;
+
+        const stage = new Konva.Stage({
+            container,
+            width: window.innerWidth,
+            height: window.innerHeight,
+        });
+
+        const layer = new Konva.Layer();
+        stage.add(layer);
+
+        let scale = 1;
+        let targetScale = 1;
+
+        const offset = {
+            x: 0,
+            y: 0,
+        };
+
+        let totalWidth = 0;
+        let colHeights: number[] = [];
+
+        const sourceImages: SourceImage[] = [];
+        const tiles: Tile[] = [];
+
+        let hasSetInitialPosition = false;
+
+        // ---------------------------------
+        // Layout helpers
+        // ---------------------------------
+
+        const getRequiredCols = () => {
+            const visibleWorldWidthAtMinScale = stage.width() / MIN_SCALE;
+
+            return (
+                Math.ceil(
+                    visibleWorldWidthAtMinScale / (ITEM_WIDTH + GAP)
+                ) + 2
             );
-
-            try {
-                const assets = await Promise.all(promises);
-                if (!cancelled) {
-                    setLoadedAssets(assets);
-                    // Delay hiding the loader slightly for polish
-                    setTimeout(() => {
-                        if (!cancelled) {
-                            setLoadingState((prev) => ({
-                                ...prev,
-                                isLoading: false,
-                            }));
-                        }
-                    }, 200);
-                }
-            } catch (err) {
-                console.error("Asset loading failed:", err);
-                if (!cancelled) {
-                    setLoadingState((prev) => ({
-                        ...prev,
-                        isLoading: false,
-                    }));
-                }
-            }
         };
 
-        loadAll();
-        return () => {
-            cancelled = true;
+        const clearTiles = () => {
+            tiles.forEach(({ kImg }) => kImg.destroy());
+            tiles.length = 0;
         };
-    }, []);
 
-    // Cleanup blob URLs on unmount or when assets change
-    useEffect(() => {
-        return () => {
-            loadedAssets.forEach((asset) => {
-                if (asset.url.startsWith("blob:")) {
-                    URL.revokeObjectURL(asset.url);
-                }
+        const addTile = (source: SourceImage) => {
+            const colIndex = colHeights.indexOf(Math.min(...colHeights));
+
+            const width = ITEM_WIDTH;
+            const height = width * source.aspectRatio;
+
+            const baseX = colIndex * (ITEM_WIDTH + GAP);
+            const baseY = colHeights[colIndex];
+
+            const kImg = new Konva.Image({
+                image: source.image,
+                x: baseX,
+                y: baseY,
+                width,
+                height,
             });
-        };
-    }, [loadedAssets]);
 
-    // Calculate layout
-    const ITEM_WIDTH = isMobile ? 250 : 400;
-    const COLS = Math.max(MIN_COLS, Math.ceil(Math.sqrt(archive.length)));
+            layer.add(kImg);
 
-    const positions = useMemo<AssetPosition[] | null>(() => {
-        if (loadedAssets.length === 0) return null;
-
-        // Build masonry layout
-        const columnHeights: number[] = Array(COLS).fill(0);
-        const positions: AssetPosition[] = [];
-
-        loadedAssets.forEach((asset) => {
-            // Find the shortest column
-            const colIndex = columnHeights.indexOf(Math.min(...columnHeights));
-            const x = colIndex * (ITEM_WIDTH + GAP);
-            const y = columnHeights[colIndex];
-
-            // Scale height to match ITEM_WIDTH
-            const scaledHeight = (asset.height / asset.width) * ITEM_WIDTH;
-
-            positions.push({
-                id: asset.id,
-                x,
-                y,
-                width: ITEM_WIDTH,
-                height: scaledHeight,
-                url: asset.url,
+            tiles.push({
+                kImg,
+                source,
+                baseX,
+                baseY,
+                width,
+                height,
                 colIndex,
             });
 
-            columnHeights[colIndex] += scaledHeight + GAP;
+            colHeights[colIndex] += height + GAP;
+        };
+
+        const centerInitialViewOnFirstImage = () => {
+            if (hasSetInitialPosition || tiles.length === 0) return;
+
+            const firstTile = tiles[0];
+
+            offset.x =
+                stage.width() / (2 * scale) -
+                firstTile.baseX -
+                firstTile.width / 2;
+
+            offset.y =
+                stage.height() / (2 * scale) -
+                firstTile.baseY -
+                firstTile.height / 2;
+
+            hasSetInitialPosition = true;
+        };
+
+        const buildTiles = () => {
+            if (sourceImages.length === 0) return;
+
+            clearTiles();
+
+            const cols = getRequiredCols();
+
+            totalWidth = cols * (ITEM_WIDTH + GAP);
+            colHeights = Array(cols).fill(0);
+
+            // Lay out each unique image once.
+            sourceImages.forEach(addTile);
+
+            centerInitialViewOnFirstImage();
+            applyTransforms();
+
+            // Trigger the entrance animation only after the real scene exists.
+            setSceneReady(true);
+        };
+
+        // ---------------------------------
+        // Transform / wrapping
+        // ---------------------------------
+
+        const applyTransforms = () => {
+            tiles.forEach((tile) => {
+                const {
+                    kImg,
+                    baseX,
+                    baseY,
+                    width,
+                    height,
+                    colIndex,
+                } = tile;
+
+                const colHeight = colHeights[colIndex];
+
+                if (!colHeight) return;
+
+                let wx = (baseX + offset.x) % totalWidth;
+                let wy = (baseY + offset.y) % colHeight;
+
+                if (wx < 0) wx += totalWidth;
+                if (wy < 0) wy += colHeight;
+
+                if (wx > totalWidth - width) wx -= totalWidth;
+                if (wy > colHeight - height) wy -= colHeight;
+
+                kImg.x(wx * scale);
+                kImg.y(wy * scale);
+                kImg.width(width * scale);
+                kImg.height(height * scale);
+            });
+
+            layer.batchDraw();
+        };
+
+        // ---------------------------------
+        // Image loading
+        // ---------------------------------
+
+        let loadedCount = 0;
+
+        const loadedByIndex: Array<SourceImage | undefined> = new Array(
+            archive.length
+        );
+
+        archive.forEach((item, index) => {
+            const img = new Image();
+
+            img.onload = () => {
+                loadedByIndex[index] = {
+                    id: item.id,
+                    src: item.image,
+                    image: img,
+                    aspectRatio: img.naturalHeight / img.naturalWidth,
+                };
+
+                loadedCount++;
+
+                if (loadedCount === archive.length) {
+                    const orderedImages = loadedByIndex.filter(
+                        (image): image is SourceImage => image !== undefined
+                    );
+
+                    const seenSources = new Set<string>();
+
+                    sourceImages.push(
+                        ...orderedImages.filter((image) => {
+                            if (seenSources.has(image.src)) return false;
+
+                            seenSources.add(image.src);
+                            return true;
+                        })
+                    );
+
+                    buildTiles();
+                }
+            };
+
+            img.src = item.image;
         });
 
-        return positions;
-    }, [loadedAssets, ITEM_WIDTH, COLS]);
+        // ---------------------------------
+        // Shared animation / momentum system
+        // ---------------------------------
 
-    // Calculate total dimensions
-    const dimensions = useMemo(() => {
-        if (!positions || positions.length === 0) {
-            return { width: 0, height: 0, columnHeights: Array(COLS).fill(0) };
-        }
+        let isDragging = false;
 
-        const columnHeights: number[] = Array(COLS).fill(0);
-        positions.forEach((pos) => {
-            columnHeights[pos.colIndex] = Math.max(
-                columnHeights[pos.colIndex],
-                pos.y + pos.height + GAP
+        let lastMouse = {
+            x: 0,
+            y: 0,
+        };
+
+        let velocity = {
+            x: 0,
+            y: 0,
+        };
+
+        let rafId: number | null = null;
+
+        const zoomToPoint = (
+            newScale: number,
+            px: number,
+            py: number
+        ) => {
+            offset.x += px * (1 / newScale - 1 / scale);
+            offset.y += py * (1 / newScale - 1 / scale);
+            scale = newScale;
+        };
+
+        const animate = () => {
+            let needsAnotherFrame = false;
+
+            if (Math.abs(targetScale - scale) > 0.0001) {
+                const nextScale =
+                    scale + (targetScale - scale) * SCALE_EASING;
+
+                const pointer = stage.getPointerPosition();
+
+                const zoomPoint = pointer ?? {
+                    x: stage.width() / 2,
+                    y: stage.height() / 2,
+                };
+
+                zoomToPoint(nextScale, zoomPoint.x, zoomPoint.y);
+
+                needsAnotherFrame = true;
+            }
+
+            if (
+                Math.abs(velocity.x) >= 0.01 ||
+                Math.abs(velocity.y) >= 0.01
+            ) {
+                velocity.x *= DRAG_DECELERATION;
+                velocity.y *= DRAG_DECELERATION;
+
+                offset.x += velocity.x;
+                offset.y += velocity.y;
+
+                needsAnotherFrame = true;
+            } else {
+                velocity = { x: 0, y: 0 };
+            }
+
+            applyTransforms();
+
+            if (needsAnotherFrame) {
+                rafId = requestAnimationFrame(animate);
+            } else {
+                rafId = null;
+            }
+        };
+
+        const startAnimation = () => {
+            if (rafId !== null) return;
+            rafId = requestAnimationFrame(animate);
+        };
+
+        const stopAnimation = () => {
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
+        };
+
+        // ---------------------------------
+        // Dragging
+        // ---------------------------------
+
+        stage.on("mousedown touchstart", () => {
+            isDragging = true;
+            stopAnimation();
+
+            const pos = stage.getPointerPosition();
+            if (!pos) return;
+
+            lastMouse = {
+                x: pos.x,
+                y: pos.y,
+            };
+
+            velocity = {
+                x: 0,
+                y: 0,
+            };
+
+            container.style.cursor = CURSOR_GRABBED;
+        });
+
+        stage.on("mousemove touchmove", () => {
+            if (!isDragging) return;
+
+            const pos = stage.getPointerPosition();
+            if (!pos) return;
+
+            const dx = (pos.x - lastMouse.x) / scale;
+            const dy = (pos.y - lastMouse.y) / scale;
+
+            offset.x += dx;
+            offset.y += dy;
+
+            velocity = {
+                x: dx,
+                y: dy,
+            };
+
+            lastMouse = {
+                x: pos.x,
+                y: pos.y,
+            };
+
+            applyTransforms();
+        });
+
+        stage.on("mouseup mouseleave touchend", () => {
+            isDragging = false;
+            container.style.cursor = CURSOR_GRAB;
+            startAnimation();
+        });
+
+        // ---------------------------------
+        // Wheel helpers
+        // ---------------------------------
+
+        const normalizeWheelDelta = (
+            delta: number,
+            deltaMode: number
+        ) => {
+            if (deltaMode === 0) return delta;
+            if (deltaMode === 1) return delta * 16;
+            return delta * stage.height();
+        };
+
+        // ---------------------------------
+        // Wheel / desktop trackpad
+        // ---------------------------------
+
+        let trackpadPinchStartScale = scale;
+        let accumulatedTrackpadPinchDelta = 0;
+        let trackpadPinchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+        const endTrackpadPinchGesture = () => {
+            trackpadPinchStartScale = targetScale;
+            accumulatedTrackpadPinchDelta = 0;
+            trackpadPinchTimeout = null;
+        };
+
+        stage.on("wheel", (e: Konva.KonvaEventObject<WheelEvent>) => {
+            e.evt.preventDefault();
+
+            const evt = e.evt;
+
+            if (evt.ctrlKey) {
+                velocity = { x: 0, y: 0 };
+
+                if (trackpadPinchTimeout === null) {
+                    trackpadPinchStartScale = targetScale;
+                    accumulatedTrackpadPinchDelta = 0;
+                }
+
+                accumulatedTrackpadPinchDelta += evt.deltaY;
+
+                targetScale = Math.max(
+                    MIN_SCALE,
+                    Math.min(
+                        MAX_SCALE,
+                        trackpadPinchStartScale *
+                            Math.exp(
+                                -accumulatedTrackpadPinchDelta *
+                                    TRACKPAD_ZOOM_SENSITIVITY
+                            )
+                    )
+                );
+
+                if (trackpadPinchTimeout !== null) {
+                    clearTimeout(trackpadPinchTimeout);
+                }
+
+                trackpadPinchTimeout = setTimeout(
+                    endTrackpadPinchGesture,
+                    TRACKPAD_PINCH_END_DELAY
+                );
+
+                startAnimation();
+                return;
+            }
+
+            const rawDeltaX = normalizeWheelDelta(
+                evt.deltaX,
+                evt.deltaMode
             );
-        });
 
-        return {
-            width: COLS * (ITEM_WIDTH + GAP),
-            height: Math.max(...columnHeights),
-            columnHeights,
-        };
-    }, [positions, COLS, ITEM_WIDTH]);
+            const rawDeltaY = normalizeWheelDelta(
+                evt.deltaY,
+                evt.deltaMode
+            );
 
-    const sceneKey = useMemo(() => {
-        if (!positions || positions.length === 0 || dimensions.width <= 0 || dimensions.height <= 0) {
-            return null;
-        }
+            let wheelX = rawDeltaX;
+            let wheelY = rawDeltaY;
 
-        return `${dimensions.width}-${dimensions.height}-${ITEM_WIDTH}-${positions.length}`;
-    }, [dimensions.height, dimensions.width, ITEM_WIDTH, positions]);
-
-    const applyTransforms = useCallback(() => {
-        if (!containerRef.current || !positions || positions.length === 0) {
-            return;
-        }
-
-        const children = containerRef.current.children;
-
-        for (let index = 0; index < children.length; index += 1) {
-            const item = children[index] as HTMLElement;
-            const pos = positions[index];
-
-            if (!pos) {
-                continue;
+            if (evt.shiftKey) {
+                wheelX = rawDeltaX !== 0 ? rawDeltaX : rawDeltaY;
+                wheelY = 0;
             }
 
-            const colHeight = dimensions.columnHeights[pos.colIndex] || 0;
-            let currentX = (pos.x + position.current.x) % dimensions.width;
-            let currentY = (pos.y + position.current.y) % colHeight;
+            velocity.x -= (wheelX / scale) * WHEEL_IMPULSE;
+            velocity.y -= (wheelY / scale) * WHEEL_IMPULSE;
 
-            if (currentX < 0) currentX += dimensions.width;
-            if (currentY < 0) currentY += colHeight;
-            if (currentX > dimensions.width - ITEM_WIDTH) currentX -= dimensions.width;
-            if (currentY > colHeight - pos.height) currentY -= colHeight;
-
-            item.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-        }
-    }, [dimensions.columnHeights, dimensions.width, ITEM_WIDTH, positions]);
-
-    // Initialize the archive scene in its final centered state before showing it.
-    useLayoutEffect(() => {
-        if (!sceneKey || !positions || positions.length === 0 || dimensions.width <= 0 || dimensions.height <= 0) {
-            return;
-        }
-
-        position.current = {
-            x: (window.innerWidth - dimensions.width) / 2,
-            y: (window.innerHeight - dimensions.height) / 2,
-        };
-
-        applyTransforms();
-
-        const frameId = requestAnimationFrame(() => {
-            applyTransforms();
-            setReadySceneKey(sceneKey);
+            startAnimation();
         });
 
-        return () => cancelAnimationFrame(frameId);
-    }, [applyTransforms, dimensions, positions, sceneKey]);
+        // ---------------------------------
+        // Mobile pinch zoom
+        // ---------------------------------
 
-    // Animation loop
-    useEffect(() => {
-        if (!positions || positions.length === 0) return;
+        let pinchStartDist = 0;
+        let pinchStartScale = scale;
 
-        const loop = () => {
-            // Apply friction
-            if (!isDragging.current) {
-                velocity.current.x *= 0.92;
-                velocity.current.y *= 0.92;
-                position.current.x += velocity.current.x;
-                position.current.y += velocity.current.y;
+        const onPinchMove = (e: TouchEvent) => {
+            if (e.touches.length !== 2) return;
+
+            e.preventDefault();
+
+            velocity = { x: 0, y: 0 };
+
+            const dx =
+                e.touches[0].clientX -
+                e.touches[1].clientX;
+
+            const dy =
+                e.touches[0].clientY -
+                e.touches[1].clientY;
+
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (!pinchStartDist) {
+                pinchStartDist = dist;
+                pinchStartScale = targetScale;
+                return;
             }
 
-            applyTransforms();
+            const gestureRatio = dist / pinchStartDist;
 
-            requestAnimationFrame(loop);
+            targetScale = Math.min(
+                MAX_SCALE,
+                Math.max(
+                    MIN_SCALE,
+                    pinchStartScale *
+                        Math.pow(gestureRatio, TOUCH_PINCH_SENSITIVITY)
+                )
+            );
+
+            startAnimation();
         };
 
-        const id = requestAnimationFrame(loop);
-        return () => cancelAnimationFrame(id);
-    }, [positions, applyTransforms]);
+        const onPinchEnd = () => {
+            pinchStartDist = 0;
+            pinchStartScale = targetScale;
+        };
 
-    // Event handlers
-    const handleMouseDown = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        isDragging.current = true;
-        lastMouse.current = { x: e.clientX, y: e.clientY };
-        velocity.current = { x: 0, y: 0 };
-        setIsGrabbing(true);
-    }, []);
+        container.addEventListener("touchmove", onPinchMove, {
+            passive: false,
+        });
 
-    const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        if (!isDragging.current) return;
-        const dx = e.clientX - lastMouse.current.x;
-        const dy = e.clientY - lastMouse.current.y;
-        position.current.x += dx;
-        position.current.y += dy;
-        velocity.current = { x: dx, y: dy };
-        lastMouse.current = { x: e.clientX, y: e.clientY };
-    }, []);
+        container.addEventListener("touchend", onPinchEnd);
 
-    const handleMouseEnd = useCallback(() => {
-        isDragging.current = false;
-        setIsGrabbing(false);
-    }, []);
+        // ---------------------------------
+        // Resize
+        // ---------------------------------
 
-    const handleTouchStart = useCallback((e: React.TouchEvent) => {
-        isDragging.current = true;
-        lastMouse.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        velocity.current = { x: 0, y: 0 };
-        setIsGrabbing(true);
-    }, []);
+        const onResize = () => {
+            stage.width(window.innerWidth);
+            stage.height(window.innerHeight);
 
-    const handleTouchMove = useCallback((e: React.TouchEvent) => {
-        if (!isDragging.current) return;
-        const dx = e.touches[0].clientX - lastMouse.current.x;
-        const dy = e.touches[0].clientY - lastMouse.current.y;
-        position.current.x += dx;
-        position.current.y += dy;
-        velocity.current = { x: dx, y: dy };
-        lastMouse.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    }, []);
+            buildTiles();
+        };
 
-    const handleTouchEnd = useCallback(() => {
-        isDragging.current = false;
-        setIsGrabbing(false);
-    }, []);
+        window.addEventListener("resize", onResize);
 
-    const handleWheel = useCallback((e: React.WheelEvent) => {
-        velocity.current.x -= e.deltaX * 0.1;
-        velocity.current.y -= e.deltaY * 0.1;
-    }, []);
+        // ---------------------------------
+        // Init / cleanup
+        // ---------------------------------
 
-    const percent =
-        loadingState.total > 0
-            ? Math.min(100, (loadingState.loaded / loadingState.total) * 100)
-            : 0;
+        container.style.cursor = CURSOR_GRAB;
+
+        return () => {
+            stopAnimation();
+
+            if (trackpadPinchTimeout !== null) {
+                clearTimeout(trackpadPinchTimeout);
+            }
+
+            window.removeEventListener("resize", onResize);
+
+            container.removeEventListener("touchmove", onPinchMove);
+            container.removeEventListener("touchend", onPinchEnd);
+
+            stage.destroy();
+        };
+    }, [isMobile]);
 
     return (
-        <AnimatePresence mode="wait">
-            {loadingState.isLoading ? (
-                <div
-                    key="loader"
-                    className="w-full h-full flex items-center justify-center p-4"
-                >
-                    <Loader percent={percent} />
-                </div>
-            ) : (
-                <div key="content" className="w-full h-full">
-                    <style>{`
-                        .archive-grab-cursor, .archive-grab-cursor * { cursor: ${CURSOR_GRAB} !important; }
-                        .archive-grabbed-cursor, .archive-grabbed-cursor * { cursor: ${CURSOR_GRABBED} !important; }
-                    `}</style>
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={readySceneKey === sceneKey ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                        style={{ transformOrigin: "center center" }}
-                        className="w-full h-full"
-                    >
-                        <div
-                            className={`w-full h-full overflow-visible relative touch-none ${
-                                isGrabbing
-                                    ? "archive-grabbed-cursor"
-                                    : "archive-grab-cursor"
-                            }`}
-                            onMouseDown={handleMouseDown}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseEnd}
-                            onMouseLeave={handleMouseEnd}
-                            onTouchStart={handleTouchStart}
-                            onTouchMove={handleTouchMove}
-                            onTouchEnd={handleTouchEnd}
-                            onWheel={handleWheel}
-                        >
-                            <div
-                                ref={containerRef}
-                                className="w-full h-full pointer-events-none overflow-visible"
-                            >
-                                {positions?.map((pos) => (
-                                    <div
-                                        key={pos.id}
-                                        className="absolute flex items-center justify-center overflow-visible"
-                                        style={{
-                                            width: `${pos.width}px`,
-                                            height: `${pos.height}px`,
-                                            top: 0,
-                                            left: 0,
-                                            willChange: "transform",
-                                        }}
-                                    >
-                                        <Card
-                                            image={pos.url}
-                                            aspectRatio={`${pos.width} / ${pos.height}`}
-                                            shimmerAspectRatio={`${pos.width} / ${pos.height}`}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="absolute bottom-10 left-0 w-full text-center text-[var(--content-tertiary)] pointer-events-none select-none label-s">
-                                drag/scroll to explore
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-            )}
-        </AnimatePresence>
+        <motion.div
+            initial={false}
+            animate={
+                sceneReady
+                    ? { opacity: 1, scale: 1 }
+                    : { opacity: 0, scale: 0.8 }
+            }
+            transition={{
+                duration: 0.4,
+                ease: [0.23, 1, 0.32, 1],
+            }}
+            className="w-full h-full origin-center"
+        >
+            <div
+                ref={containerRef}
+                className="w-full h-full overflow-hidden touch-none"
+            />
+        </motion.div>
     );
 }
-
-// === LOADER COMPONENT ===
-
-const loaderVariants: Variants = {
-    initial: { opacity: 0 },
-    animate: {
-        opacity: 1,
-        transition: { delay: 0.3, duration: 0.5, ease: [0.23, 1, 0.32, 1] },
-    },
-    exit: { opacity: 0, transition: { duration: 0.3 } },
-};
-
-const Loader = memo(({ percent }: { percent: number }) => (
-    <motion.div
-        variants={loaderVariants}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        className="flex flex-col items-center gap-4 w-full max-w-[400px] p-1 bg-[var(--background-secondary)] rounded-full"
-    >
-        <div className="w-full h-[8px] bg-[var(--background-secondary)] rounded-full overflow-hidden">
-            <div
-                className="h-full bg-[var(--content-primary)] rounded-full transition-all duration-150 ease-out"
-                style={{ width: `${percent}%`, minWidth: "8px" }}
-            />
-        </div>
-    </motion.div>
-));
-
-Loader.displayName = "Loader";
