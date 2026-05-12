@@ -10,7 +10,10 @@ export default function FullLayout({
             <div className="absolute top-0 left-0 w-full z-10">
                 <Nav />
             </div>
-            <main className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+            <main
+                data-page-transition="none"
+                className="absolute inset-0 w-full h-full z-0 overflow-hidden"
+            >
                 {children}
             </main>
         </div>

@@ -3,6 +3,7 @@
 import { pressScale } from "@/lib/transitions";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -84,6 +85,10 @@ function CardMedia({
     locked,
 }: CardMediaProps) {
     const [status, setStatus] = useState<LoadingStatus>("loading");
+    const [imageDimensions, setImageDimensions] = useState({
+        width: 1200,
+        height: 800,
+    });
     const isMounted = useRef(true);
     const isVideo = isVideoUrl(image);
     const isAuto = aspectRatio === "auto";
@@ -105,6 +110,19 @@ function CardMedia({
         if (isMounted.current) {
             setStatus("ready");
         }
+    };
+
+    const handleImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
+        const loadedImage = event.currentTarget;
+
+        if (loadedImage.naturalWidth && loadedImage.naturalHeight) {
+            setImageDimensions({
+                width: loadedImage.naturalWidth,
+                height: loadedImage.naturalHeight,
+            });
+        }
+
+        handleLoad();
     };
 
     const handleError = () => {
@@ -163,13 +181,16 @@ function CardMedia({
                     onError={handleError}
                 />
             ) : (
-                <img
+                <Image
                     src={image}
                     alt={title ? `Image representing ${title}` : "Project or artwork showcase"}
+                    width={imageDimensions.width}
+                    height={imageDimensions.height}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
                     className={mediaClasses}
-                    loading="lazy"
-                    onLoad={handleLoad}
+                    fill={!isAuto}
                     onError={handleError}
+                    onLoad={handleImageLoad}
                 />
             )}
         </div>

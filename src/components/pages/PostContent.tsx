@@ -1,6 +1,6 @@
 "use client";
 
-import { cloneElement, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -45,6 +45,40 @@ interface MediaElementProps {
     onLoadedData?: React.ReactEventHandler<HTMLVideoElement>;
     onError?: React.ReactEventHandler<HTMLElement>;
     src?: string;
+}
+
+function MarkdownImage({
+    src,
+    alt,
+}: {
+    src: string;
+    alt: string;
+}) {
+    const [dimensions, setDimensions] = useState({
+        width: 1200,
+        height: 800,
+    });
+
+    return (
+        <Image
+            src={src}
+            alt={alt}
+            width={dimensions.width}
+            height={dimensions.height}
+            sizes="(min-width: 1024px) 720px, 100vw"
+            className="w-full h-auto block"
+            onLoad={(event) => {
+                const image = event.currentTarget;
+
+                if (image.naturalWidth && image.naturalHeight) {
+                    setDimensions({
+                        width: image.naturalWidth,
+                        height: image.naturalHeight,
+                    });
+                }
+            }}
+        />
+    );
 }
 
 const processContent = (content: string) =>
@@ -108,42 +142,17 @@ function MediaWrapper({
     aspectRatio?: string;
 }) {
     const [isLoaded, setIsLoaded] = useState(false);
-    const mediaRef = useRef<HTMLElement>(null);
-
-    useEffect(() => {
-        if (mediaRef.current) {
-            const el = mediaRef.current;
-            if (el.tagName === 'IMG' && (el as HTMLImageElement).complete) {
-                setIsLoaded(true);
-            } else if (el.tagName === 'VIDEO' && (el as HTMLVideoElement).readyState >= 3) {
-                setIsLoaded(true);
-            }
-        }
-    }, [children.props.src]);
 
     return (
         <div
             className={`relative overflow-hidden rounded-[12px] w-full bg-[var(--background-secondary)] transition-all duration-300 ${isLoaded ? "" : "shimmer-loading"}`}
             style={{ aspectRatio: isLoaded ? "auto" : aspectRatio }}
+            onLoadCapture={() => setIsLoaded(true)}
+            onLoadedDataCapture={() => setIsLoaded(true)}
+            onErrorCapture={() => setIsLoaded(true)}
         >
             <div className={`w-full transition-opacity duration-500 ${isLoaded ? "opacity-100 h-auto" : "opacity-0 h-full"}`}>
-                {children.type
-                    ? cloneElement(children, {
-                        ref: mediaRef,
-                        onLoad: (event: React.SyntheticEvent<HTMLElement>) => {
-                            setIsLoaded(true);
-                            children.props.onLoad?.(event);
-                        },
-                        onLoadedData: (event: React.SyntheticEvent<HTMLVideoElement>) => {
-                            setIsLoaded(true);
-                            children.props.onLoadedData?.(event);
-                        },
-                        onError: (event: React.SyntheticEvent<HTMLElement>) => {
-                            setIsLoaded(true);
-                            children.props.onError?.(event);
-                        }
-                    } as any)
-                    : children}
+                {children}
             </div>
         </div>
     );
@@ -531,7 +540,7 @@ export default function PostContent({
             return (
                 <figure className="mb-4 lg:mb-6">
                     <MediaWrapper aspectRatio="3/2">
-                        <img src={source} alt={alt} className="w-full h-auto block" />
+                        <MarkdownImage src={source} alt={alt} />
                     </MediaWrapper>
                     {alt ? <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption> : null}
                 </figure>
@@ -588,7 +597,7 @@ export default function PostContent({
                                     <div key={`${match[2]}-${index}`} className="flex-1 min-w-0">
                                         <figure>
                                             <MediaWrapper aspectRatio="3/2">
-                                                <img className="w-full h-auto block" src={match[2]} alt={match[1]} />
+                                                <MarkdownImage src={match[2]} alt={match[1]} />
                                             </MediaWrapper>
                                             {match[1] ? (
                                                 <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">

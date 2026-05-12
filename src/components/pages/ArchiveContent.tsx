@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
 import Konva from "konva";
 import archiveData from "@/data/archive.json";
 
@@ -9,7 +8,7 @@ import archiveData from "@/data/archive.json";
 /*                                    Config                                  */
 /* -------------------------------------------------------------------------- */
 
-const GAP = 32;
+const GAP = 24;
 const DESKTOP_ITEM_WIDTH = 400;
 const MOBILE_ITEM_WIDTH = 200;
 const MOBILE_BREAKPOINT = 768;
@@ -26,7 +25,12 @@ const SCALE_EASING = 0.18;
 const TRACKPAD_PINCH_END_DELAY = 120;
 
 const LAZY_LOAD_OVERSCAN = 600;
-const MAX_CONCURRENT_IMAGE_LOADS = 3;
+const MAX_CONCURRENT_IMAGE_LOADS = 2;
+const MAX_KONVA_PIXEL_RATIO = 1.5;
+const IMAGE_LOAD_START_DELAY = 120;
+const IMAGE_LOAD_RESUME_DELAY = 160;
+const ARCHIVE_IMAGE_MIN_WIDTH = 640;
+const ARCHIVE_IMAGE_MAX_WIDTH = 1200;
 
 const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
 const CURSOR_GRABBED =
@@ -63,6 +67,9 @@ type Tile = {
     width: number;
     height: number;
     colIndex: number;
+    renderedX: number | null;
+    renderedY: number | null;
+    renderedScale: number | null;
 };
 
 type LoadCandidate = {
@@ -144,6 +151,29 @@ const intersectsViewport = (
     y + height >= -LAZY_LOAD_OVERSCAN &&
     y <= viewportHeight + LAZY_LOAD_OVERSCAN;
 
+const getOptimizedImageSrc = (src: string, width: number) => {
+    const uploadSegment = "/image/upload/";
+    const uploadIndex = src.indexOf(uploadSegment);
+
+    if (uploadIndex === -1) return src;
+
+    const insertIndex = uploadIndex + uploadSegment.length;
+    const transformation = `f_auto,q_auto,w_${width},c_limit`;
+
+    return `${src.slice(0, insertIndex)}${transformation}/${src.slice(insertIndex)}`;
+};
+
+const getImageRequestWidth = (itemWidth: number) => {
+    const dpr = Math.min(window.devicePixelRatio || 1, MAX_KONVA_PIXEL_RATIO);
+    const requestedWidth = Math.ceil((itemWidth * MAX_SCALE * dpr) / 100) * 100;
+
+    return clamp(
+        requestedWidth,
+        ARCHIVE_IMAGE_MIN_WIDTH,
+        ARCHIVE_IMAGE_MAX_WIDTH
+    );
+};
+
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
 /* -------------------------------------------------------------------------- */
@@ -156,7 +186,14 @@ export default function ArchiveContent() {
         const container = containerRef.current;
         if (!container) return;
 
+        const previousPixelRatio = Konva.pixelRatio;
+        Konva.pixelRatio = Math.min(
+            window.devicePixelRatio || 1,
+            MAX_KONVA_PIXEL_RATIO
+        );
+
         let itemWidth = getItemWidth();
+        let imageRequestWidth = getImageRequestWidth(itemWidth);
 
         const stage = new Konva.Stage({
             container,
@@ -164,7 +201,7 @@ export default function ArchiveContent() {
             height: window.innerHeight,
         });
 
-        const layer = new Konva.Layer();
+        const layer = new Konva.Layer({ listening: false });
         stage.add(layer);
 
         const offset: Point = { x: 0, y: 0 };
@@ -185,6 +222,7 @@ export default function ArchiveContent() {
 
         let lastPointer: Point = { x: 0, y: 0 };
         let animationFrameId: number | null = null;
+        let renderFrameId: number | null = null;
 
         let trackpadPinchStartScale = scale;
         let accumulatedTrackpadPinchDelta = 0;
@@ -197,6 +235,9 @@ export default function ArchiveContent() {
         const imageCache = new Map<string, Promise<HTMLImageElement>>();
         const imageLoadQueue: Tile[] = [];
         let activeImageLoads = 0;
+        let imageLoadTimer: ReturnType<typeof setTimeout> | null = null;
+        let imageLoadResumeTimer: ReturnType<typeof setTimeout> | null = null;
+        let isInteractionActive = false;
 
         /* ------------------------------------------------------------------ */
         /*                                Layout                              */
@@ -232,6 +273,8 @@ export default function ArchiveContent() {
                 width,
                 height,
                 fill: item.color || "#111111",
+                listening: false,
+                perfectDrawEnabled: false,
             });
 
             layer.add(placeholder);
@@ -248,6 +291,9 @@ export default function ArchiveContent() {
                 width,
                 height,
                 colIndex,
+                renderedX: null,
+                renderedY: null,
+                renderedScale: null,
             });
 
             colHeights[colIndex] += height + GAP;
@@ -286,7 +332,9 @@ export default function ArchiveContent() {
 
             centerInitialView();
             applyTransforms();
-            setSceneReady(true);
+            requestAnimationFrame(() => {
+                if (isMounted) setSceneReady(true);
+            });
         };
 
         /* ------------------------------------------------------------------ */
@@ -301,7 +349,19 @@ export default function ArchiveContent() {
             const promise = new Promise<HTMLImageElement>((resolve, reject) => {
                 const image = new Image();
 
-                image.onload = () => resolve(image);
+                image.decoding = "async";
+                image.onload = () => {
+                    const decode = image.decode?.();
+
+                    if (!decode) {
+                        resolve(image);
+                        return;
+                    }
+
+                    decode
+                        .catch(() => undefined)
+                        .then(() => resolve(image));
+                };
                 image.onerror = reject;
                 image.src = src;
             });
@@ -317,14 +377,24 @@ export default function ArchiveContent() {
             const generation = tile.generation;
 
             try {
-                const image = await loadImage(tile.item.image);
+                const image = await loadImage(
+                    getOptimizedImageSrc(tile.item.image, imageRequestWidth)
+                );
 
                 if (!isMounted || generation !== tileGeneration) return;
 
                 tile.imageElement = image;
                 tile.imageNode = new Konva.Image({
                     image,
+                    x: tile.renderedX ?? 0,
+                    y: tile.renderedY ?? 0,
+                    width: tile.width,
+                    height: tile.height,
+                    scaleX: tile.renderedScale ?? scale,
+                    scaleY: tile.renderedScale ?? scale,
                     opacity: 0,
+                    listening: false,
+                    perfectDrawEnabled: false,
                 });
 
                 layer.add(tile.imageNode);
@@ -335,7 +405,7 @@ export default function ArchiveContent() {
                     duration: 0.18,
                 });
 
-                applyTransforms();
+                requestRender();
             } catch {
                 if (!isMounted || generation !== tileGeneration) return;
 
@@ -344,6 +414,8 @@ export default function ArchiveContent() {
         };
 
         const processImageLoadQueue = () => {
+            if (isInteractionActive) return;
+
             while (
                 activeImageLoads < MAX_CONCURRENT_IMAGE_LOADS &&
                 imageLoadQueue.length > 0
@@ -369,6 +441,15 @@ export default function ArchiveContent() {
             }
         };
 
+        const scheduleImageLoadProcessing = () => {
+            if (imageLoadTimer !== null) return;
+
+            imageLoadTimer = setTimeout(() => {
+                imageLoadTimer = null;
+                processImageLoadQueue();
+            }, IMAGE_LOAD_START_DELAY);
+        };
+
         const queueTileImages = (candidates: LoadCandidate[]) => {
             if (candidates.length === 0) return;
 
@@ -383,7 +464,7 @@ export default function ArchiveContent() {
                 imageLoadQueue.push(tile);
             }
 
-            processImageLoadQueue();
+            scheduleImageLoadProcessing();
         };
 
         /* ------------------------------------------------------------------ */
@@ -423,23 +504,39 @@ export default function ArchiveContent() {
                 const screenWidth = width * scale;
                 const screenHeight = height * scale;
 
-                const position = {
-                    x: screenX,
-                    y: screenY,
-                };
+                const hasMoved =
+                    tile.renderedX !== screenX || tile.renderedY !== screenY;
+                const hasScaled = tile.renderedScale !== scale;
 
-                const size = {
-                    width: screenWidth,
-                    height: screenHeight,
-                };
+                if (hasMoved) {
+                    const position = {
+                        x: screenX,
+                        y: screenY,
+                    };
 
-                placeholder.position(position);
-                placeholder.size(size);
+                    placeholder.position(position);
 
-                if (imageNode) {
-                    imageNode.position(position);
-                    imageNode.size(size);
+                    if (imageNode) {
+                        imageNode.position(position);
+                    }
                 }
+
+                if (hasScaled) {
+                    const nodeScale = {
+                        x: scale,
+                        y: scale,
+                    };
+
+                    placeholder.scale(nodeScale);
+
+                    if (imageNode) {
+                        imageNode.scale(nodeScale);
+                    }
+                }
+
+                tile.renderedX = screenX;
+                tile.renderedY = screenY;
+                tile.renderedScale = scale;
 
                 if (
                     tile.loadState === "idle" &&
@@ -464,6 +561,15 @@ export default function ArchiveContent() {
 
             queueTileImages(loadCandidates);
             layer.batchDraw();
+        };
+
+        const requestRender = () => {
+            if (renderFrameId !== null) return;
+
+            renderFrameId = requestAnimationFrame(() => {
+                renderFrameId = null;
+                applyTransforms();
+            });
         };
 
         const zoomToPoint = (nextScale: number, point: Point) => {
@@ -510,6 +616,10 @@ export default function ArchiveContent() {
 
             applyTransforms();
 
+            if (!shouldContinue) {
+                resumeImageLoadingSoon();
+            }
+
             animationFrameId = shouldContinue
                 ? requestAnimationFrame(animate)
                 : null;
@@ -527,6 +637,27 @@ export default function ArchiveContent() {
             animationFrameId = null;
         };
 
+        const pauseImageLoading = () => {
+            isInteractionActive = true;
+
+            if (imageLoadResumeTimer !== null) {
+                clearTimeout(imageLoadResumeTimer);
+                imageLoadResumeTimer = null;
+            }
+        };
+
+        const resumeImageLoadingSoon = () => {
+            if (imageLoadResumeTimer !== null) {
+                clearTimeout(imageLoadResumeTimer);
+            }
+
+            imageLoadResumeTimer = setTimeout(() => {
+                imageLoadResumeTimer = null;
+                isInteractionActive = false;
+                scheduleImageLoadProcessing();
+            }, IMAGE_LOAD_RESUME_DELAY);
+        };
+
         /* ------------------------------------------------------------------ */
         /*                                Input                               */
         /* ------------------------------------------------------------------ */
@@ -539,6 +670,7 @@ export default function ArchiveContent() {
                 return;
             }
 
+            pauseImageLoading();
             isDragging = true;
             stopAnimation();
 
@@ -572,7 +704,7 @@ export default function ArchiveContent() {
             velocity = { x: dx, y: dy };
             lastPointer = pointer;
 
-            applyTransforms();
+            requestRender();
         };
 
         const handlePointerEnd = () => {
@@ -590,6 +722,7 @@ export default function ArchiveContent() {
         const handleWheel = (event: Konva.KonvaEventObject<WheelEvent>) => {
             const wheelEvent = event.evt;
             wheelEvent.preventDefault();
+            pauseImageLoading();
 
             if (wheelEvent.ctrlKey) {
                 velocity = { x: 0, y: 0 };
@@ -652,6 +785,7 @@ export default function ArchiveContent() {
             if (event.touches.length !== 2) return;
 
             event.preventDefault();
+            pauseImageLoading();
             stopAnimation();
             velocity = { x: 0, y: 0 };
             isDragging = false;
@@ -675,13 +809,14 @@ export default function ArchiveContent() {
 
             targetScale = nextScale;
             zoomToPoint(nextScale, getTouchCenter(event.touches));
-            applyTransforms();
+            requestRender();
         };
 
         const handlePinchEnd = () => {
             pinchStartDistance = 0;
             targetScale = scale;
             pinchStartScale = scale;
+            resumeImageLoadingSoon();
         };
 
         /* ------------------------------------------------------------------ */
@@ -698,6 +833,7 @@ export default function ArchiveContent() {
 
             if (nextItemWidth !== itemWidth) {
                 itemWidth = nextItemWidth;
+                imageRequestWidth = getImageRequestWidth(itemWidth);
             }
 
             buildTiles();
@@ -728,8 +864,20 @@ export default function ArchiveContent() {
             tileGeneration += 1;
             stopAnimation();
 
+            if (renderFrameId !== null) {
+                cancelAnimationFrame(renderFrameId);
+            }
+
             if (trackpadPinchTimeout !== null) {
                 clearTimeout(trackpadPinchTimeout);
+            }
+
+            if (imageLoadTimer !== null) {
+                clearTimeout(imageLoadTimer);
+            }
+
+            if (imageLoadResumeTimer !== null) {
+                clearTimeout(imageLoadResumeTimer);
             }
 
             window.removeEventListener("resize", handleResize);
@@ -738,27 +886,22 @@ export default function ArchiveContent() {
             container.removeEventListener("touchend", handlePinchEnd);
 
             stage.destroy();
+            Konva.pixelRatio = previousPixelRatio;
         };
     }, []);
 
     return (
-        <motion.div
-            initial={false}
-            animate={
-                sceneReady
-                    ? { opacity: 1, scale: 1 }
-                    : { opacity: 0, scale: 0.8 }
-            }
-            transition={{
-                duration: 0.4,
-                ease: [0.23, 1, 0.32, 1],
-            }}
-            className="w-full h-full origin-center"
+        <div
+            className={`w-full h-full transition-opacity duration-200 ease-out ${
+                sceneReady ? "opacity-100" : "opacity-0"
+            }`}
+            style={{ willChange: sceneReady ? "auto" : "opacity" }}
         >
             <div
                 ref={containerRef}
                 className="w-full h-full overflow-hidden touch-none"
+                style={{ contain: "strict" }}
             />
-        </motion.div>
+        </div>
     );
 }

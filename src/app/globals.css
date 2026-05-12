@@ -727,6 +727,10 @@ main {
   animation: pageEntrance 0.4s ease-out;
 }
 
+main[data-page-transition="none"] {
+  animation: none;
+}
+
 /* Final Premium Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 16px !important;
