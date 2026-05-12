@@ -180,7 +180,7 @@ function CardMedia({
                     onLoadedData={handleLoad}
                     onError={handleError}
                 />
-            ) : (
+            ) : isAuto ? (
                 <Image
                     src={image}
                     alt={title ? `Image representing ${title}` : "Project or artwork showcase"}
@@ -188,7 +188,16 @@ function CardMedia({
                     height={imageDimensions.height}
                     sizes="(min-width: 1024px) 50vw, 100vw"
                     className={mediaClasses}
-                    fill={!isAuto}
+                    onError={handleError}
+                    onLoad={handleImageLoad}
+                />
+            ) : (
+                <Image
+                    src={image}
+                    alt={title ? `Image representing ${title}` : "Project or artwork showcase"}
+                    fill
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className={mediaClasses}
                     onError={handleError}
                     onLoad={handleImageLoad}
                 />
