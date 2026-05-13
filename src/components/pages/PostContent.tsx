@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
-import Image from "next/image";
+import Image, { type ImageLoaderProps } from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
 import type { ContentItem, ContentType } from "@/lib/content";
+import { getCloudinaryResponsiveImageSrc, isCloudinaryImageUrl } from "@/lib/image-urls";
 
 interface PostContentProps {
     post: ContentItem;
@@ -47,26 +48,42 @@ interface MediaElementProps {
     src?: string;
 }
 
+const DEFAULT_MARKDOWN_IMAGE_SIZES = "(min-width: 1024px) 640px, calc(100vw - 32px)";
+const FULL_MARKDOWN_IMAGE_SIZES = "(min-width: 768px) calc(100vw - 64px), calc(100vw - 32px)";
+const DEFAULT_ROW_MARKDOWN_IMAGE_SIZES = "(min-width: 1024px) 348px, (min-width: 768px) calc(50vw - 40px), calc(100vw - 32px)";
+const FULL_ROW_MARKDOWN_IMAGE_SIZES = "(min-width: 768px) calc(50vw - 44px), calc(100vw - 32px)";
+
+const cloudinaryImageLoader = ({ src, width }: ImageLoaderProps) =>
+    getCloudinaryResponsiveImageSrc(src, width);
+
+const getImageLoader = (src: string) =>
+    isCloudinaryImageUrl(src) ? cloudinaryImageLoader : undefined;
+
 function MarkdownImage({
     src,
     alt,
+    sizes = DEFAULT_MARKDOWN_IMAGE_SIZES,
 }: {
     src: string;
     alt: string;
+    sizes?: string;
 }) {
     const [dimensions, setDimensions] = useState({
         width: 1200,
         height: 800,
     });
+    const loader = getImageLoader(src);
 
     return (
         <Image
+            loader={loader}
             src={src}
             alt={alt}
             width={dimensions.width}
             height={dimensions.height}
-            sizes="(min-width: 1024px) 720px, 100vw"
-            className="w-full h-auto block"
+            sizes={sizes}
+            className="w-full h-auto block mx-auto"
+            data-original-src={src}
             onLoad={(event) => {
                 const image = event.currentTarget;
 
@@ -472,6 +489,8 @@ export default function PostContent({
     nextPost,
 }: PostContentProps) {
     const isDefaultLayout = post.layout !== "full";
+    const markdownImageSizes = isDefaultLayout ? DEFAULT_MARKDOWN_IMAGE_SIZES : FULL_MARKDOWN_IMAGE_SIZES;
+    const rowMarkdownImageSizes = isDefaultLayout ? DEFAULT_ROW_MARKDOWN_IMAGE_SIZES : FULL_ROW_MARKDOWN_IMAGE_SIZES;
     const headings = useMemo(
         () => (isDefaultLayout ? extractHeadings(post.content || "") : []),
         [isDefaultLayout, post.content]
@@ -509,6 +528,7 @@ export default function PostContent({
                             <video
                                 src={source}
                                 className="w-full h-auto block"
+                                data-original-src={source}
                                 autoPlay
                                 loop
                                 muted
@@ -540,7 +560,7 @@ export default function PostContent({
             return (
                 <figure className="mb-4 lg:mb-6">
                     <MediaWrapper aspectRatio="3/2">
-                        <MarkdownImage src={source} alt={alt} />
+                        <MarkdownImage src={source} alt={alt} sizes={markdownImageSizes} />
                     </MediaWrapper>
                     {alt ? <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption> : null}
                 </figure>
@@ -597,7 +617,7 @@ export default function PostContent({
                                     <div key={`${match[2]}-${index}`} className="flex-1 min-w-0">
                                         <figure>
                                             <MediaWrapper aspectRatio="3/2">
-                                                <MarkdownImage src={match[2]} alt={match[1]} />
+                                                <MarkdownImage src={match[2]} alt={match[1]} sizes={rowMarkdownImageSizes} />
                                             </MediaWrapper>
                                             {match[1] ? (
                                                 <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">
@@ -621,7 +641,16 @@ export default function PostContent({
         <main className="flex flex-col">
             {post.bannerImage && (
                 <div className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/6]">
-                    <Image src={post.bannerImage} alt={post.title} fill className="object-cover" sizes="100vw" priority />
+                    <Image
+                        loader={getImageLoader(post.bannerImage)}
+                        src={post.bannerImage}
+                        alt={post.title}
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
+                        priority
+                        data-original-src={post.bannerImage}
+                    />
                 </div>
             )}
 

@@ -24,11 +24,12 @@ const TOUCH_PINCH_SENSITIVITY = 1.35;
 const SCALE_EASING = 0.18;
 const TRACKPAD_PINCH_END_DELAY = 120;
 
-const LAZY_LOAD_OVERSCAN = 600;
-const MAX_CONCURRENT_IMAGE_LOADS = 2;
+const LAZY_LOAD_OVERSCAN = 1200;
+const MAX_CONCURRENT_IMAGE_LOADS = 4;
+const INTERACTION_CONCURRENT_IMAGE_LOADS = 2;
 const MAX_KONVA_PIXEL_RATIO = 1.5;
-const IMAGE_LOAD_START_DELAY = 120;
-const IMAGE_LOAD_RESUME_DELAY = 160;
+const IMAGE_LOAD_START_DELAY = 40;
+const IMAGE_LOAD_RESUME_DELAY = 80;
 const ARCHIVE_IMAGE_MIN_WIDTH = 640;
 const ARCHIVE_IMAGE_MAX_WIDTH = 1200;
 
@@ -78,6 +79,7 @@ type LoadCandidate = {
 };
 
 const archive = archiveData as ArchiveItem[];
+const archiveImageCache = new Map<string, Promise<HTMLImageElement>>();
 
 /* -------------------------------------------------------------------------- */
 /*                                  Utilities                                 */
@@ -223,6 +225,8 @@ export default function ArchiveContent() {
         let lastPointer: Point = { x: 0, y: 0 };
         let animationFrameId: number | null = null;
         let renderFrameId: number | null = null;
+        let sceneRevealFrameId: number | null = null;
+        let sceneRevealSettleFrameId: number | null = null;
 
         let trackpadPinchStartScale = scale;
         let accumulatedTrackpadPinchDelta = 0;
@@ -232,12 +236,12 @@ export default function ArchiveContent() {
         let pinchStartDistance = 0;
         let pinchStartScale = scale;
 
-        const imageCache = new Map<string, Promise<HTMLImageElement>>();
         const imageLoadQueue: Tile[] = [];
         let activeImageLoads = 0;
         let imageLoadTimer: ReturnType<typeof setTimeout> | null = null;
         let imageLoadResumeTimer: ReturnType<typeof setTimeout> | null = null;
         let isInteractionActive = false;
+        let hasRevealedScene = false;
 
         /* ------------------------------------------------------------------ */
         /*                                Layout                              */
@@ -247,6 +251,17 @@ export default function ArchiveContent() {
             const visibleWidthAtMinScale = stage.width() / MIN_SCALE;
 
             return Math.ceil(visibleWidthAtMinScale / (itemWidth + GAP)) + 2;
+        };
+
+        const getRequiredColumnHeight = () => {
+            const visibleHeightAtMinScale = stage.height() / MIN_SCALE;
+            const tallestItemHeight = archive.reduce(
+                (height, item) =>
+                    Math.max(height, itemWidth * item.aspectRatio),
+                0
+            );
+
+            return visibleHeightAtMinScale + tallestItemHeight + GAP * 4;
         };
 
         const clearTiles = () => {
@@ -317,6 +332,22 @@ export default function ArchiveContent() {
             hasCenteredInitialView = true;
         };
 
+        const revealScene = () => {
+            if (hasRevealedScene) return;
+
+            hasRevealedScene = true;
+
+            sceneRevealFrameId = requestAnimationFrame(() => {
+                sceneRevealFrameId = null;
+
+                sceneRevealSettleFrameId = requestAnimationFrame(() => {
+                    sceneRevealSettleFrameId = null;
+
+                    if (isMounted) setSceneReady(true);
+                });
+            });
+        };
+
         const buildTiles = () => {
             tileGeneration += 1;
             clearTiles();
@@ -326,15 +357,24 @@ export default function ArchiveContent() {
             totalWidth = columnCount * (itemWidth + GAP);
             colHeights = Array(columnCount).fill(0);
 
-            for (const item of archive) {
-                createTile(item);
+            if (archive.length > 0) {
+                const requiredColumnHeight = getRequiredColumnHeight();
+
+                while (
+                    colHeights.some(
+                        (columnHeight) =>
+                            columnHeight < requiredColumnHeight
+                    )
+                ) {
+                    for (const item of archive) {
+                        createTile(item);
+                    }
+                }
             }
 
             centerInitialView();
             applyTransforms();
-            requestAnimationFrame(() => {
-                if (isMounted) setSceneReady(true);
-            });
+            revealScene();
         };
 
         /* ------------------------------------------------------------------ */
@@ -342,7 +382,7 @@ export default function ArchiveContent() {
         /* ------------------------------------------------------------------ */
 
         const loadImage = (src: string) => {
-            const cached = imageCache.get(src);
+            const cached = archiveImageCache.get(src);
 
             if (cached) return cached;
 
@@ -366,7 +406,7 @@ export default function ArchiveContent() {
                 image.src = src;
             });
 
-            imageCache.set(src, promise);
+            archiveImageCache.set(src, promise);
             return promise;
         };
 
@@ -413,11 +453,48 @@ export default function ArchiveContent() {
             }
         };
 
+        const getTileDistanceFromViewportCenter = (tile: Tile) => {
+            if (
+                tile.renderedX === null ||
+                tile.renderedY === null ||
+                tile.renderedScale === null
+            ) {
+                return Number.POSITIVE_INFINITY;
+            }
+
+            const viewportCenterX = stage.width() / 2;
+            const viewportCenterY = stage.height() / 2;
+            const screenWidth = tile.width * tile.renderedScale;
+            const screenHeight = tile.height * tile.renderedScale;
+
+            return Math.hypot(
+                tile.renderedX + screenWidth / 2 - viewportCenterX,
+                tile.renderedY + screenHeight / 2 - viewportCenterY
+            );
+        };
+
+        const sortImageLoadQueue = () => {
+            imageLoadQueue.sort(
+                (a, b) =>
+                    getTileDistanceFromViewportCenter(a) -
+                    getTileDistanceFromViewportCenter(b)
+            );
+        };
+
+        const getImageLoadLimit = () =>
+            isInteractionActive
+                ? INTERACTION_CONCURRENT_IMAGE_LOADS
+                : MAX_CONCURRENT_IMAGE_LOADS;
+
         const processImageLoadQueue = () => {
-            if (isInteractionActive) return;
+            const imageLoadLimit = getImageLoadLimit();
+
+            if (activeImageLoads >= imageLoadLimit) return;
+
+            sortImageLoadQueue();
 
             while (
-                activeImageLoads < MAX_CONCURRENT_IMAGE_LOADS &&
+                activeImageLoads < imageLoadLimit &&
                 imageLoadQueue.length > 0
             ) {
                 const tile = imageLoadQueue.shift();
@@ -464,6 +541,7 @@ export default function ArchiveContent() {
                 imageLoadQueue.push(tile);
             }
 
+            sortImageLoadQueue();
             scheduleImageLoadProcessing();
         };
 
@@ -868,6 +946,14 @@ export default function ArchiveContent() {
                 cancelAnimationFrame(renderFrameId);
             }
 
+            if (sceneRevealFrameId !== null) {
+                cancelAnimationFrame(sceneRevealFrameId);
+            }
+
+            if (sceneRevealSettleFrameId !== null) {
+                cancelAnimationFrame(sceneRevealSettleFrameId);
+            }
+
             if (trackpadPinchTimeout !== null) {
                 clearTimeout(trackpadPinchTimeout);
             }
@@ -892,10 +978,15 @@ export default function ArchiveContent() {
 
     return (
         <div
-            className={`w-full h-full transition-opacity duration-200 ease-out ${
-                sceneReady ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ willChange: sceneReady ? "auto" : "opacity" }}
+            className="w-full h-full"
+            style={{
+                opacity: sceneReady ? 1 : 0,
+                transform: `scale(${sceneReady ? 1 : 1.2})`,
+                transformOrigin: "center",
+                transition:
+                    "opacity 500ms cubic-bezier(0.16, 1, 0.3, 1), transform 500ms cubic-bezier(0.16, 1, 0.3, 1)",
+                willChange: sceneReady ? "auto" : "opacity, transform",
+            }}
         >
             <div
                 ref={containerRef}
