@@ -5,6 +5,7 @@ import {
     FeaturedWorkSection,
     ExplorationsSection,
     WritingSection,
+    JoinFamilySection,
     AboutSection
 } from "@/components/pages/home";
 
@@ -18,6 +19,7 @@ export default function HomeContent() {
             <AboutSection />
             <ExplorationsSection />
             <WritingSection />
+            <JoinFamilySection />
         </main>
     );
 }
