@@ -17,7 +17,7 @@ export default function JoinFamilySection() {
                 />
                 <div className="flex flex-col items-center">
                     <p className="font-[var(--font-family-blog)] text-[10px] leading-[15px] tracking-[0.25px] text-[var(--content-secondary)]">
-                        Club President
+                        Design Partner
                     </p>
                     <p className="label-s text-[var(--content-primary)]">
                         Barth Kosi
