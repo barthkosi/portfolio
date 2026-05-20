@@ -10,7 +10,7 @@ export const metadata: Metadata = {
         canonical: `${SITE_URL}/explorations`,
     },
     openGraph: {
-        title: "Explorations | Barth Kosi",
+        title: "Explorations by Barth Kosi",
         description: "Personal experiments and creative explorations, from concept designs to visual studies.",
         images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v3-explorations-og.avif" }],
     },
