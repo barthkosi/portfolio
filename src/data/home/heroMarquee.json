@@ -1,0 +1,62 @@
+[
+    {
+        "id": "1",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bookworm.avif",
+        "alt": "Bookworms app UI design – reading tracker interface"
+    },
+    {
+        "id": "2",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-cover.avif",
+        "alt": "Bookworm app cover screen design"
+    },
+    {
+        "id": "3",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/atoms-3.avif",
+        "alt": "Atoms design system component exploration – variant 3"
+    },
+    {
+        "id": "4",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/atoms-2.avif",
+        "alt": "Atoms design system component exploration – variant 2"
+    },
+    {
+        "id": "atoms-1",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/atoms-1.avif",
+        "alt": "Atoms design system component exploration – variant 1"
+    },
+    {
+        "id": "5",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/opt-2.webp",
+        "alt": "Product UI screens layout design"
+    },
+    {
+        "id": "6",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/opt-1.webp",
+        "alt": "Atoms - Opt 1"
+    },
+    {
+        "id": "7",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/polarcam-1.avif",
+        "alt": "Polarcam app UI design – camera interface concept"
+    },
+    {
+        "id": "metal-logo",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/metal-logo.avif",
+        "alt": "Metal logo design – branding and identity work"
+    },
+    {
+        "id": "explrar-explorations-2025",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/explrar-explorations-2025.avif",
+        "alt": "Explrar app UI explorations – 2025 motion design experiments"
+    },
+    {
+        "id": "image-cards",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/image-cards.avif",
+        "alt": "Image card UI component design with interactive hover states"
+    },
+    {
+        "id": "9",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/metal-cover.avif",
+        "alt": "Project cover image – featured portfolio work"
+    }
+]

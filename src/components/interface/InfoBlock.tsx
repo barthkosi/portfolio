@@ -1,112 +1,124 @@
+"use client";
+
+import type { ReactNode } from "react"
 import { motion, Variants } from "motion/react"
-import { anim } from "../../lib/transitions"
-import { useLoading } from "../../context/LoadingContext"
+import { anim } from "@/lib/transitions"
 
 type InfoBlockVariant = 'default' | 'centered'
 
 type InfoBlockProps = {
-  title: string
-  number: string | number
-  description: string
-  variant?: InfoBlockVariant
-  onComplete?: () => void
+    title: string
+    number: string | number
+    description: string
+    titleIcon?: ReactNode
+    variant?: InfoBlockVariant
+    onComplete?: () => void
 }
 
 export default function InfoBlock({
-  title,
-  number,
-  description,
-  variant = 'default',
-  onComplete,
+    title,
+    number,
+    description,
+    titleIcon,
+    variant = 'default',
+    onComplete,
 }: InfoBlockProps) {
-  const isCentered = variant === 'centered'
-  const { isContentReady } = useLoading()
+    const isCentered = variant === 'centered'
 
-  const mainContainerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.5,
-      },
-    },
-  }
+    const mainContainerVariants: Variants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.5,
+            },
+        },
+    }
 
-  const textContainerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.03,
-        when: "beforeChildren",
-      },
-    },
-  }
+    const textContainerVariants: Variants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.03,
+                when: "beforeChildren",
+            },
+        },
+    }
 
-  const animateText = (text: string) => {
-    return text.split('').map((char, index) => (
-      <motion.span
-        key={`${char}-${index}`}
-        variants={anim.upSnappy}
-        style={{ display: 'inline-block', whiteSpace: char === ' ' ? 'pre' : 'normal' }}
-      >
-        {char}
-      </motion.span>
-    ))
-  }
+    const animateText = (text: string) => {
+        return text.split('').map((char, index) => (
+            <motion.span
+                key={`${char}-${index}`}
+                variants={anim.upSnappy}
+                style={{ display: 'inline-block', whiteSpace: char === ' ' ? 'pre' : 'normal' }}
+            >
+                {char}
+            </motion.span>
+        ))
+    }
 
-  return (
-    <motion.div
-      className={[
-        'flex flex-col gap-2',
-        isCentered
-          ? 'items-center text-center'
-          : 'items-center lg:items-start text-center lg:text-left lg:sticky lg:top-[134px] lg:self-start',
-      ].join(' ')}
-      variants={mainContainerVariants}
-      initial="hidden"
-      animate={isContentReady ? "visible" : "hidden"}
-    >
-      <motion.div
-        className={[
-          'flex items-start',
-          isCentered ? 'gap-0' : 'gap-2',
-        ].join(' ')}
-      >
-        <motion.h2
-          className={!isCentered ? 'whitespace-nowrap flex-shrink-0' : undefined}
-          variants={textContainerVariants}
+    return (
+        <motion.div
+            className={[
+                'flex flex-col gap-2',
+                isCentered
+                    ? 'items-center text-center'
+                    : 'items-center lg:items-start text-center lg:text-left lg:sticky lg:top-[134px] lg:self-start',
+            ].join(' ')}
+            variants={mainContainerVariants}
+            initial="hidden"
+            animate="visible"
         >
-          {animateText(title)}
-        </motion.h2>
+            <motion.div
+                className={[
+                    'h2 flex items-start',
+                    isCentered ? 'gap-0' : 'gap-2',
+                ].join(' ')}
+            >
+                {titleIcon ? (
+                    <motion.div
+                        className="mt-[0.04em] h-[1em] aspect-[470/534] shrink-0"
+                        variants={anim.upSnappy}
+                    >
+                        {titleIcon}
+                    </motion.div>
+                ) : null}
 
-        <motion.p
-          className={[
-            'h6 text-[var(--content-primary)]',
-            !isCentered ? 'whitespace-nowrap flex-shrink-0' : '',
-          ].join(' ')}
-          variants={textContainerVariants}
-        >
-          {animateText(String(number))}
-        </motion.p>
-      </motion.div>
+                <motion.h2
+                    className={!isCentered ? 'whitespace-nowrap flex-shrink-0' : undefined}
+                    variants={textContainerVariants}
+                >
+                    {animateText(title)}
+                </motion.h2>
 
-      <motion.p
-        className={[
-          'text-[var(--content-secondary)]',
-          isCentered
-            ? 'body-m-medium'
-            : 'body-m-medium max-w-[480px] lg:max-w-[335px]',
-        ].join(' ')}
-        variants={anim.upSnappy}
-        onAnimationComplete={(definition) => {
-          if (definition === 'visible') {
-            onComplete?.()
-          }
-        }}
-      >
-        {description}
-      </motion.p>
-    </motion.div>
-  )
+                <motion.p
+                    className={[
+                        'h6 text-[var(--content-primary)]',
+                        !isCentered ? 'whitespace-nowrap flex-shrink-0' : '',
+                    ].join(' ')}
+                    variants={textContainerVariants}
+                >
+                    {animateText(String(number))}
+                </motion.p>
+            </motion.div>
+
+            <motion.p
+                className={[
+                    'text-[var(--content-secondary)]',
+                    isCentered
+                        ? 'body-m-medium'
+                        : 'body-m-medium max-w-[480px] lg:max-w-[335px]',
+                ].join(' ')}
+                variants={anim.upSnappy}
+                onAnimationComplete={(definition) => {
+                    if (definition === 'visible') {
+                        onComplete?.()
+                    }
+                }}
+            >
+                {description}
+            </motion.p>
+        </motion.div>
+    )
 }

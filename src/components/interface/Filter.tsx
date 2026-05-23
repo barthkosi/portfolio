@@ -1,3 +1,6 @@
+"use client";
+
+import { pressScale } from "@/lib/transitions";
 import { motion, Variants } from "motion/react";
 
 interface FilterProps {
@@ -26,6 +29,7 @@ const itemVariants: Variants = {
 
 export default function Filter({ tags, activeTag, onTagSelect, animate = false, onAnimationComplete }: FilterProps) {
     if (tags.length === 0) return null;
+    const tagPressMotion = pressScale();
 
     return (
         <motion.div
@@ -37,6 +41,7 @@ export default function Filter({ tags, activeTag, onTagSelect, animate = false, 
         >
             <motion.button
                 variants={itemVariants}
+                {...tagPressMotion}
                 onClick={() => onTagSelect(null)}
                 className={`px-4 py-2 rounded-full label-s transition-colors ${activeTag === null
                     ? "bg-[var(--background-inverse)] text-[var(--content-primary-inverse)]"
@@ -49,6 +54,7 @@ export default function Filter({ tags, activeTag, onTagSelect, animate = false, 
                 <motion.button
                     key={tag}
                     variants={itemVariants}
+                    {...tagPressMotion}
                     onClick={() => onTagSelect(tag === activeTag ? null : tag)}
                     className={`px-4 py-2 rounded-full label-s transition-colors ${activeTag === tag
                         ? "bg-[var(--background-inverse)] text-[var(--content-primary-inverse)]"

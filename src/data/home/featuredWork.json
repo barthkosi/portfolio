@@ -1,0 +1,68 @@
+[
+    {
+        "id": "atoms",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/atoms-demo.gif",
+        "title": "Atoms",
+        "description": "A pinterest alternative for creatives.",
+        "link": "/work/atoms",
+        "tags": [
+            "UI/UX",
+            "Product Design"
+        ],
+        "aspectRatio": "auto",
+        "colSpan": 3
+    },
+    {
+        "id": "explrar",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/explrar-logo.avif",
+        "title": "Explrar",
+        "description": "An AI powered trip planner and document organizer",
+        "link": "",
+        "tags": [
+            "UI/UX",
+            "Product Design"
+        ],
+        "aspectRatio": "16:9",
+        "colSpan": 3,
+        "locked": true
+    },
+    {
+        "id": "sui-axelar",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/sui-image-v1.avif",
+        "title": "Sui x Axelar event graphics",
+        "description": "Posters and event banners for the sui x axelar event in Lagos, NG.",
+        "link": "",
+        "tags": [
+            "Graphic Design"
+        ],
+        "aspectRatio": "auto",
+        "colSpan": 2,
+        "locked": true
+    },
+    {
+        "id": "bookworm",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/bw-showcase-1.avif",
+        "title": "Bookworm",
+        "description": "A fully customizable graphic interface for manga and comics.",
+        "link": "/work/bookworm",
+        "tags": [
+            "UI/UX",
+            "Branding"
+        ],
+        "aspectRatio": "auto",
+        "colSpan": 2
+    },
+    {
+        "id": "x402",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/x402-cover.avif",
+        "title": "x402",
+        "description": "Self hosted x402 facilitator.",
+        "link": "/work/x402",
+        "tags": [
+            "UI/UX",
+            "Product Design"
+        ],
+        "aspectRatio": "16:9",
+        "colSpan": 2
+    }
+]

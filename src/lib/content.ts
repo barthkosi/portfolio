@@ -1,6 +1,8 @@
-// import matter from 'gray-matter';
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
 
-export type ContentType = 'writing' | 'projects' | 'work' | 'explorations';
+export type ContentType = "writing" | "work" | "explorations";
 
 export interface ContentItem {
     slug: string;
@@ -10,109 +12,66 @@ export interface ContentItem {
     description: string;
     coverImage?: string;
     bannerImage?: string;
-    author?: string;
     tags?: string[];
     buttonText?: string;
     buttonLink?: string;
-    content: string; // The raw markdown body
+    layout?: "default" | "full";
+    locked?: boolean;
+    content: string;
 }
 
-// Simple frontmatter parser to avoid node dependencies (gray-matter) in browser
-const parseFrontmatter = (text: string) => {
-    const frontmatterRegex = /^---\s*[\r\n]+([\s\S]*?)[\r\n]+---\s*[\r\n]+([\s\S]*)$/;
-    const match = frontmatterRegex.exec(text);
-    if (!match) return { data: {}, content: text };
+const contentDirectory = path.join(process.cwd(), "src/content");
+const markdownExtension = ".md";
 
-    const frontMatterBlock = match[1];
-    const content = match[2];
+export const getContent = (type: ContentType): ContentItem[] => {
+    const typeDir = path.join(contentDirectory, type);
 
-    const data: Record<string, any> = {};
-    frontMatterBlock.split('\n').forEach(line => {
-        const parts = line.split(':');
-        if (parts.length < 2) return;
-
-        const key = parts[0].trim();
-        let value = parts.slice(1).join(':').trim();
-
-        // Remove quotes
-        value = value.replace(/^['"](.*)['"]$/, '$1');
-
-        // Handle array: ["Tag1", "Tag2"]
-        if (value.startsWith('[') && value.endsWith(']')) {
-            const arrayContent = value.slice(1, -1);
-            data[key] = arrayContent.split(',').map(s => s.trim().replace(/^['"](.*)['"]$/, '$1')).filter(Boolean);
-        } else {
-            data[key] = value;
-        }
-    });
-
-    return { data, content };
-}
-
-// Helper to parse a single file
-const parseFile = (path: string, content: string, type: ContentType): ContentItem => {
-    const { data, content: body } = parseFrontmatter(content);
-    // Extract slug from path (e.g., "/src/content/writing/my-post.md" -> "my-post")
-    const slug = path.split('/').pop()?.replace('.md', '') || '';
-
-    return {
-        slug,
-        type,
-        title: data.title || 'Untitled',
-        date: data.date || new Date().toISOString(),
-        description: data.description || '',
-        coverImage: data.coverImage,
-        bannerImage: data.bannerImage,
-        author: data.author,
-        tags: data.tags || [],
-        buttonText: data.buttonText,
-        buttonLink: data.buttonLink,
-        content: body || '',
-    };
-};
-
-export const getContent = async (type: ContentType): Promise<ContentItem[]> => {
-    let files: Record<string, unknown>;
-
-    if (type === 'writing') {
-        files = import.meta.glob('@/content/writing/*.md', { eager: true, query: '?raw', import: 'default' });
-    } else if (type === 'work') {
-        files = import.meta.glob('@/content/work/*.md', { eager: true, query: '?raw', import: 'default' });
-    } else if (type === 'explorations') {
-        files = import.meta.glob('@/content/explorations/*.md', { eager: true, query: '?raw', import: 'default' });
-    } else {
-        files = import.meta.glob('@/content/projects/*.md', { eager: true, query: '?raw', import: 'default' });
+    if (!fs.existsSync(typeDir)) {
+        return [];
     }
 
-    console.log(`[DEBUG] Loading ${type} content...`);
-    console.log(`[DEBUG] Found Files:`, Object.keys(files));
+    const files = fs.readdirSync(typeDir).filter((file) => file.endsWith(markdownExtension));
 
-    const items = Object.entries(files).map(([path, content]) => {
-        try {
-            const result = parseFile(path, content as string, type);
-            // console.log(`[DEBUG] Parsed ${path}:`, result.title);
-            return result;
-        } catch (e) {
-            console.error(`[DEBUG] Error parsing ${path}:`, e);
-            throw e;
-        }
+    const items = files.map((filename) => {
+        const filePath = path.join(typeDir, filename);
+        const fileContents = fs.readFileSync(filePath, "utf8");
+        const { data, content } = matter(fileContents);
+        const slug = filename.replace(markdownExtension, "");
+
+        return {
+            slug,
+            type,
+            title: data.title || "Untitled",
+            date: data.date || new Date().toISOString(),
+            description: data.description || "",
+            coverImage: data.coverImage,
+            bannerImage: data.bannerImage,
+            tags: data.tags || [],
+            buttonText: data.buttonText,
+            buttonLink: data.buttonLink,
+            layout: data.layout === "full" ? "full" : "default",
+            locked: data.locked === true,
+            content: content || "",
+        } as ContentItem;
     });
 
-    console.log(`[DEBUG] Total Items Loaded:`, items.length);
-
-    // Sort by date descending
     return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
 export const getAllTags = (items: ContentItem[]): string[] => {
     const tags = new Set<string>();
-    items.forEach(item => {
-        item.tags?.forEach(tag => tags.add(tag));
+    items.forEach((item) => {
+        item.tags?.forEach((tag) => tags.add(tag));
     });
     return Array.from(tags).sort();
 };
 
-export const getPostBySlug = async (type: ContentType, slug: string): Promise<ContentItem | undefined> => {
-    const items = await getContent(type);
-    return items.find(item => item.slug === slug);
+export const getPostBySlug = (type: ContentType, slug: string): ContentItem | undefined => {
+    const items = getContent(type);
+    return items.find((item) => item.slug === slug);
+};
+
+export const getAllSlugs = (type: ContentType): string[] => {
+    const items = getContent(type);
+    return items.map((item) => item.slug);
 };

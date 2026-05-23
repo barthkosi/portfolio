@@ -1,5 +1,7 @@
-import { useRef } from "react";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+"use client";
+
+import { useEffect, useRef } from "react";
+import { motion, useMotionValue, useTransform, MotionValue } from "motion/react";
 
 interface ScrollRevealProps {
     children: string;
@@ -11,6 +13,8 @@ interface CharProps {
     progress: MotionValue<number>;
     range: [number, number];
 }
+
+const REVEAL_ANCHOR = 0.8;
 
 const Char = ({ children, progress, range }: CharProps) => {
     const opacity = useTransform(progress, range, [0.2, 1]);
@@ -26,18 +30,43 @@ const Char = ({ children, progress, range }: CharProps) => {
 };
 
 export default function ScrollReveal({ children, className }: ScrollRevealProps) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start 0.55", "start 0.1"],
-    });
+    const paragraphRef = useRef<HTMLParagraphElement>(null);
+    const scrollYProgress = useMotionValue(0);
+
+    useEffect(() => {
+        const updateProgress = () => {
+            const paragraph = paragraphRef.current;
+            if (!paragraph) return;
+
+            const paragraphRect = paragraph.getBoundingClientRect();
+            const revealAnchorY = window.innerHeight * REVEAL_ANCHOR;
+            const paragraphHeight = Math.max(paragraphRect.height, 1);
+            const progress = (revealAnchorY - paragraphRect.top) / paragraphHeight;
+
+            scrollYProgress.set(Math.max(0, Math.min(1, progress)));
+        };
+
+        updateProgress();
+
+        window.addEventListener("scroll", updateProgress, { passive: true });
+        window.addEventListener("resize", updateProgress);
+
+        return () => {
+            window.removeEventListener("scroll", updateProgress);
+            window.removeEventListener("resize", updateProgress);
+        };
+    }, [scrollYProgress]);
 
     const words = children.split(" ");
     const chars = children.split("");
 
     return (
-        <div ref={containerRef} className={className}>
-            <p className="h4 break-words" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+        <div className={className}>
+            <p
+                ref={paragraphRef}
+                className="h4 break-words"
+                style={{ wordWrap: "break-word", overflowWrap: "break-word" }}
+            >
                 {words.map((word, wordIndex) => {
                     // Calculate the starting index of the current word in the original string
                     // We sum the lengths of all previous words plus the spaces between them

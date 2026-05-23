@@ -2,9 +2,8 @@
 title: "Liquid Glass Shader"
 date: "2025-06-16" 
 description: "Recreated liquid glass in the browser with shaders."
-coverImage: "https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-ring.webp"
+coverImage: "https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-demo.mp4"
 bannerImage: ""
-author: "Barth"
 tags: ["Unicorn Studio" , "Shader"]
 buttonText: "View Live"
 buttonLink: "https://liquidglassexploration.framer.website/"
@@ -12,15 +11,15 @@ buttonLink: "https://liquidglassexploration.framer.website/"
 
 During the pre-iOS 26 beta hype cycle I experimented with liquid glass in the browser using Unicorn Studio.
 
-![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-ring.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-ring.avif)
 
 The tool’s high level of granularity makes it easy to fine-tune how the glass looks and reacts to different backgrounds, allowing for deep manipulation of shape and light refraction.
 
 ![](https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-preview-video-2025.webm)
 
-![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-1-2025.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-1-2025.avif)
 
-![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-2-2025.webp)
+![](https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-2-2025.avif)
 
 ### Finished product
 
