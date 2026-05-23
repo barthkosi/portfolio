@@ -259,14 +259,16 @@ export default function Nav() {
                             {navData.main.map((item) => (
                                 <motion.div
                                     key={item.href}
-                                    className="flex flex-col gap-1"
                                     variants={{
                                         hidden: anim.fadeDownBouncyBouncy.hidden,
                                         visible: anim.fadeDownBouncyBouncy.visible,
                                     }}
                                 >
                                     <motion.div {...navLinkPressMotion} className="inline-flex">
-                                        <Link href={item.href} onClick={closeMenu}>
+                                        <Link
+                                            href={item.href}
+                                            onClick={closeMenu}                                          
+                                        >
                                             {item.label}
                                         </Link>
                                     </motion.div>

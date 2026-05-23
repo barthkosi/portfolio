@@ -1,5 +1,6 @@
 "use client";
 
+import BookIcon from "@/components/interface/BookIcon";
 import ContentIndex from "@/components/pages/ContentIndex";
 import type { ContentItem } from "@/lib/content";
 
@@ -17,6 +18,7 @@ export default function WritingContent({ initialPosts, allTags }: WritingContent
             items={initialPosts}
             allTags={allTags}
             type="writing"
+            titleIcon={<BookIcon className="h-full" />}
         />
     );
 }

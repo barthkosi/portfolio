@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import InfoBlock from "@/components/interface/InfoBlock";
@@ -15,6 +16,7 @@ interface ContentIndexProps {
     items: ContentItem[];
     allTags: string[];
     type: ContentType;
+    titleIcon?: ReactNode;
 }
 
 const containerVariants: Variants = {
@@ -45,6 +47,7 @@ export default function ContentIndex({
     items,
     allTags,
     type,
+    titleIcon,
 }: ContentIndexProps) {
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const [introFinished, setIntroFinished] = useState(false);
@@ -77,6 +80,7 @@ export default function ContentIndex({
                 title={title}
                 number={items.length}
                 description={description}
+                titleIcon={titleIcon}
                 onComplete={() => setIntroFinished(true)}
             />
 
@@ -97,18 +101,14 @@ export default function ContentIndex({
                         animate={introFinished && showCards ? "visible" : "hidden"}
                     >
                         {itemsByYear.map(([year, yearItems]) => (
-                            <div key={year} className="w-full flex flex-col md:flex-row gap-4 relative">
-                                <div className="md:w-[0px] shrink-0 relative z-20 pointer-events-none">
-                                    <span className="h3 text-[var(--content-primary)] [text-shadow:5px_5px_0px_var(--border-primary)] sticky top-[134px] hidden md:block relative z-20">
+                            <div key={year} className="w-full flex flex-row gap-4 relative">
+                                <div className="w-[0px] shrink-0 relative z-20 pointer-events-none">
+                                    <span className="h3 text-[var(--content-primary)] [text-shadow:5px_5px_0px_var(--border-primary)] sticky top-[64px] md:top-[134px] block relative z-20">
                                         {year}
                                     </span>
                                 </div>
 
                                 <div className="w-full flex flex-col gap-4 relative z-0">
-                                    <div className="md:hidden pb-2 select-none">
-                                        <span className="h3 text-[var(--content-primary)]">{year}</span>
-                                    </div>
-
                                     {yearItems.map((item) => (
                                         <motion.div key={item.slug} variants={cardVariants}>
                                             <Card

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react"
 import { motion, Variants } from "motion/react"
 import { anim } from "@/lib/transitions"
 
@@ -9,6 +10,7 @@ type InfoBlockProps = {
     title: string
     number: string | number
     description: string
+    titleIcon?: ReactNode
     variant?: InfoBlockVariant
     onComplete?: () => void
 }
@@ -17,6 +19,7 @@ export default function InfoBlock({
     title,
     number,
     description,
+    titleIcon,
     variant = 'default',
     onComplete,
 }: InfoBlockProps) {
@@ -69,10 +72,19 @@ export default function InfoBlock({
         >
             <motion.div
                 className={[
-                    'flex items-start',
+                    'h2 flex items-start',
                     isCentered ? 'gap-0' : 'gap-2',
                 ].join(' ')}
             >
+                {titleIcon ? (
+                    <motion.div
+                        className="mt-[0.04em] h-[1em] aspect-[470/534] shrink-0"
+                        variants={anim.upSnappy}
+                    >
+                        {titleIcon}
+                    </motion.div>
+                ) : null}
+
                 <motion.h2
                     className={!isCentered ? 'whitespace-nowrap flex-shrink-0' : undefined}
                     variants={textContainerVariants}
