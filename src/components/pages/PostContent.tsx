@@ -7,6 +7,7 @@ import { motion } from "motion/react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
+import postMediaData from "@/data/post-media.json";
 import type { ContentItem, ContentType } from "@/lib/content";
 import { getCloudinaryResponsiveImageSrc, isCloudinaryImageUrl } from "@/lib/image-urls";
 
@@ -48,6 +49,12 @@ interface MediaElementProps {
     src?: string;
 }
 
+interface PostMediaMeta {
+    width: number;
+    height: number;
+    aspectRatio: string;
+}
+
 const DEFAULT_MARKDOWN_IMAGE_SIZES = "(min-width: 1024px) 640px, calc(100vw - 32px)";
 const FULL_MARKDOWN_IMAGE_SIZES = "(min-width: 768px) calc(100vw - 64px), calc(100vw - 32px)";
 const DEFAULT_ROW_MARKDOWN_IMAGE_SIZES = "(min-width: 1024px) 348px, (min-width: 768px) calc(50vw - 40px), calc(100vw - 32px)";
@@ -59,18 +66,26 @@ const cloudinaryImageLoader = ({ src, width }: ImageLoaderProps) =>
 const getImageLoader = (src: string) =>
     isCloudinaryImageUrl(src) ? cloudinaryImageLoader : undefined;
 
+const postMedia = postMediaData as Record<string, PostMediaMeta | undefined>;
+
+function getPostMediaMeta(src: string) {
+    return postMedia[src];
+}
+
 function MarkdownImage({
     src,
     alt,
     sizes = DEFAULT_MARKDOWN_IMAGE_SIZES,
+    mediaMeta,
 }: {
     src: string;
     alt: string;
     sizes?: string;
+    mediaMeta?: PostMediaMeta;
 }) {
     const [dimensions, setDimensions] = useState({
-        width: 1200,
-        height: 800,
+        width: mediaMeta?.width ?? 1200,
+        height: mediaMeta?.height ?? 800,
     });
     const loader = getImageLoader(src);
 
@@ -154,16 +169,19 @@ function isMediaParagraph(node: MarkdownNodeLike | undefined) {
 function MediaWrapper({
     children,
     aspectRatio = "16/9",
+    preserveAspectRatio = false,
 }: {
     children: ReactElement<MediaElementProps>;
     aspectRatio?: string;
+    preserveAspectRatio?: boolean;
 }) {
     const [isLoaded, setIsLoaded] = useState(false);
+    const wrapperAspectRatio = preserveAspectRatio || !isLoaded ? aspectRatio : "auto";
 
     return (
         <div
             className={`relative overflow-hidden rounded-[12px] w-full bg-[var(--background-secondary)] transition-all duration-300 ${isLoaded ? "" : "shimmer-loading"}`}
-            style={{ aspectRatio: isLoaded ? "auto" : aspectRatio }}
+            style={{ aspectRatio: wrapperAspectRatio }}
             onLoadCapture={() => setIsLoaded(true)}
             onLoadedDataCapture={() => setIsLoaded(true)}
             onErrorCapture={() => setIsLoaded(true)}
@@ -520,11 +538,13 @@ export default function PostContent({
         ),
         img: ({ src = "", alt = "" }) => {
             const source = String(src);
+            const mediaMeta = getPostMediaMeta(source);
+            const aspectRatio = mediaMeta?.aspectRatio;
 
             if (/\.(mp4|webm|mov)(\?.*)?$/i.test(source)) {
                 return (
                     <figure className="mb-4 lg:mb-6">
-                        <MediaWrapper aspectRatio="16/9">
+                        <MediaWrapper aspectRatio={aspectRatio ?? "16/9"} preserveAspectRatio={Boolean(aspectRatio)}>
                             <video
                                 src={source}
                                 className="w-full h-auto block"
@@ -559,8 +579,8 @@ export default function PostContent({
 
             return (
                 <figure className="mb-4 lg:mb-6">
-                    <MediaWrapper aspectRatio="3/2">
-                        <MarkdownImage src={source} alt={alt} sizes={markdownImageSizes} />
+                    <MediaWrapper aspectRatio={aspectRatio ?? "3/2"} preserveAspectRatio={Boolean(aspectRatio)}>
+                        <MarkdownImage src={source} alt={alt} sizes={markdownImageSizes} mediaMeta={mediaMeta} />
                     </MediaWrapper>
                     {alt ? <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">{alt}</figcaption> : null}
                 </figure>
@@ -613,20 +633,26 @@ export default function PostContent({
                     if (matches.length > 0) {
                         return (
                             <div className={`flex flex-col md:flex-row gap-4 lg:gap-6 mb-4 lg:mb-6 ${post.layout !== "full" ? "lg:w-[calc(100%+80px)] lg:max-w-[720px] lg:-ml-[40px]" : ""}`}>
-                                {matches.map((match, index) => (
-                                    <div key={`${match[2]}-${index}`} className="flex-1 min-w-0">
-                                        <figure>
-                                            <MediaWrapper aspectRatio="3/2">
-                                                <MarkdownImage src={match[2]} alt={match[1]} sizes={rowMarkdownImageSizes} />
-                                            </MediaWrapper>
-                                            {match[1] ? (
-                                                <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">
-                                                    {match[1]}
-                                                </figcaption>
-                                            ) : null}
-                                        </figure>
-                                    </div>
-                                ))}
+                                {matches.map((match, index) => {
+                                    const source = match[2];
+                                    const mediaMeta = getPostMediaMeta(source);
+                                    const aspectRatio = mediaMeta?.aspectRatio;
+
+                                    return (
+                                        <div key={`${source}-${index}`} className="flex-1 min-w-0">
+                                            <figure>
+                                                <MediaWrapper aspectRatio={aspectRatio ?? "3/2"} preserveAspectRatio={Boolean(aspectRatio)}>
+                                                    <MarkdownImage src={source} alt={match[1]} sizes={rowMarkdownImageSizes} mediaMeta={mediaMeta} />
+                                                </MediaWrapper>
+                                                {match[1] ? (
+                                                    <figcaption className="label-s text-[var(--content-tertiary)] mt-2 text-center">
+                                                        {match[1]}
+                                                    </figcaption>
+                                                ) : null}
+                                            </figure>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         );
                     }
