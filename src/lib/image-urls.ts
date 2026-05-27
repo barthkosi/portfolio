@@ -1,4 +1,5 @@
 const CLOUDINARY_IMAGE_UPLOAD_SEGMENT = "/image/upload/";
+const CLOUDINARY_VIDEO_UPLOAD_SEGMENT = "/video/upload/";
 const NEXT_IMAGE_OPTIMIZER_PATH = "/_next/image";
 
 const safeDecode = (value: string) => {
@@ -22,6 +23,19 @@ export function isCloudinaryImageUrl(src: string) {
     }
 }
 
+export function isCloudinaryVideoUrl(src: string) {
+    try {
+        const url = new URL(src);
+
+        return (
+            url.hostname === "res.cloudinary.com" &&
+            url.pathname.includes(CLOUDINARY_VIDEO_UPLOAD_SEGMENT)
+        );
+    } catch {
+        return false;
+    }
+}
+
 export function getCloudinaryResponsiveImageSrc(src: string, width: number) {
     const uploadIndex = src.indexOf(CLOUDINARY_IMAGE_UPLOAD_SEGMENT);
 
@@ -32,6 +46,19 @@ export function getCloudinaryResponsiveImageSrc(src: string, width: number) {
     const insertIndex = uploadIndex + CLOUDINARY_IMAGE_UPLOAD_SEGMENT.length;
     const requestedWidth = Math.max(1, Math.round(width));
     const transformation = `f_auto,q_auto:best,w_${requestedWidth},c_limit`;
+
+    return `${src.slice(0, insertIndex)}${transformation}/${src.slice(insertIndex)}`;
+}
+
+export function getCloudinaryOptimizedVideoSrc(src: string) {
+    const uploadIndex = src.indexOf(CLOUDINARY_VIDEO_UPLOAD_SEGMENT);
+
+    if (uploadIndex === -1) {
+        return src;
+    }
+
+    const insertIndex = uploadIndex + CLOUDINARY_VIDEO_UPLOAD_SEGMENT.length;
+    const transformation = "f_auto,q_auto:eco,vc_auto";
 
     return `${src.slice(0, insertIndex)}${transformation}/${src.slice(insertIndex)}`;
 }

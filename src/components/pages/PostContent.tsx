@@ -9,7 +9,12 @@ import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
 import postMediaData from "@/data/post-media.json";
 import type { ContentItem, ContentType } from "@/lib/content";
-import { getCloudinaryResponsiveImageSrc, isCloudinaryImageUrl } from "@/lib/image-urls";
+import {
+    getCloudinaryOptimizedVideoSrc,
+    getCloudinaryResponsiveImageSrc,
+    isCloudinaryImageUrl,
+    isCloudinaryVideoUrl,
+} from "@/lib/image-urls";
 
 interface PostContentProps {
     post: ContentItem;
@@ -540,13 +545,16 @@ export default function PostContent({
             const source = String(src);
             const mediaMeta = getPostMediaMeta(source);
             const aspectRatio = mediaMeta?.aspectRatio;
+            const videoSource = isCloudinaryVideoUrl(source)
+                ? getCloudinaryOptimizedVideoSrc(source)
+                : source;
 
             if (/\.(mp4|webm|mov)(\?.*)?$/i.test(source)) {
                 return (
                     <figure className="mb-4 lg:mb-6">
                         <MediaWrapper aspectRatio={aspectRatio ?? "16/9"} preserveAspectRatio={Boolean(aspectRatio)}>
                             <video
-                                src={source}
+                                src={videoSource}
                                 className="w-full h-auto block"
                                 data-original-src={source}
                                 autoPlay

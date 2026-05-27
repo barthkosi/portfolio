@@ -1,6 +1,7 @@
 "use client";
 
 import { pressScale } from "@/lib/transitions";
+import { getCloudinaryOptimizedVideoSrc, isCloudinaryVideoUrl } from "@/lib/image-urls";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
@@ -91,6 +92,9 @@ function CardMedia({
     });
     const isMounted = useRef(true);
     const isVideo = isVideoUrl(image);
+    const mediaSrc = isVideo && isCloudinaryVideoUrl(image)
+        ? getCloudinaryOptimizedVideoSrc(image)
+        : image;
     const isAuto = aspectRatio === "auto";
     const normalizedAspectRatio = normalizeAspectRatio(aspectRatio);
     const normalizedShimmerAspectRatio = normalizeAspectRatio(shimmerAspectRatio);
@@ -171,8 +175,9 @@ function CardMedia({
 
             {isVideo ? (
                 <video
-                    src={image}
+                    src={mediaSrc}
                     className={mediaClasses}
+                    data-original-src={image}
                     autoPlay
                     muted
                     loop
