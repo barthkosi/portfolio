@@ -17,6 +17,8 @@ type CardProps = {
     variant?: "default" | "list" | "list-stacked";
     aspectRatio?: string;
     shimmerAspectRatio?: string;
+    imageWidth?: number;
+    imageHeight?: number;
     locked?: boolean;
 };
 
@@ -75,6 +77,8 @@ interface CardMediaProps {
     title?: string;
     aspectRatio: string;
     shimmerAspectRatio?: string;
+    imageWidth?: number;
+    imageHeight?: number;
     locked?: boolean;
 }
 
@@ -83,12 +87,14 @@ function CardMedia({
     title,
     aspectRatio,
     shimmerAspectRatio,
+    imageWidth,
+    imageHeight,
     locked,
 }: CardMediaProps) {
     const [status, setStatus] = useState<LoadingStatus>("loading");
     const [imageDimensions, setImageDimensions] = useState({
-        width: 1200,
-        height: 800,
+        width: imageWidth ?? 1200,
+        height: imageHeight ?? 800,
     });
     const isMounted = useRef(true);
     const isVideo = isVideoUrl(image);
@@ -235,6 +241,8 @@ export default function Card({
     variant = "default",
     aspectRatio = "aspect-video",
     shimmerAspectRatio,
+    imageWidth,
+    imageHeight,
     locked = false,
 }: CardProps) {
     const isList = variant === "list";
@@ -259,6 +267,8 @@ export default function Card({
                     title={title}
                     aspectRatio={aspectRatio}
                     shimmerAspectRatio={shimmerAspectRatio}
+                    imageWidth={imageWidth}
+                    imageHeight={imageHeight}
                     locked={locked}
                 />
             </div>
@@ -285,6 +295,8 @@ export default function Card({
                     title={title}
                     aspectRatio={aspectRatio}
                     shimmerAspectRatio={shimmerAspectRatio}
+                    imageWidth={imageWidth}
+                    imageHeight={imageHeight}
                     locked={locked}
                 />
             </div>

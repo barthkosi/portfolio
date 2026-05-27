@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run enrich:post-media && next build",
     "start": "next start",
     "lint": "eslint",
     "enrich:archive": "node scripts/enrich-archive.mjs",

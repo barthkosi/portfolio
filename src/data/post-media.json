@@ -1,4 +1,25 @@
 {
+    "https://res.cloudinary.com/barthkosi/image/upload/My-Sister%2C-the-Serial-Killer.avif": {
+        "publicId": "My-Sister,-the-Serial-Killer",
+        "resourceType": "image",
+        "width": 1000,
+        "height": 1609,
+        "aspectRatio": "1000/1609"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/The-Creative-Act-A-Way-of-Being.avif": {
+        "publicId": "The-Creative-Act-A-Way-of-Being",
+        "resourceType": "image",
+        "width": 272,
+        "height": 400,
+        "aspectRatio": "272/400"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/all-tomorrows.avif": {
+        "publicId": "all-tomorrows",
+        "resourceType": "image",
+        "width": 318,
+        "height": 450,
+        "aspectRatio": "318/450"
+    },
     "https://res.cloudinary.com/barthkosi/image/upload/atoms-404.avif": {
         "publicId": "atoms-404",
         "resourceType": "image",
@@ -125,6 +146,13 @@
         "height": 1920,
         "aspectRatio": "1920/1920"
     },
+    "https://res.cloudinary.com/barthkosi/image/upload/beckham-2025.avif": {
+        "publicId": "beckham-2025",
+        "resourceType": "image",
+        "width": 1080,
+        "height": 1440,
+        "aspectRatio": "1080/1440"
+    },
     "https://res.cloudinary.com/barthkosi/image/upload/bookworm-01.webp": {
         "publicId": "bookworm-01",
         "resourceType": "image",
@@ -173,6 +201,34 @@
         "width": 2528,
         "height": 1042,
         "aspectRatio": "2528/1042"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/cassette-illustration-2025.avif": {
+        "publicId": "cassette-illustration-2025",
+        "resourceType": "image",
+        "width": 1024,
+        "height": 1024,
+        "aspectRatio": "1024/1024"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/cassette-illustration-isometric-2025.avif": {
+        "publicId": "cassette-illustration-isometric-2025",
+        "resourceType": "image",
+        "width": 1024,
+        "height": 1024,
+        "aspectRatio": "1024/1024"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/dieter-rams-the-complete-works.avif": {
+        "publicId": "dieter-rams-the-complete-works",
+        "resourceType": "image",
+        "width": 733,
+        "height": 1000,
+        "aspectRatio": "733/1000"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/essentialism.avif": {
+        "publicId": "essentialism",
+        "resourceType": "image",
+        "width": 302,
+        "height": 466,
+        "aspectRatio": "302/466"
     },
     "https://res.cloudinary.com/barthkosi/image/upload/explrar-activities.avif": {
         "publicId": "explrar-activities",
@@ -258,6 +314,13 @@
         "height": 1215,
         "aspectRatio": "2160/1215"
     },
+    "https://res.cloudinary.com/barthkosi/image/upload/explrar-otp-illustration.avif": {
+        "publicId": "explrar-otp-illustration",
+        "resourceType": "image",
+        "width": 1080,
+        "height": 1080,
+        "aspectRatio": "1080/1080"
+    },
     "https://res.cloudinary.com/barthkosi/image/upload/explrar-trip-plan.avif": {
         "publicId": "explrar-trip-plan",
         "resourceType": "image",
@@ -271,6 +334,34 @@
         "width": 2160,
         "height": 2160,
         "aspectRatio": "2160/2160"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/face-blue-dark-2025.avif": {
+        "publicId": "face-blue-dark-2025",
+        "resourceType": "image",
+        "width": 1080,
+        "height": 1080,
+        "aspectRatio": "1080/1080"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/face-with-glasses-illustration-2025.avif": {
+        "publicId": "face-with-glasses-illustration-2025",
+        "resourceType": "image",
+        "width": 1024,
+        "height": 615,
+        "aspectRatio": "1024/615"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/jake-illustration-5-Nov-2025.avif": {
+        "publicId": "jake-illustration-5-Nov-2025",
+        "resourceType": "image",
+        "width": 1024,
+        "height": 1024,
+        "aspectRatio": "1024/1024"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/landscape-2025.avif": {
+        "publicId": "landscape-2025",
+        "resourceType": "image",
+        "width": 1082,
+        "height": 1444,
+        "aspectRatio": "1082/1444"
     },
     "https://res.cloudinary.com/barthkosi/image/upload/lillup.avif": {
         "publicId": "lillup",
@@ -307,6 +398,20 @@
         "height": 768,
         "aspectRatio": "1366/768"
     },
+    "https://res.cloudinary.com/barthkosi/image/upload/native-son.avif": {
+        "publicId": "native-son",
+        "resourceType": "image",
+        "width": 325,
+        "height": 500,
+        "aspectRatio": "325/500"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/no-longer-human.avif": {
+        "publicId": "no-longer-human",
+        "resourceType": "image",
+        "width": 302,
+        "height": 475,
+        "aspectRatio": "302/475"
+    },
     "https://res.cloudinary.com/barthkosi/image/upload/old-explrar.avif": {
         "publicId": "old-explrar",
         "resourceType": "image",
@@ -314,12 +419,26 @@
         "height": 1215,
         "aspectRatio": "2160/1215"
     },
+    "https://res.cloudinary.com/barthkosi/image/upload/penguin-highway-cover.avif": {
+        "publicId": "penguin-highway-cover",
+        "resourceType": "image",
+        "width": 2000,
+        "height": 3000,
+        "aspectRatio": "2000/3000"
+    },
     "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif": {
         "publicId": "placeholder",
         "resourceType": "image",
         "width": 2160,
         "height": 1215,
         "aspectRatio": "2160/1215"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/red-building-illustration-2025.avif": {
+        "publicId": "red-building-illustration-2025",
+        "resourceType": "image",
+        "width": 1024,
+        "height": 1451,
+        "aspectRatio": "1024/1451"
     },
     "https://res.cloudinary.com/barthkosi/image/upload/replacement-banner.avif": {
         "publicId": "replacement-banner",
@@ -335,6 +454,13 @@
         "height": 1215,
         "aspectRatio": "2160/1215"
     },
+    "https://res.cloudinary.com/barthkosi/image/upload/show-your-work.avif": {
+        "publicId": "show-your-work",
+        "resourceType": "image",
+        "width": 318,
+        "height": 318,
+        "aspectRatio": "318/318"
+    },
     "https://res.cloudinary.com/barthkosi/image/upload/spectrapay.avif": {
         "publicId": "spectrapay",
         "resourceType": "image",
@@ -342,12 +468,47 @@
         "height": 1080,
         "aspectRatio": "1920/1080"
     },
+    "https://res.cloudinary.com/barthkosi/image/upload/steal-like-an-artist.avif": {
+        "publicId": "steal-like-an-artist",
+        "resourceType": "image",
+        "width": 698,
+        "height": 1024,
+        "aspectRatio": "698/1024"
+    },
     "https://res.cloudinary.com/barthkosi/image/upload/sui-image-v1.avif": {
         "publicId": "sui-image-v1",
         "resourceType": "image",
         "width": 1080,
         "height": 1520,
         "aspectRatio": "1080/1520"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/tennis-illustration-05-Nov-2025.avif": {
+        "publicId": "tennis-illustration-05-Nov-2025",
+        "resourceType": "image",
+        "width": 1024,
+        "height": 1539,
+        "aspectRatio": "1024/1539"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/the-alchemist.avif": {
+        "publicId": "the-alchemist",
+        "resourceType": "image",
+        "width": 676,
+        "height": 1024,
+        "aspectRatio": "676/1024"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/the-brand-gap.avif": {
+        "publicId": "the-brand-gap",
+        "resourceType": "image",
+        "width": 685,
+        "height": 1024,
+        "aspectRatio": "685/1024"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/the-design-of-everyday-things.avif": {
+        "publicId": "the-design-of-everyday-things",
+        "resourceType": "image",
+        "width": 550,
+        "height": 824,
+        "aspectRatio": "550/824"
     },
     "https://res.cloudinary.com/barthkosi/image/upload/unproductive.avif": {
         "publicId": "unproductive",
@@ -376,6 +537,13 @@
         "width": 1200,
         "height": 800,
         "aspectRatio": "1200/800"
+    },
+    "https://res.cloudinary.com/barthkosi/image/upload/woman-Illustration-2024.avif": {
+        "publicId": "woman-Illustration-2024",
+        "resourceType": "image",
+        "width": 1080,
+        "height": 1440,
+        "aspectRatio": "1080/1440"
     },
     "https://res.cloudinary.com/barthkosi/image/upload/x402-01.webp": {
         "publicId": "x402-01",

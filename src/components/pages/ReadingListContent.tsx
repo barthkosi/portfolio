@@ -6,6 +6,7 @@ import { Masonry, type RenderComponentProps } from "masonic";
 import InfoBlock from "@/components/interface/InfoBlock";
 import Card from "@/components/interface/Card";
 import books from "@/data/books.json";
+import postMediaData from "@/data/post-media.json";
 import { useIsClient } from "@/hooks/useIsClient";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
 import { springBouncy } from "@/lib/transitions";
@@ -17,6 +18,14 @@ type BookItem = {
     author: string;
     link: string;
 };
+
+type MediaMeta = {
+    width: number;
+    height: number;
+    aspectRatio: string;
+};
+
+const postMedia = postMediaData as Record<string, MediaMeta | undefined>;
 
 function shuffleArray<T>(array: T[]) {
     const shuffled = [...array];
@@ -34,6 +43,8 @@ function BookCard({
     index,
     isVisible,
 }: RenderComponentProps<BookItem> & { isVisible: boolean }) {
+    const mediaMeta = postMedia[data.image];
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -46,7 +57,9 @@ function BookCard({
                 description={data.author}
                 link={data.link}
                 aspectRatio="auto"
-                shimmerAspectRatio="2/3"
+                shimmerAspectRatio={mediaMeta?.aspectRatio ?? "2/3"}
+                imageWidth={mediaMeta?.width}
+                imageHeight={mediaMeta?.height}
             />
         </motion.div>
     );

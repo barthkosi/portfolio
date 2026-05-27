@@ -5,6 +5,10 @@ import matter from "gray-matter";
 import { v2 as cloudinary } from "cloudinary";
 
 const CONTENT_PATH = resolve("src/content");
+const DATA_PATHS = [
+    resolve("src/data/books.json"),
+    resolve("src/data/illustrations.json"),
+];
 const OUTPUT_PATH = resolve("src/data/post-media.json");
 const LOCAL_ENV_PATH = resolve(".env.local");
 const CLOUDINARY_HOST = "res.cloudinary.com";
@@ -71,7 +75,7 @@ function parseCloudinaryAssetUrl(value) {
             assetParts = assetParts.slice(1);
         }
 
-        const publicId = assetParts.join("/").replace(/\.[^.]+$/, "");
+        const publicId = decodeURIComponent(assetParts.join("/")).replace(/\.[^.]+$/, "");
 
         return { publicId, resourceType };
     } catch {
@@ -114,6 +118,27 @@ function collectMediaUrls(fileContents) {
     return Array.from(urls).filter((url) => parseCloudinaryAssetUrl(url));
 }
 
+function collectMediaUrlsFromData(value, urls = new Set()) {
+    if (typeof value === "string") {
+        if (parseCloudinaryAssetUrl(value)) {
+            urls.add(value);
+        }
+
+        return urls;
+    }
+
+    if (Array.isArray(value)) {
+        value.forEach((item) => collectMediaUrlsFromData(item, urls));
+        return urls;
+    }
+
+    if (value && typeof value === "object") {
+        Object.values(value).forEach((item) => collectMediaUrlsFromData(item, urls));
+    }
+
+    return urls;
+}
+
 async function fetchAssetDimensions(url) {
     const assetRef = parseCloudinaryAssetUrl(url);
 
@@ -149,6 +174,15 @@ async function main() {
         const fileContents = await readFile(file, "utf8");
 
         for (const url of collectMediaUrls(fileContents)) {
+            mediaUrls.add(url);
+        }
+    }
+
+    for (const dataPath of DATA_PATHS) {
+        const fileContents = await readFile(dataPath, "utf8");
+        const data = JSON.parse(fileContents);
+
+        for (const url of collectMediaUrlsFromData(data)) {
             mediaUrls.add(url);
         }
     }
