@@ -9,6 +9,7 @@ import { getImageFileName, getOriginalImageSource } from "@/lib/image-urls";
 
 // --- Constants & Types ---
 const MENU_WIDTH = 220;
+const MENU_ITEM_HEIGHT = 34;
 const VERTICAL_THRESHOLD = 350;
 const HORIZONTAL_THRESHOLD = 200;
 const NAV_ITEMS = [
@@ -142,6 +143,10 @@ export default function ContextMenu() {
         return ids;
     }, [type]);
     const submenuItemIds = useMemo(() => NAV_ITEMS.map((item) => item.href), []);
+    const mainHighlightIndex = hoveredId ? menuItemIds.indexOf(hoveredId) : -1;
+    const submenuHighlightIndex = submenuHoveredId
+        ? submenuItemIds.indexOf(submenuHoveredId)
+        : NAV_ITEMS.findIndex((item) => typeof window !== "undefined" && item.href === window.location.pathname);
 
     const getDefaultSubmenuId = useCallback(() => {
         if (typeof window !== "undefined") {
@@ -436,7 +441,9 @@ export default function ContextMenu() {
                     }}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="flex flex-col" onMouseLeave={handleResetHover}>
+                    <div className="relative isolate flex flex-col" onMouseLeave={handleResetHover}>
+                        <ContextMenuHighlight selectedIndex={mainHighlightIndex} />
+
                         {/* Contextual Section */}
                         {type === "card" && (
                             <>
@@ -485,7 +492,9 @@ export default function ContextMenu() {
                                         )}
                                     >
                                         <div className={cn("absolute top-0 w-4 h-full cursor-pointer", pos.alignX === 'left' ? "-left-4" : "-right-4")} />
-                                        <motion.div className="flex flex-col" initial="initial" animate="animate">
+                                        <motion.div className="relative isolate flex flex-col" initial="initial" animate="animate">
+                                            <ContextMenuHighlight selectedIndex={submenuHighlightIndex} />
+
                                             {NAV_ITEMS.map((item) => (
                                                 <Link key={item.href} href={item.href} onClick={closeMenu}>
                                                     <ContextMenuItem
@@ -494,7 +503,6 @@ export default function ContextMenu() {
                                                         active={window.location.pathname === item.href}
                                                         hoveredId={submenuHoveredId}
                                                         setHoveredId={setSubmenuHoveredIdFromPointer}
-                                                        layoutId="submenu-hover"
                                                     />
                                                 </Link>
                                             ))}
@@ -510,6 +518,23 @@ export default function ContextMenu() {
     );
 }
 
+function ContextMenuHighlight({ selectedIndex }: { selectedIndex: number }) {
+    const isVisible = selectedIndex >= 0;
+
+    return (
+        <motion.div
+            aria-hidden
+            className="absolute left-0 right-0 top-0 z-0 h-[34px] rounded-[8px] bg-[var(--background-tertiary)] pointer-events-none"
+            initial={false}
+            animate={{
+                opacity: isVisible ? 1 : 0,
+                y: isVisible ? selectedIndex * MENU_ITEM_HEIGHT : 0,
+            }}
+            transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
+        />
+    );
+}
+
 // --- Lean Item Component ---
 interface ItemProps {
     id: string;
@@ -519,12 +544,11 @@ interface ItemProps {
     hoveredId: string | null;
     setHoveredId: (id: string | null) => void;
     hasSubMenu?: boolean;
-    layoutId?: string;
     className?: string;
 }
 
 function ContextMenuItem({ 
-    id, label, onClick, active, hoveredId, setHoveredId, hasSubMenu, layoutId = "menu-hover", className 
+    id, label, onClick, active, hoveredId, setHoveredId, hasSubMenu, className 
 }: ItemProps) {
     const isSelected = hoveredId === id || (!hoveredId && active);
     
@@ -537,17 +561,10 @@ function ContextMenuItem({
             {...pressScale({ hover: 1, tap: 0.96 })}
             animate={{ color: isSelected ? "var(--content-primary)" : "var(--content-secondary)" }}
             transition={{ duration: 0.2 }}
-            className={cn("relative flex items-center gap-3 px-3 py-2 rounded-[8px] group z-10", className)}
+            className={cn("relative z-10 flex h-[34px] items-center gap-3 px-3 rounded-[8px] group", className)}
             onClick={onClick}
             onMouseEnter={() => setHoveredId(id)}
         >
-            {isSelected && (
-                <motion.div
-                    layoutId={layoutId}
-                    className="absolute inset-0 bg-[var(--background-tertiary)] rounded-[8px] -z-10 pointer-events-none"
-                    transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
-                />
-            )}
             <span className="label-s flex-1">{label}</span>
             {hasSubMenu && (
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-40">
