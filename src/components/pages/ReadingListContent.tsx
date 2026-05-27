@@ -5,27 +5,26 @@ import { motion } from "motion/react";
 import { Masonry, type RenderComponentProps } from "masonic";
 import InfoBlock from "@/components/interface/InfoBlock";
 import Card from "@/components/interface/Card";
+import Filter from "@/components/interface/Filter";
 import books from "@/data/books.json";
-import postMediaData from "@/data/post-media.json";
 import { useIsClient } from "@/hooks/useIsClient";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
 import { springBouncy } from "@/lib/transitions";
 
+const FAVORITES_TAG = "Favorites";
+
 type BookItem = {
     id: string;
     image: string;
+    publicId: string;
+    width: number;
+    height: number;
+    aspectRatio: number;
     title: string;
     author: string;
     link: string;
+    tags: string[];
 };
-
-type MediaMeta = {
-    width: number;
-    height: number;
-    aspectRatio: string;
-};
-
-const postMedia = postMediaData as Record<string, MediaMeta | undefined>;
 
 function shuffleArray<T>(array: T[]) {
     const shuffled = [...array];
@@ -43,8 +42,6 @@ function BookCard({
     index,
     isVisible,
 }: RenderComponentProps<BookItem> & { isVisible: boolean }) {
-    const mediaMeta = postMedia[data.image];
-
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -57,9 +54,9 @@ function BookCard({
                 description={data.author}
                 link={data.link}
                 aspectRatio="auto"
-                shimmerAspectRatio={mediaMeta?.aspectRatio ?? "2/3"}
-                imageWidth={mediaMeta?.width}
-                imageHeight={mediaMeta?.height}
+                shimmerAspectRatio={`${data.width}/${data.height}`}
+                imageWidth={data.width}
+                imageHeight={data.height}
             />
         </motion.div>
     );
@@ -68,8 +65,31 @@ function BookCard({
 export default function ReadingListContent() {
     const isClient = useIsClient();
     const [areBooksVisible, setAreBooksVisible] = useState(false);
+    const [activeTag, setActiveTag] = useState<string | null>(FAVORITES_TAG);
     const { columnCount, gutter } = useResponsiveLayout();
-    const shuffledBooks = useMemo(() => shuffleArray(books), []);
+    const allTags = useMemo(() => {
+        const tags = new Set<string>();
+
+        books.forEach((book) => {
+            book.tags.forEach((tag) => tags.add(tag));
+        });
+
+        return [
+            ...(tags.has(FAVORITES_TAG) ? [FAVORITES_TAG] : []),
+            ...Array.from(tags)
+                .filter((tag) => tag !== FAVORITES_TAG)
+                .sort((firstTag, secondTag) => firstTag.localeCompare(secondTag)),
+        ];
+    }, []);
+
+    const filteredBooks = useMemo(
+        () =>
+            activeTag
+                ? books.filter((book) => book.tags.includes(activeTag))
+                : books,
+        [activeTag]
+    );
+    const shuffledBooks = useMemo(() => shuffleArray(filteredBooks), [filteredBooks]);
 
     const renderCard = useCallback(
         (props: RenderComponentProps<BookItem>) => <BookCard {...props} isVisible={areBooksVisible} />,
@@ -89,9 +109,16 @@ export default function ReadingListContent() {
                 onComplete={() => setAreBooksVisible(true)}
             />
 
-            <div className="w-full">
+            <div className="w-full items-center lg:items-start flex flex-col">
+                <Filter
+                    tags={allTags}
+                    activeTag={activeTag}
+                    onTagSelect={setActiveTag}
+                    animate={areBooksVisible}
+                />
+
                 <Masonry
-                    key={`${columnCount}-${gutter}`}
+                    key={`${activeTag ?? "all"}-${columnCount}-${gutter}`}
                     items={shuffledBooks}
                     columnGutter={gutter}
                     columnCount={columnCount}

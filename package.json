@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "enrich:archive": "node scripts/enrich-archive.mjs",
+    "enrich:data-media": "node scripts/enrich-data-media.mjs",
     "enrich:post-media": "node scripts/enrich-post-media.mjs"
   },
   "dependencies": {

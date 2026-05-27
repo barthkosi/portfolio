@@ -1,93 +1,1135 @@
 [
     {
-        "id": "the-brand-gap",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-brand-gap.avif",
-        "title": "The Brand Gap",
-        "author": "Marty Neumeier",
-        "link": "https://www.goodreads.com/book/show/290733"
+        "id": "a-broken-people-s-playlist",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "A Broken People's Playlist",
+        "author": "Chimeka Garricks",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Fiction"
+        ]
     },
     {
-        "id": "steal-like-an-artist",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/steal-like-an-artist.avif",
-        "title": "Steal Like an Artist",
-        "author": "Austin Kleon",
-        "link": "https://www.goodreads.com/book/show/13099738"
-    },
-    {
-        "id": "the-alchemist",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-alchemist.avif",
-        "title": "The Alchemist",
-        "author": "Paulo Coelho",
-        "link": "https://www.goodreads.com/book/show/18144590"
-    },
-    {
-        "id": "dieter-rams-the-complete-works",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/dieter-rams-the-complete-works.avif",
-        "title": "Dieter Rams: The Complete Works",
-        "author": "Klaus Klemp",
-        "link": "https://www.goodreads.com/book/show/53288155"
-    },
-    {
-        "id": "the-design-of-everyday-things",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-design-of-everyday-things.avif",
-        "title": "The Design of Everyday Things",
-        "author": "Don Norman",
-        "link": "https://www.goodreads.com/book/show/85686691"
-    },
-    {
-        "id": "penguin-highway",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/penguin-highway-cover.avif",
-        "title": "Penguin Highway",
-        "author": "Tomihiko Morimi",
-        "link": "https://www.goodreads.com/book/show/41825397"
-    },
-    {
-        "id": "the-creative-act",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/The-Creative-Act-A-Way-of-Being.avif",
-        "title": "The Creative Act A Way of Being",
-        "author": "Rick Rubin",
-        "link": "https://www.goodreads.com/book/show/60965426"
-    },
-    {
-        "id": "my-sister-the-serial-killer",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/My-Sister%2C-the-Serial-Killer.avif",
-        "title": "My Sister, the Serial Killer",
-        "author": "Oyinkan Braithwaite",
-        "link": "https://www.goodreads.com/book/show/38819868"
-    },
-    {
-        "id": "no-longer-human",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/no-longer-human.avif",
-        "title": "No Longer Human",
-        "author": "Osamu Dazai",
-        "link": "https://www.goodreads.com/book/show/194746"
+        "id": "a-technique-for-producing-ideas",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/a-technique-for-producing-ideas.jpg",
+        "publicId": "a-technique-for-producing-ideas",
+        "width": 340,
+        "height": 475,
+        "aspectRatio": 1.3970588235294117,
+        "title": "A Technique for Producing Ideas",
+        "author": "James Webb Young",
+        "link": "https://openlibrary.org/works/OL1164135W",
+        "tags": [
+            "Business"
+        ]
     },
     {
         "id": "all-tomorrows",
         "image": "https://res.cloudinary.com/barthkosi/image/upload/all-tomorrows.avif",
-        "title": "All Tomorrows: The Myriad Species and Mixed Fortunes of Man",
+        "publicId": "all-tomorrows",
+        "width": 318,
+        "height": 450,
+        "aspectRatio": 1.4150943396226414,
+        "title": "All Tomorrows: The Myriad Species and Mixed Fortunes of the Distant Future",
         "author": "Nemo Ramjet",
-        "link": "https://www.goodreads.com/book/show/16143402"
+        "link": "https://www.goodreads.com/book/show/16143402",
+        "tags": [
+            "Favorites",
+            "Fiction"
+        ]
     },
     {
-        "id": "show-your-work",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/show-your-work.avif",
-        "title": "Show Your Work!",
-        "author": "Austin Kleon",
-        "link": "https://www.goodreads.com/book/show/18290401"
+        "id": "art-direction-explained-at-last",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/art-direction-explained-at-last.jpg",
+        "publicId": "art-direction-explained-at-last",
+        "width": 417,
+        "height": 500,
+        "aspectRatio": 1.1990407673860912,
+        "title": "Art Direction Explained (At Last)",
+        "author": "Steven Heller & Véronique Vienne",
+        "link": "https://openlibrary.org/works/OL19099629W",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "articulating-design-decisions",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/articulating-design-decisions.jpg",
+        "publicId": "articulating-design-decisions",
+        "width": 333,
+        "height": 499,
+        "aspectRatio": 1.4984984984984986,
+        "title": "Articulating Design Decisions",
+        "author": "Tom Greever",
+        "link": "https://openlibrary.org/works/OL17926245W",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "as-little-design-as-possible",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/as-little-design-as-possible.jpg",
+        "publicId": "as-little-design-as-possible",
+        "width": 303,
+        "height": 400,
+        "aspectRatio": 1.3201320132013201,
+        "title": "As Little Design as Possible",
+        "author": "Jonathan Ive",
+        "link": "https://openlibrary.org/works/OL17402278W",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "blue-and-gold",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/blue-and-gold.jpg",
+        "publicId": "blue-and-gold",
+        "width": 142,
+        "height": 218,
+        "aspectRatio": 1.5352112676056338,
+        "title": "Blue & Gold",
+        "author": "Dan Jurgens",
+        "link": "https://openlibrary.org/works/OL28432974W",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "bleach-gokui-meimei-hen",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "Bleach: Gokui Meimei-hen",
+        "author": "Tite Kubo",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "braun-designed-to-keep",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "Braun: Designed to Keep",
+        "author": "Klaus Klemp",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "building-a-storybrand",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/building-a-storybrand.jpg",
+        "publicId": "building-a-storybrand",
+        "width": 335,
+        "height": 500,
+        "aspectRatio": 1.492537313432836,
+        "title": "Building a StoryBrand",
+        "author": "Donald Miller",
+        "link": "https://openlibrary.org/works/OL19347277W",
+        "tags": [
+            "Business"
+        ]
+    },
+    {
+        "id": "business-thinking-for-designers",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/business-thinking-for-designers.jpg",
+        "publicId": "business-thinking-for-designers",
+        "width": 400,
+        "height": 316,
+        "aspectRatio": 0.79,
+        "title": "Business Thinking for Designers",
+        "author": "Ryan Rumsey",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "caps-lock-how-capitalism-took-hold-of-graphic-design-and-how-to-escape-from-it",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/caps-lock-how-capitalism-took-hold-of-graphic-design-and-how-to-escape-from-it.jpg",
+        "publicId": "caps-lock-how-capitalism-took-hold-of-graphic-design-and-how-to-escape-from-it",
+        "width": 317,
+        "height": 500,
+        "aspectRatio": 1.5772870662460567,
+        "title": "Caps Lock: How Capitalism Took Hold of Graphic Design and How to Escape From It",
+        "author": "Ruben Pater",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "case-study",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/case-study.jpg",
+        "publicId": "case-study",
+        "width": 325,
+        "height": 500,
+        "aspectRatio": 1.5384615384615385,
+        "title": "Case Study",
+        "author": "Graeme Macrae",
+        "link": "https://openlibrary.org/works/OL26514686W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "contagious-why-things-catch-on",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/contagious-why-things-catch-on.jpg",
+        "publicId": "contagious-why-things-catch-on",
+        "width": 326,
+        "height": 500,
+        "aspectRatio": 1.5337423312883436,
+        "title": "Contagious: Why Things Catch On",
+        "author": "Jonah Berger",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Business"
+        ]
+    },
+    {
+        "id": "corporate-diversity",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/corporate-diversity.jpg",
+        "publicId": "corporate-diversity",
+        "width": 272,
+        "height": 400,
+        "aspectRatio": 1.4705882352941178,
+        "title": "Corporate Diversity",
+        "author": "Andres Janser & Barbara Junod",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Other"
+        ]
+    },
+    {
+        "id": "dai-dark-vol-1",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/dai-dark-vol-1.jpg",
+        "publicId": "dai-dark-vol-1",
+        "width": 349,
+        "height": 500,
+        "aspectRatio": 1.4326647564469914,
+        "title": "Dai Dark vol 1",
+        "author": "",
+        "link": "https://openlibrary.org/works/OL24468974W",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "days-at-the-morisaki-bookshop",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/days-at-the-morisaki-bookshop.jpg",
+        "publicId": "days-at-the-morisaki-bookshop",
+        "width": 332,
+        "height": 500,
+        "aspectRatio": 1.5060240963855422,
+        "title": "Days at the Morisaki Bookshop",
+        "author": "Satoshi Yagisawa",
+        "link": "https://openlibrary.org/works/OL29049148W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "dear-self",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/dear-self.jpg",
+        "publicId": "dear-self",
+        "width": 324,
+        "height": 500,
+        "aspectRatio": 1.5432098765432098,
+        "title": "Dear Self",
+        "author": "Patience Tamarra",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Poetry"
+        ]
+    },
+    {
+        "id": "design-for-how-people-think",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/design-for-how-people-think.jpg",
+        "publicId": "design-for-how-people-think",
+        "width": 333,
+        "height": 500,
+        "aspectRatio": 1.5015015015015014,
+        "title": "Design for How People Think",
+        "author": "John Whalen",
+        "link": "https://openlibrary.org/works/OL20162349W",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "design-justice",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/design-justice.jpg",
+        "publicId": "design-justice",
+        "width": 333,
+        "height": 500,
+        "aspectRatio": 1.5015015015015014,
+        "title": "Design Justice",
+        "author": "Sasha Costanza-Chock",
+        "link": "https://openlibrary.org/works/OL20742905W",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "dieter-rams-the-complete-works",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/dieter-rams-the-complete-works.avif",
+        "publicId": "dieter-rams-the-complete-works",
+        "width": 733,
+        "height": 1000,
+        "aspectRatio": 1.364256480218281,
+        "title": "Dieter Rams: The Complete Works",
+        "author": "Klaus Klemp",
+        "link": "https://www.goodreads.com/book/show/53288155",
+        "tags": [
+            "Favorites",
+            "Design"
+        ]
+    },
+    {
+        "id": "dune",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/dune.jpg",
+        "publicId": "dune",
+        "width": 317,
+        "height": 500,
+        "aspectRatio": 1.5772870662460567,
+        "title": "Dune",
+        "author": "Frank Herbert",
+        "link": "https://openlibrary.org/works/OL893415W",
+        "tags": [
+            "Fiction"
+        ]
     },
     {
         "id": "essentialism",
         "image": "https://res.cloudinary.com/barthkosi/image/upload/essentialism.avif",
-        "title": "Essentialism",
+        "publicId": "essentialism",
+        "width": 302,
+        "height": 466,
+        "aspectRatio": 1.5430463576158941,
+        "title": "Essentialism: The Disciplined Pursuit of Less",
         "author": "Greg McKeown",
-        "link": "https://www.goodreads.com/book/show/19776547"
+        "link": "https://www.goodreads.com/book/show/19776547",
+        "tags": [
+            "Favorites",
+            "Self-Help"
+        ]
+    },
+    {
+        "id": "future-ethics",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/future-ethics.jpg",
+        "publicId": "future-ethics",
+        "width": 324,
+        "height": 500,
+        "aspectRatio": 1.5432098765432098,
+        "title": "Future Ethics",
+        "author": "Cennydd Bowles",
+        "link": "https://openlibrary.org/works/OL20530168W",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "graphic-design-1987",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "Graphic Design (1987)",
+        "author": "Masatsugu Kimura",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "homunculus",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/homunculus.jpg",
+        "publicId": "homunculus",
+        "width": 345,
+        "height": 500,
+        "aspectRatio": 1.4492753623188406,
+        "title": "Homunculus",
+        "author": "Hideo Yamamoto",
+        "link": "https://openlibrary.org/works/OL24527259W",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "how-to-live-with-objects",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "How to Live with Objects",
+        "author": "Monica Khemsurov & Jill Singer",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "how-to-win-friends-and-influence-people",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/how-to-win-friends-and-influence-people.jpg",
+        "publicId": "how-to-win-friends-and-influence-people",
+        "width": 328,
+        "height": 500,
+        "aspectRatio": 1.524390243902439,
+        "title": "How to Win Friends and Influence People",
+        "author": "Dale Carnegie",
+        "link": "https://openlibrary.org/works/OL1063267W",
+        "tags": [
+            "Self-Help"
+        ]
+    },
+    {
+        "id": "ikigai",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/ikigai.jpg",
+        "publicId": "ikigai",
+        "width": 353,
+        "height": 500,
+        "aspectRatio": 1.4164305949008498,
+        "title": "Ikigai",
+        "author": "Héctor García & Francesc Miralles",
+        "link": "https://openlibrary.org/works/OL19714233W",
+        "tags": [
+            "Self-Help"
+        ]
+    },
+    {
+        "id": "incognito-the-secret-lives-of-the-brain",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/incognito-the-secret-lives-of-the-brain.jpg",
+        "publicId": "incognito-the-secret-lives-of-the-brain",
+        "width": 332,
+        "height": 500,
+        "aspectRatio": 1.5060240963855422,
+        "title": "Incognito: The Secret Lives of the Brain",
+        "author": "David Eagleman",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Psychology"
+        ]
+    },
+    {
+        "id": "intermezzo",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/intermezzo.jpg",
+        "publicId": "intermezzo",
+        "width": 312,
+        "height": 500,
+        "aspectRatio": 1.6025641025641026,
+        "title": "Intermezzo",
+        "author": "Sally Rooney",
+        "link": "https://openlibrary.org/works/OL37949460W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "invisible-women",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/invisible-women.jpg",
+        "publicId": "invisible-women",
+        "width": 331,
+        "height": 500,
+        "aspectRatio": 1.5105740181268883,
+        "title": "Invisible Women",
+        "author": "Caroline Criado Perez",
+        "link": "https://openlibrary.org/works/OL20157508W",
+        "tags": [
+            "Other"
+        ]
+    },
+    {
+        "id": "japanese-design-since-1945-a-complete-sourcebook",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/japanese-design-since-1945-a-complete-sourcebook.jpg",
+        "publicId": "japanese-design-since-1945-a-complete-sourcebook",
+        "width": 432,
+        "height": 500,
+        "aspectRatio": 1.1574074074074074,
+        "title": "Japanese Design Since 1945: A Complete Sourcebook",
+        "author": "Naomi Pollock",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "japanese-layout-design",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "Japanese Layout Design",
+        "author": "SendPoints",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "like-art-glenn-o-brien-on-advertising",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/like-art-glenn-o-brien-on-advertising.jpg",
+        "publicId": "like-art-glenn-o-brien-on-advertising",
+        "width": 356,
+        "height": 500,
+        "aspectRatio": 1.404494382022472,
+        "title": "Like Art: Glenn O'Brien on Advertising",
+        "author": "Glenn O'Brien",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Business"
+        ]
+    },
+    {
+        "id": "living-on-almost-nothing",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/living-on-almost-nothing.jpg",
+        "publicId": "living-on-almost-nothing",
+        "width": 300,
+        "height": 300,
+        "aspectRatio": 1,
+        "title": "Living On Almost Nothing",
+        "author": "Amber Storck",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Business"
+        ]
+    },
+    {
+        "id": "madonna-in-a-fur-coat",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/madonna-in-a-fur-coat.jpg",
+        "publicId": "madonna-in-a-fur-coat",
+        "width": 304,
+        "height": 500,
+        "aspectRatio": 1.644736842105263,
+        "title": "Madonna in a Fur Coat",
+        "author": "Sabahattin Ali",
+        "link": "https://openlibrary.org/works/OL21145161W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "my-sister-the-serial-killer",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/My-Sister%2C-the-Serial-Killer.avif",
+        "publicId": "My-Sister,-the-Serial-Killer",
+        "width": 1000,
+        "height": 1609,
+        "aspectRatio": 1.609,
+        "title": "My Sister, the Serial Killer",
+        "author": "Oyinkan Braithwaite",
+        "link": "https://www.goodreads.com/book/show/38819868",
+        "tags": [
+            "Favorites",
+            "Fiction"
+        ]
     },
     {
         "id": "native-son",
         "image": "https://res.cloudinary.com/barthkosi/image/upload/native-son.avif",
+        "publicId": "native-son",
+        "width": 325,
+        "height": 500,
+        "aspectRatio": 1.5384615384615385,
         "title": "Native Son",
         "author": "Richard Wright",
-        "link": "https://www.goodreads.com/book/show/15622"
+        "link": "https://www.goodreads.com/book/show/15622",
+        "tags": [
+            "Favorites",
+            "Fiction"
+        ]
+    },
+    {
+        "id": "nearly-all-the-men-in-lagos-are-mad",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/nearly-all-the-men-in-lagos-are-mad.jpg",
+        "publicId": "nearly-all-the-men-in-lagos-are-mad",
+        "width": 333,
+        "height": 500,
+        "aspectRatio": 1.5015015015015014,
+        "title": "Nearly All the Men in Lagos Are Mad",
+        "author": "Damilare Kuku",
+        "link": "https://openlibrary.org/works/OL28351716W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "no-longer-human",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/no-longer-human.avif",
+        "publicId": "no-longer-human",
+        "width": 302,
+        "height": 475,
+        "aspectRatio": 1.5728476821192052,
+        "title": "No Longer Human",
+        "author": "Osamu Dazai",
+        "link": "https://www.goodreads.com/book/show/194746",
+        "tags": [
+            "Favorites",
+            "Fiction"
+        ]
+    },
+    {
+        "id": "one-piece",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/one-piece.jpg",
+        "publicId": "one-piece",
+        "width": 95,
+        "height": 143,
+        "aspectRatio": 1.5052631578947369,
+        "title": "One Piece",
+        "author": "Eiichiro Oda",
+        "link": "https://openlibrary.org/works/OL8215661W",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "penguin-highway",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/penguin-highway-cover.avif",
+        "publicId": "penguin-highway-cover",
+        "width": 2000,
+        "height": 3000,
+        "aspectRatio": 1.5,
+        "title": "Penguin Highway",
+        "author": "Tomihiko Morimi",
+        "link": "https://www.goodreads.com/book/show/41825397",
+        "tags": [
+            "Favorites",
+            "Fiction"
+        ]
+    },
+    {
+        "id": "positioning-the-battle-for-your-mind",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "Positioning: The Battle for Your Mind",
+        "author": "Al Ries & Jack Trout",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Business"
+        ]
+    },
+    {
+        "id": "psychology-for-designers",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/psychology-for-designers.jpg",
+        "publicId": "psychology-for-designers",
+        "width": 400,
+        "height": 500,
+        "aspectRatio": 1.25,
+        "title": "Psychology for Designers",
+        "author": "Joe Leech",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "rich-dad-poor-dad",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/rich-dad-poor-dad.jpg",
+        "publicId": "rich-dad-poor-dad",
+        "width": 333,
+        "height": 500,
+        "aspectRatio": 1.5015015015015014,
+        "title": "Rich Dad Poor Dad",
+        "author": "Robert T. Kiyosaki",
+        "link": "https://openlibrary.org/works/OL2010879W",
+        "tags": [
+            "Business"
+        ]
+    },
+    {
+        "id": "ruined-by-design",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/ruined-by-design.jpg",
+        "publicId": "ruined-by-design",
+        "width": 333,
+        "height": 500,
+        "aspectRatio": 1.5015015015015014,
+        "title": "Ruined by Design",
+        "author": "Mike Monteiro",
+        "link": "https://openlibrary.org/works/OL24994697W",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "sakamoto-days",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/sakamoto-days.jpg",
+        "publicId": "sakamoto-days",
+        "width": 338,
+        "height": 500,
+        "aspectRatio": 1.4792899408284024,
+        "title": "Sakamoto Days",
+        "author": "Yuto Suzuki",
+        "link": "https://openlibrary.org/works/OL34755197W",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "scavenger-of-souls",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/scavenger-of-souls.jpg",
+        "publicId": "scavenger-of-souls",
+        "width": 331,
+        "height": 500,
+        "aspectRatio": 1.5105740181268883,
+        "title": "Scavenger of Souls",
+        "author": "Joshua David Bellin",
+        "link": "https://openlibrary.org/works/OL24872649W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "show-your-work",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/show-your-work.avif",
+        "publicId": "show-your-work",
+        "width": 318,
+        "height": 318,
+        "aspectRatio": 1,
+        "title": "Show Your Work!",
+        "author": "Austin Kleon",
+        "link": "https://www.goodreads.com/book/show/18290401",
+        "tags": [
+            "Favorites",
+            "Design"
+        ]
+    },
+    {
+        "id": "songs-of-no-provenance",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "Songs of No Provenance",
+        "author": "Lydi Conklin",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "steal-like-an-artist",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/steal-like-an-artist.avif",
+        "publicId": "steal-like-an-artist",
+        "width": 698,
+        "height": 1024,
+        "aspectRatio": 1.4670487106017192,
+        "title": "Steal Like an Artist",
+        "author": "Austin Kleon",
+        "link": "https://www.goodreads.com/book/show/13099738",
+        "tags": [
+            "Favorites",
+            "Design"
+        ]
+    },
+    {
+        "id": "sunbathing",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/sunbathing.jpg",
+        "publicId": "sunbathing",
+        "width": 475,
+        "height": 329,
+        "aspectRatio": 0.6926315789473684,
+        "title": "Sunbathing",
+        "author": "Isobel Beech",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "superman-lost",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "Superman: Lost",
+        "author": "Christopher Priest",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "tell-me-everything",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/tell-me-everything.jpg",
+        "publicId": "tell-me-everything",
+        "width": 308,
+        "height": 500,
+        "aspectRatio": 1.6233766233766234,
+        "title": "Tell Me Everything",
+        "author": "Elizabeth Strout",
+        "link": "https://openlibrary.org/works/OL37836858W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "the-adweek-copywriting-handbook",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-adweek-copywriting-handbook.jpg",
+        "publicId": "the-adweek-copywriting-handbook",
+        "width": 407,
+        "height": 500,
+        "aspectRatio": 1.2285012285012284,
+        "title": "The Adweek Copywriting Handbook",
+        "author": "Joseph Sugarman",
+        "link": "https://openlibrary.org/works/OL2265078W",
+        "tags": [
+            "Business"
+        ]
+    },
+    {
+        "id": "the-age-of-surveillance-capitalism",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-age-of-surveillance-capitalism.jpg",
+        "publicId": "the-age-of-surveillance-capitalism",
+        "width": 301,
+        "height": 500,
+        "aspectRatio": 1.6611295681063123,
+        "title": "The Age of Surveillance Capitalism",
+        "author": "Shoshana Zuboff",
+        "link": "https://openlibrary.org/works/OL18201749W",
+        "tags": [
+            "Other"
+        ]
+    },
+    {
+        "id": "the-alchemist",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-alchemist.avif",
+        "publicId": "the-alchemist",
+        "width": 676,
+        "height": 1024,
+        "aspectRatio": 1.514792899408284,
+        "title": "The Alchemist",
+        "author": "Paulo Coelho",
+        "link": "https://www.goodreads.com/book/show/18144590",
+        "tags": [
+            "Favorites",
+            "Fiction"
+        ]
+    },
+    {
+        "id": "the-art-of-doing-science-and-engineering",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-art-of-doing-science-and-engineering.jpg",
+        "publicId": "the-art-of-doing-science-and-engineering",
+        "width": 405,
+        "height": 500,
+        "aspectRatio": 1.2345679012345678,
+        "title": "The Art of Doing Science and Engineering",
+        "author": "Richard Hamming",
+        "link": "https://openlibrary.org/works/OL1185120W",
+        "tags": [
+            "Science"
+        ]
+    },
+    {
+        "id": "the-art-of-money-getting",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-art-of-money-getting.jpg",
+        "publicId": "the-art-of-money-getting",
+        "width": 333,
+        "height": 500,
+        "aspectRatio": 1.5015015015015014,
+        "title": "The Art of Money Getting",
+        "author": "P. T. Barnum",
+        "link": "https://openlibrary.org/works/OL891636W",
+        "tags": [
+            "Business"
+        ]
+    },
+    {
+        "id": "the-art-of-war",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-art-of-war.jpg",
+        "publicId": "the-art-of-war",
+        "width": 128,
+        "height": 192,
+        "aspectRatio": 1.5,
+        "title": "The Art of War",
+        "author": "Sun Tzu",
+        "link": "https://openlibrary.org/works/OL244537W",
+        "tags": [
+            "Philosophy"
+        ]
+    },
+    {
+        "id": "the-brand-gap",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-brand-gap.avif",
+        "publicId": "the-brand-gap",
+        "width": 685,
+        "height": 1024,
+        "aspectRatio": 1.494890510948905,
+        "title": "The Brand Gap",
+        "author": "Marty Neumeier",
+        "link": "https://www.goodreads.com/book/show/290733",
+        "tags": [
+            "Favorites",
+            "Design"
+        ]
+    },
+    {
+        "id": "the-business-of-aspiration",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif",
+        "publicId": "placeholder",
+        "width": 2160,
+        "height": 1215,
+        "aspectRatio": 0.5625,
+        "title": "The Business of Aspiration",
+        "author": "Ana Andjelic",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Other"
+        ]
+    },
+    {
+        "id": "the-catcher-in-the-rye",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-catcher-in-the-rye.jpg",
+        "publicId": "the-catcher-in-the-rye",
+        "width": 338,
+        "height": 500,
+        "aspectRatio": 1.4792899408284024,
+        "title": "The Catcher in the Rye",
+        "author": "J. D. Salinger",
+        "link": "https://openlibrary.org/works/OL3335245W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "the-climber",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-climber.jpg",
+        "publicId": "the-climber",
+        "width": 324,
+        "height": 500,
+        "aspectRatio": 1.5432098765432098,
+        "title": "The Climber",
+        "author": "Shin-ichi Sakamoto",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "the-convenience-store-by-the-sea",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-convenience-store-by-the-sea.jpg",
+        "publicId": "the-convenience-store-by-the-sea",
+        "width": 330,
+        "height": 500,
+        "aspectRatio": 1.5151515151515151,
+        "title": "The Convenience Store by the Sea",
+        "author": "Sonoko Machida",
+        "link": "https://openlibrary.org/works/OL38013560W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "the-creative-act",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/The-Creative-Act-A-Way-of-Being.avif",
+        "publicId": "The-Creative-Act-A-Way-of-Being",
+        "width": 272,
+        "height": 400,
+        "aspectRatio": 1.4705882352941178,
+        "title": "The Creative Act",
+        "author": "Rick Rubin",
+        "link": "https://www.goodreads.com/book/show/60965426",
+        "tags": [
+            "Favorites",
+            "Design"
+        ]
+    },
+    {
+        "id": "the-design-of-everyday-things",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-design-of-everyday-things.avif",
+        "publicId": "the-design-of-everyday-things",
+        "width": 550,
+        "height": 824,
+        "aspectRatio": 1.4981818181818183,
+        "title": "The Design of Everyday Things",
+        "author": "Don Norman",
+        "link": "https://www.goodreads.com/book/show/85686691",
+        "tags": [
+            "Favorites",
+            "Design"
+        ]
+    },
+    {
+        "id": "the-four-agreements",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-four-agreements.jpg",
+        "publicId": "the-four-agreements",
+        "width": 345,
+        "height": 500,
+        "aspectRatio": 1.4492753623188406,
+        "title": "The Four Agreements",
+        "author": "Miguel Ruiz",
+        "link": "https://openlibrary.org/works/OL27203W",
+        "tags": [
+            "Self-Help"
+        ]
+    },
+    {
+        "id": "the-horizon",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-horizon.jpg",
+        "publicId": "the-horizon",
+        "width": 296,
+        "height": 475,
+        "aspectRatio": 1.6047297297297298,
+        "title": "The Horizon",
+        "author": "JH",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "the-inheritance-games",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-inheritance-games.jpg",
+        "publicId": "the-inheritance-games",
+        "width": 331,
+        "height": 499,
+        "aspectRatio": 1.5075528700906344,
+        "title": "The Inheritance Games",
+        "author": "Jennifer Lynn Barnes",
+        "link": "https://openlibrary.org/works/OL21692056W",
+        "tags": [
+            "Fiction"
+        ]
+    },
+    {
+        "id": "the-japanese-garden",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-japanese-garden.jpg",
+        "publicId": "the-japanese-garden",
+        "width": 305,
+        "height": 400,
+        "aspectRatio": 1.3114754098360655,
+        "title": "The Japanese Garden",
+        "author": "",
+        "link": "https://openlibrary.org/works/OL19732325W",
+        "tags": [
+            "Other"
+        ]
+    },
+    {
+        "id": "the-mastery-of-love",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-mastery-of-love.jpg",
+        "publicId": "the-mastery-of-love",
+        "width": 327,
+        "height": 475,
+        "aspectRatio": 1.452599388379205,
+        "title": "The Mastery of Love",
+        "author": "Don Miguel Ruiz",
+        "link": "https://openlibrary.org/works/OL8353317W",
+        "tags": [
+            "Self-Help"
+        ]
+    },
+    {
+        "id": "the-nineties",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-nineties.jpg",
+        "publicId": "the-nineties",
+        "width": 331,
+        "height": 500,
+        "aspectRatio": 1.5105740181268883,
+        "title": "The Nineties",
+        "author": "Chuck Klosterman",
+        "link": "https://openlibrary.org/works/OL24682096W",
+        "tags": [
+            "Other"
+        ]
+    },
+    {
+        "id": "the-politics-of-design",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-politics-of-design.jpg",
+        "publicId": "the-politics-of-design",
+        "width": 401,
+        "height": 500,
+        "aspectRatio": 1.2468827930174564,
+        "title": "The Politics of Design",
+        "author": "Ruben Pater",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "the-subtle-art-of-not-giving-a-f-ck",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-subtle-art-of-not-giving-a-f-ck.jpg",
+        "publicId": "the-subtle-art-of-not-giving-a-f-ck",
+        "width": 180,
+        "height": 269,
+        "aspectRatio": 1.4944444444444445,
+        "title": "The Subtle Art of Not Giving a F*ck",
+        "author": "Mark Manson",
+        "link": "https://openlibrary.org/works/OL17590212W",
+        "tags": [
+            "Self-Help"
+        ]
+    },
+    {
+        "id": "the-user-experience-team-of-one",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/the-user-experience-team-of-one.jpg",
+        "publicId": "the-user-experience-team-of-one",
+        "width": 334,
+        "height": 500,
+        "aspectRatio": 1.4970059880239521,
+        "title": "The User Experience Team of One",
+        "author": "Leah Buley",
+        "link": "https://openlibrary.org/works/OL23175750W",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "universal-principles-of-design",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/universal-principles-of-design.jpg",
+        "publicId": "universal-principles-of-design",
+        "width": 420,
+        "height": 500,
+        "aspectRatio": 1.1904761904761905,
+        "title": "Universal Principles of Design",
+        "author": "William Lidwell, Kritina Holden & Jill Butler",
+        "link": "https://openlibrary.org",
+        "tags": [
+            "Design"
+        ]
+    },
+    {
+        "id": "vagabond",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/vagabond.jpg",
+        "publicId": "vagabond",
+        "width": 325,
+        "height": 500,
+        "aspectRatio": 1.5384615384615385,
+        "title": "Vagabond",
+        "author": "Takehiko Inoue",
+        "link": "https://openlibrary.org/works/OL8783807W",
+        "tags": [
+            "Comics & Graphic Novels"
+        ]
+    },
+    {
+        "id": "verity",
+        "image": "https://res.cloudinary.com/barthkosi/image/upload/verity.jpg",
+        "publicId": "verity",
+        "width": 324,
+        "height": 499,
+        "aspectRatio": 1.5401234567901234,
+        "title": "Verity",
+        "author": "Colleen Hoover",
+        "link": "https://openlibrary.org/works/OL20068530W",
+        "tags": [
+            "Fiction"
+        ]
     }
 ]

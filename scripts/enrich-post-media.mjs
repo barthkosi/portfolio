@@ -5,10 +5,6 @@ import matter from "gray-matter";
 import { v2 as cloudinary } from "cloudinary";
 
 const CONTENT_PATH = resolve("src/content");
-const DATA_PATHS = [
-    resolve("src/data/books.json"),
-    resolve("src/data/illustrations.json"),
-];
 const OUTPUT_PATH = resolve("src/data/post-media.json");
 const LOCAL_ENV_PATH = resolve(".env.local");
 const CLOUDINARY_HOST = "res.cloudinary.com";
@@ -118,37 +114,155 @@ function collectMediaUrls(fileContents) {
     return Array.from(urls).filter((url) => parseCloudinaryAssetUrl(url));
 }
 
-function collectMediaUrlsFromData(value, urls = new Set()) {
-    if (typeof value === "string") {
-        if (parseCloudinaryAssetUrl(value)) {
-            urls.add(value);
+function getJpegDimensions(buffer) {
+    let offset = 2;
+
+    while (offset < buffer.length) {
+        if (buffer[offset] !== 0xff) return null;
+
+        const marker = buffer[offset + 1];
+        const length = buffer.readUInt16BE(offset + 2);
+        const isStartOfFrame = marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker);
+
+        if (isStartOfFrame) {
+            return {
+                height: buffer.readUInt16BE(offset + 5),
+                width: buffer.readUInt16BE(offset + 7),
+            };
         }
 
-        return urls;
+        offset += 2 + length;
     }
 
-    if (Array.isArray(value)) {
-        value.forEach((item) => collectMediaUrlsFromData(item, urls));
-        return urls;
-    }
-
-    if (value && typeof value === "object") {
-        Object.values(value).forEach((item) => collectMediaUrlsFromData(item, urls));
-    }
-
-    return urls;
+    return null;
 }
 
-async function fetchAssetDimensions(url) {
+function getPngDimensions(buffer) {
+    if (buffer.toString("ascii", 1, 4) !== "PNG") return null;
+
+    return {
+        width: buffer.readUInt32BE(16),
+        height: buffer.readUInt32BE(20),
+    };
+}
+
+function getGifDimensions(buffer) {
+    if (buffer.toString("ascii", 0, 3) !== "GIF") return null;
+
+    return {
+        width: buffer.readUInt16LE(6),
+        height: buffer.readUInt16LE(8),
+    };
+}
+
+function getWebpDimensions(buffer) {
+    if (buffer.toString("ascii", 0, 4) !== "RIFF" || buffer.toString("ascii", 8, 12) !== "WEBP") {
+        return null;
+    }
+
+    const chunkType = buffer.toString("ascii", 12, 16);
+
+    if (chunkType === "VP8X") {
+        return {
+            width: 1 + buffer.readUIntLE(24, 3),
+            height: 1 + buffer.readUIntLE(27, 3),
+        };
+    }
+
+    if (chunkType === "VP8 ") {
+        return {
+            width: buffer.readUInt16LE(26) & 0x3fff,
+            height: buffer.readUInt16LE(28) & 0x3fff,
+        };
+    }
+
+    if (chunkType === "VP8L") {
+        const bits = buffer.readUInt32LE(21);
+
+        return {
+            width: (bits & 0x3fff) + 1,
+            height: ((bits >> 14) & 0x3fff) + 1,
+        };
+    }
+
+    return null;
+}
+
+function getImageDimensionsFromBuffer(buffer) {
+    if (buffer[0] === 0xff && buffer[1] === 0xd8) return getJpegDimensions(buffer);
+
+    return getPngDimensions(buffer) ?? getGifDimensions(buffer) ?? getWebpDimensions(buffer);
+}
+
+async function fetchImageDimensionsFromUrl(url) {
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`Image fetch failed with status ${response.status}`);
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const dimensions = getImageDimensionsFromBuffer(buffer);
+
+    if (!dimensions) {
+        throw new Error("Unsupported image format for direct dimension probing");
+    }
+
+    return dimensions;
+}
+
+function isRateLimited(error) {
+    return error?.http_code === 420 || error?.error?.http_code === 420;
+}
+
+function loadExistingMediaEntries() {
+    if (!existsSync(OUTPUT_PATH)) return {};
+
+    return JSON.parse(readFileSync(OUTPUT_PATH, "utf8"));
+}
+
+async function fetchAssetDimensions(url, existingMediaEntries) {
+    const existingEntry = existingMediaEntries[url];
+
+    if (existingEntry) {
+        return existingEntry;
+    }
+
     const assetRef = parseCloudinaryAssetUrl(url);
 
     if (!assetRef) {
         return null;
     }
 
-    const asset = await cloudinary.api.resource(assetRef.publicId, {
-        resource_type: assetRef.resourceType,
-    });
+    if (assetRef.resourceType === "image") {
+        try {
+            const dimensions = await fetchImageDimensionsFromUrl(url);
+
+            return {
+                publicId: assetRef.publicId,
+                resourceType: assetRef.resourceType,
+                width: dimensions.width,
+                height: dimensions.height,
+                aspectRatio: `${dimensions.width}/${dimensions.height}`,
+            };
+        } catch (error) {
+            console.warn(`Direct image probe failed for ${url}`, error);
+        }
+    }
+
+    let asset;
+
+    try {
+        asset = await cloudinary.api.resource(assetRef.publicId, {
+            resource_type: assetRef.resourceType,
+        });
+    } catch (error) {
+        if (isRateLimited(error)) {
+            throw new Error(`Cloudinary Admin API rate limited and no cached metadata exists for "${url}"`);
+        }
+
+        throw error;
+    }
 
     if (!asset.width || !asset.height) {
         throw new Error(`Missing dimensions for Cloudinary asset "${assetRef.publicId}"`);
@@ -168,6 +282,7 @@ async function main() {
     cloudinary.config(getCloudinaryConfig());
 
     const markdownFiles = await getMarkdownFiles(CONTENT_PATH);
+    const existingMediaEntries = loadExistingMediaEntries();
     const mediaUrls = new Set();
 
     for (const file of markdownFiles) {
@@ -178,21 +293,12 @@ async function main() {
         }
     }
 
-    for (const dataPath of DATA_PATHS) {
-        const fileContents = await readFile(dataPath, "utf8");
-        const data = JSON.parse(fileContents);
-
-        for (const url of collectMediaUrlsFromData(data)) {
-            mediaUrls.add(url);
-        }
-    }
-
     const mediaEntries = {};
     const failedUrls = [];
 
     for (const url of [...mediaUrls].sort()) {
         try {
-            const dimensions = await fetchAssetDimensions(url);
+            const dimensions = await fetchAssetDimensions(url, existingMediaEntries);
 
             if (dimensions) {
                 mediaEntries[url] = dimensions;

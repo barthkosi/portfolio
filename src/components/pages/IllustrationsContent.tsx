@@ -8,29 +8,22 @@ import Card from "@/components/interface/Card";
 import { useIsClient } from "@/hooks/useIsClient";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
 import illustrations from "@/data/illustrations.json";
-import postMediaData from "@/data/post-media.json";
 import { springBouncy } from "@/lib/transitions";
 
 type IllustrationItem = {
     id: string;
     image: string;
-};
-
-type MediaMeta = {
+    publicId: string;
     width: number;
     height: number;
-    aspectRatio: string;
+    aspectRatio: number;
 };
-
-const postMedia = postMediaData as Record<string, MediaMeta | undefined>;
 
 function IllustrationCard({
     data,
     index,
     isVisible,
 }: RenderComponentProps<IllustrationItem> & { isVisible: boolean }) {
-    const mediaMeta = postMedia[data.image];
-
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -40,9 +33,9 @@ function IllustrationCard({
             <Card
                 image={data.image}
                 aspectRatio="auto"
-                shimmerAspectRatio={mediaMeta?.aspectRatio ?? "aspect-[3/4]"}
-                imageWidth={mediaMeta?.width}
-                imageHeight={mediaMeta?.height}
+                shimmerAspectRatio={`${data.width}/${data.height}`}
+                imageWidth={data.width}
+                imageHeight={data.height}
             />
         </motion.div>
     );
