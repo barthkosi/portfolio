@@ -116,10 +116,10 @@ export default function Nav() {
                     </Link>
                 </motion.div>
 
-                <div className="hidden md:flex label-s flex-row gap-6 text-[var(--content-secondary)] items-center">
+                <div className="hidden md:flex label-s flex-row gap-6 text-[var(--content-primary)] items-center">
                     {navData.main.map((item) => (
                         <motion.div key={item.href} {...navLinkPressMotion} className="inline-flex">
-                            <Link href={item.href} className="hover:text-[var(--content-primary)]">
+                            <Link href={item.href} className="hover:text-[var(--content-secondary)]">
                                 {item.label}
                             </Link>
                         </motion.div>
@@ -130,7 +130,7 @@ export default function Nav() {
                         onMouseEnter={() => setShowVault(true)}
                         onMouseLeave={() => setShowVault(false)}
                     >
-                        <button className="group py-2 items-center flex flex-row gap-1 hover:text-[var(--content-primary)] transition-colors">
+                        <button className="group py-2 items-center flex flex-row gap-1 hover:text-[var(--content-secondary)] transition-colors">
                             Vault
                             <ChevronDown isOpen={showVault} />
                         </button>
@@ -163,7 +163,7 @@ export default function Nav() {
                         onMouseEnter={() => setShowSocial(true)}
                         onMouseLeave={() => setShowSocial(false)}
                     >
-                        <button className="group py-2 items-center flex flex-row gap-1 hover:text-[var(--content-primary)] transition-colors">
+                        <button className="group py-2 items-center flex flex-row gap-1 hover:text-[var(--content-secondary)] transition-colors">
                             Social
                             <ChevronDown isOpen={showSocial} />
                         </button>
