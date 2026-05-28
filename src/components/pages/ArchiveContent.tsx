@@ -22,6 +22,7 @@ const DRAG_DECELERATION = 0.92;
 const WHEEL_IMPULSE = 0.18;
 
 const TRACKPAD_ZOOM_SENSITIVITY = 0.0015;
+const TRACKPAD_PINCH_ZOOM_SENSITIVITY = 0.012;
 const TOUCH_PINCH_SENSITIVITY = 1.35;
 const SCALE_EASING = 0.18;
 const TRACKPAD_PINCH_END_DELAY = 120;
@@ -262,6 +263,7 @@ export default function ArchiveContent() {
         let accumulatedTrackpadPinchDelta = 0;
         let trackpadPinchTimeout: ReturnType<typeof setTimeout> | null =
             null;
+        let isControlKeyPressed = false;
 
         let pinchStartDistance = 0;
         let pinchStartScale = scale;
@@ -890,6 +892,22 @@ export default function ArchiveContent() {
             trackpadPinchTimeout = null;
         };
 
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Control") {
+                isControlKeyPressed = true;
+            }
+        };
+
+        const handleKeyUp = (event: KeyboardEvent) => {
+            if (event.key === "Control") {
+                isControlKeyPressed = false;
+            }
+        };
+
+        const handleWindowBlur = () => {
+            isControlKeyPressed = false;
+        };
+
         const handleWheel = (event: Konva.KonvaEventObject<WheelEvent>) => {
             const wheelEvent = event.evt;
             wheelEvent.preventDefault();
@@ -897,6 +915,9 @@ export default function ArchiveContent() {
 
             if (wheelEvent.ctrlKey) {
                 velocity = { x: 0, y: 0 };
+                const zoomSensitivity = isControlKeyPressed
+                    ? TRACKPAD_ZOOM_SENSITIVITY
+                    : TRACKPAD_PINCH_ZOOM_SENSITIVITY;
 
                 if (trackpadPinchTimeout === null) {
                     trackpadPinchStartScale = targetScale;
@@ -909,7 +930,7 @@ export default function ArchiveContent() {
                     trackpadPinchStartScale *
                         Math.exp(
                             -accumulatedTrackpadPinchDelta *
-                                TRACKPAD_ZOOM_SENSITIVITY
+                                zoomSensitivity
                         ),
                     minScale,
                     MAX_SCALE
@@ -1007,6 +1028,9 @@ export default function ArchiveContent() {
         container.addEventListener("touchcancel", handlePinchEnd);
 
         window.addEventListener("resize", handleResize);
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("blur", handleWindowBlur);
 
         container.style.cursor = CURSOR_GRAB;
 
@@ -1042,6 +1066,9 @@ export default function ArchiveContent() {
             }
 
             window.removeEventListener("resize", handleResize);
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener("keyup", handleKeyUp);
+            window.removeEventListener("blur", handleWindowBlur);
 
             container.removeEventListener(
                 "touchstart",
