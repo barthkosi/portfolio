@@ -136,6 +136,10 @@ const isolateTouchEvent = (event: TouchEvent) => {
     event.stopPropagation();
 };
 
+const stopTouchPropagation = (event: TouchEvent) => {
+    event.stopPropagation();
+};
+
 const normalizeWheelDelta = (
     delta: number,
     deltaMode: number,
@@ -755,7 +759,7 @@ export default function ArchiveContent() {
             event: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
             if (isTouchEvent(event.evt)) {
-                isolateTouchEvent(event.evt);
+                stopTouchPropagation(event.evt);
             }
 
             if (isMultiTouchEvent(event.evt)) {
@@ -808,7 +812,7 @@ export default function ArchiveContent() {
             event?: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
             if (event && isTouchEvent(event.evt)) {
-                isolateTouchEvent(event.evt);
+                stopTouchPropagation(event.evt);
             }
 
             isDragging = false;
@@ -885,9 +889,10 @@ export default function ArchiveContent() {
         };
 
         const handlePinchMove = (event: TouchEvent) => {
+            isolateTouchEvent(event);
+
             if (event.touches.length !== 2) return;
 
-            isolateTouchEvent(event);
             pauseImageLoading();
             stopAnimation();
             velocity = { x: 0, y: 0 };
@@ -923,15 +928,11 @@ export default function ArchiveContent() {
         };
 
         const handleContainerTouchStart = (event: TouchEvent) => {
-            isolateTouchEvent(event);
-        };
-
-        const handleContainerTouchMove = (event: TouchEvent) => {
-            isolateTouchEvent(event);
+            stopTouchPropagation(event);
         };
 
         const handleContainerTouchEnd = (event: TouchEvent) => {
-            event.stopPropagation();
+            stopTouchPropagation(event);
         };
 
         /* ------------------------------------------------------------------ */
@@ -964,9 +965,6 @@ export default function ArchiveContent() {
         stage.on("wheel", handleWheel);
 
         container.addEventListener("touchstart", handleContainerTouchStart, {
-            passive: false,
-        });
-        container.addEventListener("touchmove", handleContainerTouchMove, {
             passive: false,
         });
         container.addEventListener("touchend", handleContainerTouchEnd, {
@@ -1021,10 +1019,6 @@ export default function ArchiveContent() {
             container.removeEventListener(
                 "touchstart",
                 handleContainerTouchStart
-            );
-            container.removeEventListener(
-                "touchmove",
-                handleContainerTouchMove
             );
             container.removeEventListener("touchend", handleContainerTouchEnd);
             container.removeEventListener(
