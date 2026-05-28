@@ -13,7 +13,9 @@ const DESKTOP_ITEM_WIDTH = 400;
 const MOBILE_ITEM_WIDTH = 200;
 const MOBILE_BREAKPOINT = 768;
 
-const MIN_SCALE = 0.5;
+const DESKTOP_MIN_SCALE = 0.5;
+const MOBILE_MIN_VISIBLE_COLUMNS = 7;
+const MOBILE_MIN_SCALE_FLOOR = 0.2;
 const MAX_SCALE = 1.5;
 
 const DRAG_DECELERATION = 0.92;
@@ -97,6 +99,17 @@ const getItemWidth = () =>
     window.innerWidth < MOBILE_BREAKPOINT
         ? MOBILE_ITEM_WIDTH
         : DESKTOP_ITEM_WIDTH;
+
+const getMinScale = (itemWidth: number) => {
+    if (window.innerWidth >= MOBILE_BREAKPOINT) {
+        return DESKTOP_MIN_SCALE;
+    }
+
+    const scaleForSevenColumns =
+        window.innerWidth / ((itemWidth + GAP) * MOBILE_MIN_VISIBLE_COLUMNS);
+
+    return clamp(scaleForSevenColumns, MOBILE_MIN_SCALE_FLOOR, DESKTOP_MIN_SCALE);
+};
 
 const getShortestColumnIndex = (heights: number[]) => {
     let shortestIndex = 0;
@@ -210,6 +223,7 @@ export default function ArchiveContent() {
         );
 
         let itemWidth = getItemWidth();
+        let minScale = getMinScale(itemWidth);
         let imageRequestWidth = getImageRequestWidth(itemWidth);
 
         const stage = new Konva.Stage({
@@ -226,6 +240,7 @@ export default function ArchiveContent() {
 
         let scale = 1;
         let targetScale = 1;
+        let zoomAnchorPoint: Point | null = null;
 
         let totalWidth = 0;
         let colHeights: number[] = [];
@@ -263,13 +278,13 @@ export default function ArchiveContent() {
         /* ------------------------------------------------------------------ */
 
         const getRequiredColumnCount = () => {
-            const visibleWidthAtMinScale = stage.width() / MIN_SCALE;
+            const visibleWidthAtMinScale = stage.width() / minScale;
 
             return Math.ceil(visibleWidthAtMinScale / (itemWidth + GAP)) + 2;
         };
 
         const getRequiredColumnHeight = () => {
-            const visibleHeightAtMinScale = stage.height() / MIN_SCALE;
+            const visibleHeightAtMinScale = stage.height() / minScale;
             const tallestItemHeight = archive.reduce(
                 (height, item) =>
                     Math.max(height, itemWidth * item.aspectRatio),
@@ -671,11 +686,14 @@ export default function ArchiveContent() {
             scale = nextScale;
         };
 
-        const getZoomPoint = (): Point =>
+        const getPointerZoomPoint = (): Point =>
             stage.getPointerPosition() ?? {
                 x: stage.width() / 2,
                 y: stage.height() / 2,
             };
+
+        const getZoomPoint = (): Point =>
+            zoomAnchorPoint ?? getPointerZoomPoint();
 
         /* ------------------------------------------------------------------ */
         /*                              Animation                             */
@@ -710,6 +728,7 @@ export default function ArchiveContent() {
             applyTransforms();
 
             if (!shouldContinue) {
+                zoomAnchorPoint = null;
                 resumeImageLoadingSoon();
             }
 
@@ -769,7 +788,8 @@ export default function ArchiveContent() {
 
             if (!pinchStartDistance) {
                 pinchStartDistance = distance;
-                pinchStartScale = scale;
+                pinchStartScale = targetScale;
+                zoomAnchorPoint = getTouchCenter(event.touches);
                 return;
             }
 
@@ -778,20 +798,19 @@ export default function ArchiveContent() {
             const nextScale = clamp(
                 pinchStartScale *
                     Math.pow(gestureRatio, TOUCH_PINCH_SENSITIVITY),
-                MIN_SCALE,
+                minScale,
                 MAX_SCALE
             );
 
             targetScale = nextScale;
-            zoomToPoint(nextScale, getTouchCenter(event.touches));
-            requestRender();
+            zoomAnchorPoint = getTouchCenter(event.touches);
+            startAnimation();
         }
 
         function handlePinchEnd() {
             pinchStartDistance = 0;
-            targetScale = scale;
-            pinchStartScale = scale;
-            resumeImageLoadingSoon();
+            pinchStartScale = targetScale;
+            startAnimation();
         }
 
         const handlePointerStart = (
@@ -808,6 +827,7 @@ export default function ArchiveContent() {
 
             pauseImageLoading();
             isDragging = true;
+            zoomAnchorPoint = null;
             stopAnimation();
 
             const pointer = stage.getPointerPosition();
@@ -891,9 +911,10 @@ export default function ArchiveContent() {
                             -accumulatedTrackpadPinchDelta *
                                 TRACKPAD_ZOOM_SENSITIVITY
                         ),
-                    MIN_SCALE,
+                    minScale,
                     MAX_SCALE
                 );
+                zoomAnchorPoint = getPointerZoomPoint();
 
                 if (trackpadPinchTimeout !== null) {
                     clearTimeout(trackpadPinchTimeout);
@@ -950,11 +971,16 @@ export default function ArchiveContent() {
             });
 
             const nextItemWidth = getItemWidth();
+            const nextMinScale = getMinScale(nextItemWidth);
 
             if (nextItemWidth !== itemWidth) {
                 itemWidth = nextItemWidth;
                 imageRequestWidth = getImageRequestWidth(itemWidth);
             }
+
+            minScale = nextMinScale;
+            scale = clamp(scale, minScale, MAX_SCALE);
+            targetScale = clamp(targetScale, minScale, MAX_SCALE);
 
             buildTiles();
         };
