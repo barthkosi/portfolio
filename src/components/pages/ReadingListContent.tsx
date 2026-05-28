@@ -12,6 +12,7 @@ import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
 import { springBouncy } from "@/lib/transitions";
 
 const FAVORITES_TAG = "Favorites";
+const OTHER_TAG = "Other";
 
 type BookItem = {
     id: string;
@@ -66,6 +67,7 @@ export default function ReadingListContent() {
     const isClient = useIsClient();
     const [areBooksVisible, setAreBooksVisible] = useState(false);
     const [activeTag, setActiveTag] = useState<string | null>(FAVORITES_TAG);
+    const [filterAnimationKey, setFilterAnimationKey] = useState(0);
     const { columnCount, gutter } = useResponsiveLayout();
     const allTags = useMemo(() => {
         const tags = new Set<string>();
@@ -77,8 +79,9 @@ export default function ReadingListContent() {
         return [
             ...(tags.has(FAVORITES_TAG) ? [FAVORITES_TAG] : []),
             ...Array.from(tags)
-                .filter((tag) => tag !== FAVORITES_TAG)
+                .filter((tag) => tag !== FAVORITES_TAG && tag !== OTHER_TAG)
                 .sort((firstTag, secondTag) => firstTag.localeCompare(secondTag)),
+            ...(tags.has(OTHER_TAG) ? [OTHER_TAG] : []),
         ];
     }, []);
 
@@ -90,6 +93,10 @@ export default function ReadingListContent() {
         [activeTag]
     );
     const shuffledBooks = useMemo(() => shuffleArray(filteredBooks), [filteredBooks]);
+    const handleTagSelect = useCallback((tag: string | null) => {
+        setActiveTag(tag);
+        setFilterAnimationKey((currentKey) => currentKey + 1);
+    }, []);
 
     const renderCard = useCallback(
         (props: RenderComponentProps<BookItem>) => <BookCard {...props} isVisible={areBooksVisible} />,
@@ -113,13 +120,14 @@ export default function ReadingListContent() {
                 <Filter
                     tags={allTags}
                     activeTag={activeTag}
-                    onTagSelect={setActiveTag}
+                    onTagSelect={handleTagSelect}
                     animate={areBooksVisible}
                 />
 
                 <Masonry
-                    key={`${activeTag ?? "all"}-${columnCount}-${gutter}`}
+                    key={`${filterAnimationKey}-${activeTag ?? "all"}-${columnCount}-${gutter}`}
                     items={shuffledBooks}
+                    itemKey={(book) => `${filterAnimationKey}-${book.id}`}
                     columnGutter={gutter}
                     columnCount={columnCount}
                     overscanBy={5}

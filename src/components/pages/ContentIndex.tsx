@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import InfoBlock from "@/components/interface/InfoBlock";
 import Card from "@/components/interface/Card";
@@ -52,6 +52,7 @@ export default function ContentIndex({
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const [introFinished, setIntroFinished] = useState(false);
     const [showCards, setShowCards] = useState(false);
+    const [filterAnimationKey, setFilterAnimationKey] = useState(0);
 
     const filteredItems = useMemo(
         () =>
@@ -74,6 +75,11 @@ export default function ContentIndex({
         [filteredItems]
     );
 
+    const handleTagSelect = useCallback((tag: string | null) => {
+        setActiveTag(tag);
+        setFilterAnimationKey((currentKey) => currentKey + 1);
+    }, []);
+
     return (
         <div className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
             <InfoBlock
@@ -88,13 +94,14 @@ export default function ContentIndex({
                 <Filter
                     tags={allTags}
                     activeTag={activeTag}
-                    onTagSelect={setActiveTag}
+                    onTagSelect={handleTagSelect}
                     animate={introFinished}
                     onAnimationComplete={() => setShowCards(true)}
                 />
 
                 {items.length > 0 ? (
                     <motion.div
+                        key={filterAnimationKey}
                         className="w-full flex flex-col gap-4"
                         variants={containerVariants}
                         initial="hidden"
@@ -110,7 +117,7 @@ export default function ContentIndex({
 
                                 <div className="w-full flex flex-col gap-4 relative z-0">
                                     {yearItems.map((item) => (
-                                        <motion.div key={item.slug} variants={cardVariants}>
+                                        <motion.div key={`${filterAnimationKey}-${item.slug}`} variants={cardVariants}>
                                             <Card
                                                 image={item.coverImage || ""}
                                                 title={item.title}
