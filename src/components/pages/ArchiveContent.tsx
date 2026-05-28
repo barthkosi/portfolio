@@ -755,6 +755,45 @@ export default function ArchiveContent() {
         /*                                Input                               */
         /* ------------------------------------------------------------------ */
 
+        function handlePinchMove(event: TouchEvent) {
+            isolateTouchEvent(event);
+
+            if (event.touches.length !== 2) return;
+
+            pauseImageLoading();
+            stopAnimation();
+            velocity = { x: 0, y: 0 };
+            isDragging = false;
+
+            const distance = getTouchDistance(event.touches);
+
+            if (!pinchStartDistance) {
+                pinchStartDistance = distance;
+                pinchStartScale = scale;
+                return;
+            }
+
+            const gestureRatio = distance / pinchStartDistance;
+
+            const nextScale = clamp(
+                pinchStartScale *
+                    Math.pow(gestureRatio, TOUCH_PINCH_SENSITIVITY),
+                MIN_SCALE,
+                MAX_SCALE
+            );
+
+            targetScale = nextScale;
+            zoomToPoint(nextScale, getTouchCenter(event.touches));
+            requestRender();
+        }
+
+        function handlePinchEnd() {
+            pinchStartDistance = 0;
+            targetScale = scale;
+            pinchStartScale = scale;
+            resumeImageLoadingSoon();
+        }
+
         const handlePointerStart = (
             event: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
@@ -784,11 +823,12 @@ export default function ArchiveContent() {
             event: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
             if (isTouchEvent(event.evt)) {
-                isolateTouchEvent(event.evt);
-            }
+                if (isMultiTouchEvent(event.evt)) {
+                    handlePinchMove(event.evt);
+                    return;
+                }
 
-            if (isMultiTouchEvent(event.evt)) {
-                return;
+                isolateTouchEvent(event.evt);
             }
 
             if (!isDragging) return;
@@ -813,6 +853,10 @@ export default function ArchiveContent() {
         ) => {
             if (event && isTouchEvent(event.evt)) {
                 stopTouchPropagation(event.evt);
+
+                if (event.evt.touches.length < 2) {
+                    handlePinchEnd();
+                }
             }
 
             isDragging = false;
@@ -887,46 +931,6 @@ export default function ArchiveContent() {
 
             startAnimation();
         };
-
-        const handlePinchMove = (event: TouchEvent) => {
-            isolateTouchEvent(event);
-
-            if (event.touches.length !== 2) return;
-
-            pauseImageLoading();
-            stopAnimation();
-            velocity = { x: 0, y: 0 };
-            isDragging = false;
-
-            const distance = getTouchDistance(event.touches);
-
-            if (!pinchStartDistance) {
-                pinchStartDistance = distance;
-                pinchStartScale = scale;
-                return;
-            }
-
-            const gestureRatio = distance / pinchStartDistance;
-
-            const nextScale = clamp(
-                pinchStartScale *
-                    Math.pow(gestureRatio, TOUCH_PINCH_SENSITIVITY),
-                MIN_SCALE,
-                MAX_SCALE
-            );
-
-            targetScale = nextScale;
-            zoomToPoint(nextScale, getTouchCenter(event.touches));
-            requestRender();
-        };
-
-        const handlePinchEnd = () => {
-            pinchStartDistance = 0;
-            targetScale = scale;
-            pinchStartScale = scale;
-            resumeImageLoadingSoon();
-        };
-
         const handleContainerTouchStart = (event: TouchEvent) => {
             stopTouchPropagation(event);
         };
@@ -971,9 +975,6 @@ export default function ArchiveContent() {
             passive: false,
         });
         container.addEventListener("touchcancel", handleContainerTouchEnd, {
-            passive: false,
-        });
-        container.addEventListener("touchmove", handlePinchMove, {
             passive: false,
         });
         container.addEventListener("touchend", handlePinchEnd);
@@ -1025,7 +1026,6 @@ export default function ArchiveContent() {
                 "touchcancel",
                 handleContainerTouchEnd
             );
-            container.removeEventListener("touchmove", handlePinchMove);
             container.removeEventListener("touchend", handlePinchEnd);
             container.removeEventListener("touchcancel", handlePinchEnd);
 
