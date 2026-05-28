@@ -125,6 +125,17 @@ const getTouchCenter = (touches: TouchList): Point => ({
 const isMultiTouchEvent = (event: MouseEvent | TouchEvent) =>
     "touches" in event && event.touches.length > 1;
 
+const isTouchEvent = (event: MouseEvent | TouchEvent): event is TouchEvent =>
+    "touches" in event;
+
+const isolateTouchEvent = (event: TouchEvent) => {
+    if (event.cancelable) {
+        event.preventDefault();
+    }
+
+    event.stopPropagation();
+};
+
 const normalizeWheelDelta = (
     delta: number,
     deltaMode: number,
@@ -743,6 +754,10 @@ export default function ArchiveContent() {
         const handlePointerStart = (
             event: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
+            if (isTouchEvent(event.evt)) {
+                isolateTouchEvent(event.evt);
+            }
+
             if (isMultiTouchEvent(event.evt)) {
                 isDragging = false;
                 return;
@@ -764,6 +779,10 @@ export default function ArchiveContent() {
         const handlePointerMove = (
             event: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
+            if (isTouchEvent(event.evt)) {
+                isolateTouchEvent(event.evt);
+            }
+
             if (isMultiTouchEvent(event.evt)) {
                 return;
             }
@@ -785,7 +804,13 @@ export default function ArchiveContent() {
             requestRender();
         };
 
-        const handlePointerEnd = () => {
+        const handlePointerEnd = (
+            event?: Konva.KonvaEventObject<MouseEvent | TouchEvent>
+        ) => {
+            if (event && isTouchEvent(event.evt)) {
+                isolateTouchEvent(event.evt);
+            }
+
             isDragging = false;
             container.style.cursor = CURSOR_GRAB;
             startAnimation();
@@ -862,7 +887,7 @@ export default function ArchiveContent() {
         const handlePinchMove = (event: TouchEvent) => {
             if (event.touches.length !== 2) return;
 
-            event.preventDefault();
+            isolateTouchEvent(event);
             pauseImageLoading();
             stopAnimation();
             velocity = { x: 0, y: 0 };
@@ -897,6 +922,18 @@ export default function ArchiveContent() {
             resumeImageLoadingSoon();
         };
 
+        const handleContainerTouchStart = (event: TouchEvent) => {
+            isolateTouchEvent(event);
+        };
+
+        const handleContainerTouchMove = (event: TouchEvent) => {
+            isolateTouchEvent(event);
+        };
+
+        const handleContainerTouchEnd = (event: TouchEvent) => {
+            event.stopPropagation();
+        };
+
         /* ------------------------------------------------------------------ */
         /*                               Resize                               */
         /* ------------------------------------------------------------------ */
@@ -923,13 +960,26 @@ export default function ArchiveContent() {
 
         stage.on("mousedown touchstart", handlePointerStart);
         stage.on("mousemove touchmove", handlePointerMove);
-        stage.on("mouseup mouseleave touchend", handlePointerEnd);
+        stage.on("mouseup mouseleave touchend touchcancel", handlePointerEnd);
         stage.on("wheel", handleWheel);
 
+        container.addEventListener("touchstart", handleContainerTouchStart, {
+            passive: false,
+        });
+        container.addEventListener("touchmove", handleContainerTouchMove, {
+            passive: false,
+        });
+        container.addEventListener("touchend", handleContainerTouchEnd, {
+            passive: false,
+        });
+        container.addEventListener("touchcancel", handleContainerTouchEnd, {
+            passive: false,
+        });
         container.addEventListener("touchmove", handlePinchMove, {
             passive: false,
         });
         container.addEventListener("touchend", handlePinchEnd);
+        container.addEventListener("touchcancel", handlePinchEnd);
 
         window.addEventListener("resize", handleResize);
 
@@ -968,8 +1018,22 @@ export default function ArchiveContent() {
 
             window.removeEventListener("resize", handleResize);
 
+            container.removeEventListener(
+                "touchstart",
+                handleContainerTouchStart
+            );
+            container.removeEventListener(
+                "touchmove",
+                handleContainerTouchMove
+            );
+            container.removeEventListener("touchend", handleContainerTouchEnd);
+            container.removeEventListener(
+                "touchcancel",
+                handleContainerTouchEnd
+            );
             container.removeEventListener("touchmove", handlePinchMove);
             container.removeEventListener("touchend", handlePinchEnd);
+            container.removeEventListener("touchcancel", handlePinchEnd);
 
             stage.destroy();
             Konva.pixelRatio = previousPixelRatio;
@@ -991,7 +1055,11 @@ export default function ArchiveContent() {
             <div
                 ref={containerRef}
                 className="w-full h-full overflow-hidden touch-none"
-                style={{ contain: "strict" }}
+                style={{
+                    contain: "strict",
+                    touchAction: "none",
+                    WebkitOverflowScrolling: "auto",
+                }}
             />
         </div>
     );
