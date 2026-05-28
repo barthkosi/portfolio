@@ -45,7 +45,6 @@ export default function JoinFamilySection() {
             <Button
                 href="https://cal.com/barthkosi/intro"
                 openInNewTab
-                variant="secondary"
             >
                 Book a call
             </Button>
