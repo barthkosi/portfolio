@@ -4,6 +4,9 @@ import { pressScale } from "@/lib/transitions"
 import { motion } from "motion/react"
 import Link from 'next/link'
 
+const MotionLink = motion(Link)
+
+
 type ButtonVariant = 'primary' | 'secondary'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
@@ -139,13 +142,14 @@ export default function Button({
     }
 
     if (to) {
-        const MotionDiv = motion.div
         return (
-            <MotionDiv {...motionConfig} className={baseClassName}>
-                <Link href={to} className="w-full h-full flex items-center justify-center">
-                    {children}
-                </Link>
-            </MotionDiv>
+            <MotionLink
+                {...motionConfig}
+                href={to}
+                className={baseClassName}
+            >
+                {children}
+            </MotionLink>
         )
     }
 

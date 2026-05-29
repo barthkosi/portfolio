@@ -9,17 +9,27 @@ export default function ScrollToTop() {
     const pathname = usePathname();
 
     useEffect(() => {
+        let frameId1: number;
+        let frameId2: number;
+
         const scrollToTop = () => {
-            window.dispatchEvent(new CustomEvent(SCROLL_TO_TOP_EVENT));
+            frameId1 = requestAnimationFrame(() => {
+                window.dispatchEvent(new CustomEvent(SCROLL_TO_TOP_EVENT));
+            });
 
             window.scrollTo({ top: 0, left: 0, behavior: "auto" });
 
-            requestAnimationFrame(() => {
+            frameId2 = requestAnimationFrame(() => {
                 window.scrollTo({ top: 0, left: 0, behavior: "auto" });
             });
         };
 
         scrollToTop();
+
+        return () => {
+            if (frameId1) cancelAnimationFrame(frameId1);
+            if (frameId2) cancelAnimationFrame(frameId2);
+        };
     }, [pathname]);
 
     return null;
