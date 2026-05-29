@@ -68,6 +68,7 @@ export default function ReadingListContent() {
     const [areBooksVisible, setAreBooksVisible] = useState(false);
     const [activeTag, setActiveTag] = useState<string | null>(FAVORITES_TAG);
     const [filterAnimationKey, setFilterAnimationKey] = useState(0);
+    const [shuffledBooks] = useState(() => shuffleArray(books));
     const { columnCount, gutter } = useResponsiveLayout();
     const allTags = useMemo(() => {
         const tags = new Set<string>();
@@ -88,11 +89,10 @@ export default function ReadingListContent() {
     const filteredBooks = useMemo(
         () =>
             activeTag
-                ? books.filter((book) => book.tags.includes(activeTag))
-                : books,
-        [activeTag]
+                ? shuffledBooks.filter((book) => book.tags.includes(activeTag))
+                : shuffledBooks,
+        [activeTag, shuffledBooks]
     );
-    const shuffledBooks = useMemo(() => shuffleArray(filteredBooks), [filteredBooks]);
     const handleTagSelect = useCallback((tag: string | null) => {
         setActiveTag(tag);
         setFilterAnimationKey((currentKey) => currentKey + 1);
@@ -126,7 +126,7 @@ export default function ReadingListContent() {
 
                 <Masonry
                     key={`${filterAnimationKey}-${activeTag ?? "all"}-${columnCount}-${gutter}`}
-                    items={shuffledBooks}
+                    items={filteredBooks}
                     itemKey={(book) => `${filterAnimationKey}-${book.id}`}
                     columnGutter={gutter}
                     columnCount={columnCount}
