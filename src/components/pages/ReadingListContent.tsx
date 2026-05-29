@@ -6,6 +6,7 @@ import { Masonry, type RenderComponentProps } from "masonic";
 import InfoBlock from "@/components/interface/InfoBlock";
 import Card from "@/components/interface/Card";
 import Filter from "@/components/interface/Filter";
+import Button from "@/components/interface/Button";
 import books from "@/data/books.json";
 import { useIsClient } from "@/hooks/useIsClient";
 import { useResponsiveLayout } from "@/hooks/useResponsiveLayout";
@@ -133,6 +134,20 @@ export default function ReadingListContent() {
                     overscanBy={5}
                     render={renderCard}
                 />
+
+                {activeTag !== null && (
+                    <div className="mt-12 w-full flex justify-center">
+                        <Button
+                            variant="secondary"
+                            onClick={() => {
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                                handleTagSelect(null);
+                            }}
+                        >
+                            More Books
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );
