@@ -14,6 +14,7 @@ import { springBouncy } from "@/lib/transitions";
 
 const FAVORITES_TAG = "Favorites";
 const OTHER_TAG = "Other";
+const MORE_BOOKS_TEXT = "More Books";
 
 type BookItem = {
     id: string;
@@ -33,17 +34,28 @@ function shuffleArray<T>(array: T[]) {
 
     for (let index = shuffled.length - 1; index > 0; index -= 1) {
         const randomIndex = Math.floor(Math.random() * (index + 1));
-        [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+        const temp = shuffled.at(index);
+        const randVal = shuffled.at(randomIndex);
+        if (temp !== undefined && randVal !== undefined) {
+            shuffled.splice(index, 1, randVal);
+            shuffled.splice(randomIndex, 1, temp);
+        }
     }
 
     return shuffled;
 }
 
+type BookCardProps = {
+    data: BookItem;
+    index: number;
+    isVisible: boolean;
+};
+
 function BookCard({
     data,
     index,
     isVisible,
-}: RenderComponentProps<BookItem> & { isVisible: boolean }) {
+}: BookCardProps) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -100,7 +112,9 @@ export default function ReadingListContent() {
     }, []);
 
     const renderCard = useCallback(
-        (props: RenderComponentProps<BookItem>) => <BookCard {...props} isVisible={areBooksVisible} />,
+        ({ data, index }: RenderComponentProps<BookItem>) => (
+            <BookCard data={data} index={index} isVisible={areBooksVisible} />
+        ),
         [areBooksVisible]
     );
 
@@ -136,7 +150,7 @@ export default function ReadingListContent() {
                 />
 
                 {activeTag !== null && (
-                    <div className="mt-12 w-full flex justify-center">
+                    <div className="mt-5 w-full flex justify-center">
                         <Button
                             variant="secondary"
                             onClick={() => {
@@ -144,7 +158,7 @@ export default function ReadingListContent() {
                                 handleTagSelect(null);
                             }}
                         >
-                            More Books
+                            {MORE_BOOKS_TEXT}
                         </Button>
                     </div>
                 )}
