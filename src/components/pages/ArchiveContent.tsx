@@ -20,6 +20,7 @@ const MAX_SCALE = 1.5;
 
 const DRAG_DECELERATION = 0.92;
 const WHEEL_IMPULSE = 0.18;
+const CLICK_MOVE_THRESHOLD = 6;
 
 const TRACKPAD_ZOOM_SENSITIVITY = 0.0015;
 const TRACKPAD_PINCH_ZOOM_SENSITIVITY = 0.012;
@@ -35,6 +36,7 @@ const IMAGE_LOAD_START_DELAY = 40;
 const IMAGE_LOAD_RESUME_DELAY = 80;
 const ARCHIVE_IMAGE_MIN_WIDTH = 640;
 const ARCHIVE_IMAGE_MAX_WIDTH = 1200;
+const CONTEXT_IMAGE_SRC_ATTRIBUTE = "data-context-image-src";
 
 const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
 const CURSOR_GRABBED =
@@ -238,6 +240,7 @@ export default function ArchiveContent() {
 
         const offset: Point = { x: 0, y: 0 };
         let velocity: Point = { x: 0, y: 0 };
+        let momentumTargetOffset: Point | null = null;
 
         let scale = 1;
         let targetScale = 1;
@@ -252,8 +255,10 @@ export default function ArchiveContent() {
 
         let hasCenteredInitialView = false;
         let isDragging = false;
+        let hasDraggedSincePointerStart = false;
 
         let lastPointer: Point = { x: 0, y: 0 };
+        let pointerStart: Point = { x: 0, y: 0 };
         let animationFrameId: number | null = null;
         let renderFrameId: number | null = null;
         let sceneRevealFrameId: number | null = null;
@@ -697,6 +702,66 @@ export default function ArchiveContent() {
         const getZoomPoint = (): Point =>
             zoomAnchorPoint ?? getPointerZoomPoint();
 
+        const getTileAtPoint = (point: Point) => {
+            for (let index = tiles.length - 1; index >= 0; index--) {
+                const tile = tiles[index];
+
+                if (
+                    tile.renderedX === null ||
+                    tile.renderedY === null ||
+                    tile.renderedScale === null
+                ) {
+                    continue;
+                }
+
+                const screenWidth = tile.width * tile.renderedScale;
+                const screenHeight = tile.height * tile.renderedScale;
+
+                if (
+                    point.x >= tile.renderedX &&
+                    point.x <= tile.renderedX + screenWidth &&
+                    point.y >= tile.renderedY &&
+                    point.y <= tile.renderedY + screenHeight
+                ) {
+                    return tile;
+                }
+            }
+
+            return null;
+        };
+
+        const centerTile = (tile: Tile) => {
+            if (
+                tile.renderedX === null ||
+                tile.renderedY === null ||
+                tile.renderedScale === null
+            ) {
+                return;
+            }
+
+            const tileCenterX =
+                tile.renderedX + (tile.width * tile.renderedScale) / 2;
+            const tileCenterY =
+                tile.renderedY + (tile.height * tile.renderedScale) / 2;
+            const nextOffset = {
+                x: offset.x + (stage.width() / 2 - tileCenterX) / scale,
+                y: offset.y + (stage.height() / 2 - tileCenterY) / scale,
+            };
+            const dx = nextOffset.x - offset.x;
+            const dy = nextOffset.y - offset.y;
+            const impulseScale = (1 - DRAG_DECELERATION) / DRAG_DECELERATION;
+
+            pauseImageLoading();
+            stopAnimation();
+            zoomAnchorPoint = null;
+            momentumTargetOffset = nextOffset;
+            velocity = {
+                x: dx * impulseScale,
+                y: dy * impulseScale,
+            };
+            startAnimation();
+        };
+
         /* ------------------------------------------------------------------ */
         /*                              Animation                             */
         /* ------------------------------------------------------------------ */
@@ -725,6 +790,12 @@ export default function ArchiveContent() {
                 shouldContinue = true;
             } else {
                 velocity = { x: 0, y: 0 };
+
+                if (momentumTargetOffset) {
+                    offset.x = momentumTargetOffset.x;
+                    offset.y = momentumTargetOffset.y;
+                    momentumTargetOffset = null;
+                }
             }
 
             applyTransforms();
@@ -783,6 +854,7 @@ export default function ArchiveContent() {
 
             pauseImageLoading();
             stopAnimation();
+            momentumTargetOffset = null;
             velocity = { x: 0, y: 0 };
             isDragging = false;
 
@@ -818,6 +890,10 @@ export default function ArchiveContent() {
         const handlePointerStart = (
             event: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
+            if (event.evt instanceof MouseEvent && event.evt.button !== 0) {
+                return;
+            }
+
             if (isTouchEvent(event.evt)) {
                 stopTouchPropagation(event.evt);
             }
@@ -829,13 +905,16 @@ export default function ArchiveContent() {
 
             pauseImageLoading();
             isDragging = true;
+            hasDraggedSincePointerStart = false;
             zoomAnchorPoint = null;
             stopAnimation();
+            momentumTargetOffset = null;
 
             const pointer = stage.getPointerPosition();
             if (!pointer) return;
 
             lastPointer = pointer;
+            pointerStart = pointer;
             velocity = { x: 0, y: 0 };
 
             container.style.cursor = CURSOR_GRABBED;
@@ -858,6 +937,15 @@ export default function ArchiveContent() {
             const pointer = stage.getPointerPosition();
             if (!pointer) return;
 
+            if (
+                Math.hypot(
+                    pointer.x - pointerStart.x,
+                    pointer.y - pointerStart.y
+                ) > CLICK_MOVE_THRESHOLD
+            ) {
+                hasDraggedSincePointerStart = true;
+            }
+
             const dx = (pointer.x - lastPointer.x) / scale;
             const dy = (pointer.y - lastPointer.y) / scale;
 
@@ -873,6 +961,16 @@ export default function ArchiveContent() {
         const handlePointerEnd = (
             event?: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
+            const shouldCenterClickedTile =
+                isDragging &&
+                event?.type === "mouseup" &&
+                event?.evt instanceof MouseEvent &&
+                event.evt.button === 0 &&
+                !hasDraggedSincePointerStart;
+            const clickedTile = shouldCenterClickedTile
+                ? getTileAtPoint(stage.getPointerPosition() ?? pointerStart)
+                : null;
+
             if (event && isTouchEvent(event.evt)) {
                 stopTouchPropagation(event.evt);
 
@@ -883,6 +981,12 @@ export default function ArchiveContent() {
 
             isDragging = false;
             container.style.cursor = CURSOR_GRAB;
+
+            if (clickedTile) {
+                centerTile(clickedTile);
+                return;
+            }
+
             startAnimation();
         };
 
@@ -912,6 +1016,7 @@ export default function ArchiveContent() {
             const wheelEvent = event.evt;
             wheelEvent.preventDefault();
             pauseImageLoading();
+            momentumTargetOffset = null;
 
             if (wheelEvent.ctrlKey) {
                 velocity = { x: 0, y: 0 };
@@ -981,6 +1086,20 @@ export default function ArchiveContent() {
             stopTouchPropagation(event);
         };
 
+        const handleContextMenu = (event: MouseEvent) => {
+            const rect = container.getBoundingClientRect();
+            const tile = getTileAtPoint({
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top,
+            });
+
+            container.removeAttribute(CONTEXT_IMAGE_SRC_ATTRIBUTE);
+
+            if (!tile) return;
+
+            container.setAttribute(CONTEXT_IMAGE_SRC_ATTRIBUTE, tile.item.image);
+        };
+
         /* ------------------------------------------------------------------ */
         /*                               Resize                               */
         /* ------------------------------------------------------------------ */
@@ -1026,6 +1145,7 @@ export default function ArchiveContent() {
         });
         container.addEventListener("touchend", handlePinchEnd);
         container.addEventListener("touchcancel", handlePinchEnd);
+        container.addEventListener("contextmenu", handleContextMenu);
 
         window.addEventListener("resize", handleResize);
         window.addEventListener("keydown", handleKeyDown);
@@ -1081,6 +1201,7 @@ export default function ArchiveContent() {
             );
             container.removeEventListener("touchend", handlePinchEnd);
             container.removeEventListener("touchcancel", handlePinchEnd);
+            container.removeEventListener("contextmenu", handleContextMenu);
 
             stage.destroy();
             Konva.pixelRatio = previousPixelRatio;

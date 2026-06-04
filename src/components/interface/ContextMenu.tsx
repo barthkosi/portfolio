@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { pressScale } from "@/lib/transitions";
@@ -12,6 +12,8 @@ const MENU_WIDTH = 220;
 const MENU_ITEM_HEIGHT = 34;
 const VERTICAL_THRESHOLD = 350;
 const HORIZONTAL_THRESHOLD = 200;
+const CONTEXT_IMAGE_SRC_ATTRIBUTE = "data-context-image-src";
+const TOUCH_CONTEXT_MENU_SUPPRESSION_MS = 900;
 const NAV_ITEMS = [
     { label: "Home", href: "/" },
     { label: "Work", href: "/work" },
@@ -38,6 +40,22 @@ interface MenuPos {
     alignY: 'top' | 'bottom';
 }
 
+const isTouchGeneratedContextMenu = (
+    event: MouseEvent,
+    lastTouchTime: number
+) => {
+    const eventWithSource = event as MouseEvent & {
+        pointerType?: string;
+        sourceCapabilities?: { firesTouchEvents?: boolean };
+    };
+
+    return (
+        eventWithSource.pointerType === "touch" ||
+        eventWithSource.sourceCapabilities?.firesTouchEvents === true ||
+        Date.now() - lastTouchTime < TOUCH_CONTEXT_MENU_SUPPRESSION_MS
+    );
+};
+
 // --- Custom Hook: State & Events ---
 function useContextMenu(onOpen?: () => void) {
     const [isOpen, setIsOpen] = useState(false);
@@ -45,15 +63,30 @@ function useContextMenu(onOpen?: () => void) {
     const [pos, setPos] = useState<MenuPos>({ x: 0, y: 0, alignX: 'left', alignY: 'top' });
     const [type, setType] = useState<MenuType>("default");
     const [data, setData] = useState<ContextMenuData>({});
+    const lastTouchTimeRef = useRef(0);
 
     const closeMenu = useCallback(() => setIsOpen(false), []);
 
     useEffect(() => {
+        const handleTouchStart = () => {
+            lastTouchTimeRef.current = Date.now();
+        };
+
         const handleContextMenu = (e: MouseEvent) => {
             e.preventDefault();
+
+            if (
+                isTouchGeneratedContextMenu(e, lastTouchTimeRef.current)
+            ) {
+                closeMenu();
+                return;
+            }
             
             const target = e.target as HTMLElement;
             const card = target.closest('[data-context="card"]');
+            const contextualImage = target.closest(
+                `[${CONTEXT_IMAGE_SRC_ATTRIBUTE}]`
+            ) as HTMLElement | null;
             const media = target.closest('img, video') as HTMLImageElement | HTMLVideoElement;
 
             let menuType: MenuType = "default";
@@ -64,6 +97,17 @@ function useContextMenu(onOpen?: () => void) {
                 menuData = {
                     link: card.getAttribute('data-card-link') || undefined,
                     title: card.getAttribute('data-card-title') || undefined,
+                };
+            } else if (contextualImage) {
+                const imageSrc = contextualImage.getAttribute(
+                    CONTEXT_IMAGE_SRC_ATTRIBUTE
+                );
+
+                menuType = "image";
+                menuData = {
+                    src: imageSrc
+                        ? getOriginalImageSource(imageSrc, window.location.href)
+                        : undefined,
                 };
             } else if (media) {
                 const mediaSrc = media.dataset.originalSrc || media.currentSrc || media.src;
@@ -87,11 +131,16 @@ function useContextMenu(onOpen?: () => void) {
             setIsOpen(true);
         };
 
+        window.addEventListener("touchstart", handleTouchStart, {
+            capture: true,
+            passive: true,
+        });
         window.addEventListener("contextmenu", handleContextMenu);
         window.addEventListener("click", closeMenu);
         window.addEventListener("scroll", closeMenu, true);
 
         return () => {
+            window.removeEventListener("touchstart", handleTouchStart, true);
             window.removeEventListener("contextmenu", handleContextMenu);
             window.removeEventListener("click", closeMenu);
             window.removeEventListener("scroll", closeMenu, true);
