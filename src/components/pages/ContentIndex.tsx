@@ -81,7 +81,7 @@ export default function ContentIndex({
     }, []);
 
     return (
-        <div className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
+        <section className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
             <InfoBlock
                 title={title}
                 number={items.length}
@@ -108,16 +108,16 @@ export default function ContentIndex({
                         animate={introFinished && showCards ? "visible" : "hidden"}
                     >
                         {itemsByYear.map(([year, yearItems]) => (
-                            <div key={year} className="w-full flex flex-row gap-4 relative">
+                            <section key={year} className="w-full flex flex-row gap-4 relative">
                                 <div className="w-[0px] shrink-0 relative z-20 pointer-events-none">
-                                    <span className="h3 text-[var(--content-primary)] [text-shadow:5px_5px_0px_var(--border-primary)] sticky top-[64px] md:top-[134px] block relative z-20">
+                                    <h2 className="h3 text-[var(--content-primary)] [text-shadow:5px_5px_0px_var(--border-primary)] sticky top-[64px] md:top-[134px] block relative z-20">
                                         {year}
-                                    </span>
+                                    </h2>
                                 </div>
 
-                                <div className="w-full flex flex-col gap-4 relative z-0">
+                                <ul className="w-full flex flex-col gap-4 relative z-0">
                                     {yearItems.map((item) => (
-                                        <motion.div key={`${filterAnimationKey}-${item.slug}`} variants={cardVariants}>
+                                        <motion.li key={`${filterAnimationKey}-${item.slug}`} variants={cardVariants}>
                                             <Card
                                                 image={item.coverImage || ""}
                                                 title={item.title}
@@ -128,10 +128,10 @@ export default function ContentIndex({
                                                 aspectRatio="aspect-video"
                                                 locked={item.locked}
                                             />
-                                        </motion.div>
+                                        </motion.li>
                                     ))}
-                                </div>
-                            </div>
+                                </ul>
+                            </section>
                         ))}
                     </motion.div>
                 ) : (
@@ -141,10 +141,10 @@ export default function ContentIndex({
                         initial="initial"
                         animate={introFinished ? "animate" : "initial"}
                     >
-                        <h5 className="my-auto h-full text-[var(--content-primary)]">{emptyMessage}</h5>
+                        <p className="h5 my-auto h-full text-[var(--content-primary)]">{emptyMessage}</p>
                     </Motion>
                 )}
             </div>
-        </div>
+        </section>
     );
 }

@@ -85,14 +85,14 @@ export default function InfoBlock({
                     </motion.div>
                 ) : null}
 
-                <motion.h2
-                    className={!isCentered ? 'whitespace-nowrap flex-shrink-0' : undefined}
+                <motion.h1
+                    className={['h2', !isCentered ? 'whitespace-nowrap flex-shrink-0' : ''].join(' ')}
                     variants={textContainerVariants}
                 >
                     {animateText(title)}
-                </motion.h2>
+                </motion.h1>
 
-                <motion.p
+                <motion.span
                     className={[
                         'h6 text-[var(--content-primary)]',
                         !isCentered ? 'whitespace-nowrap flex-shrink-0' : '',
@@ -100,7 +100,7 @@ export default function InfoBlock({
                     variants={textContainerVariants}
                 >
                     {animateText(String(number))}
-                </motion.p>
+                </motion.span>
             </motion.div>
 
             <motion.p

@@ -57,7 +57,7 @@ function BookCard({
     isVisible,
 }: BookCardProps) {
     return (
-        <motion.div
+        <motion.article
             initial={{ opacity: 0, y: 30 }}
             animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ ...springBouncy, delay: index * 0.08 }}
@@ -72,7 +72,7 @@ function BookCard({
                 imageWidth={data.width}
                 imageHeight={data.height}
             />
-        </motion.div>
+        </motion.article>
     );
 }
 
@@ -123,7 +123,7 @@ export default function ReadingListContent() {
     }
 
     return (
-        <div className="flex flex-col lg:flex-row w-full gap-7 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
+        <section className="flex flex-col lg:flex-row w-full gap-7 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
             <InfoBlock
                 title="Reading List"
                 number={books.length}
@@ -163,6 +163,6 @@ export default function ReadingListContent() {
                     </div>
                 )}
             </div>
-        </div>
+        </section>
     );
 }

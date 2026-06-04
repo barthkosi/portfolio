@@ -25,7 +25,7 @@ function IllustrationCard({
     isVisible,
 }: RenderComponentProps<IllustrationItem> & { isVisible: boolean }) {
     return (
-        <motion.div
+        <motion.article
             initial={{ opacity: 0, y: 30 }}
             animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
             transition={{ ...springBouncy, delay: index * 0.05 }}
@@ -37,7 +37,7 @@ function IllustrationCard({
                 imageWidth={data.width}
                 imageHeight={data.height}
             />
-        </motion.div>
+        </motion.article>
     );
 }
 
@@ -58,7 +58,7 @@ export default function IllustrationsContent() {
     }
 
     return (
-        <div className="flex flex-col w-full gap-7 lg:gap-8 h-auto items-center justify-center">
+        <section className="flex flex-col w-full gap-7 lg:gap-8 h-auto items-center justify-center">
             <div className="max-w-[480px]">
                 <InfoBlock
                     variant="centered"
@@ -78,6 +78,6 @@ export default function IllustrationsContent() {
                     render={renderCard}
                 />
             </div>
-        </div>
+        </section>
     );
 }

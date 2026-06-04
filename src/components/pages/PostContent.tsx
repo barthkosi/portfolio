@@ -672,9 +672,9 @@ export default function PostContent({
     };
 
     return (
-        <main className="flex flex-col">
+        <article className="flex flex-col">
             {post.bannerImage && (
-                <div className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/6]">
+                <figure className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/6]">
                     <Image
                         loader={getImageLoader(post.bannerImage)}
                         src={post.bannerImage}
@@ -685,7 +685,7 @@ export default function PostContent({
                         priority
                         data-original-src={post.bannerImage}
                     />
-                </div>
+                </figure>
             )}
 
             <motion.div
@@ -694,22 +694,22 @@ export default function PostContent({
                 transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                 className={`relative flex flex-col items-center lg:items-start w-full p-4 md:p-8 mx-auto gap-8 ${isDefaultLayout ? "max-w-[720px]" : ""}`}
             >
-                <div className="w-full flex flex-col gap-4 items-start md:items-center">
+                <header className="w-full flex flex-col gap-4 items-start md:items-center">
                     <h1 className="text-start md:text-center text-[var(--content-primary)]">{post.title}</h1>
                     <div className="flex flex-col items-start md:items-center gap-4 text-[var(--content-tertiary)] label-s">
                         <div className="flex flex-col items-start md:items-center gap-2">
-                            <span className="label-m" suppressHydrationWarning>
+                            <time className="label-m" dateTime={post.date || undefined} suppressHydrationWarning>
                                 {post.date ? formatDateWithOrdinal(post.date) : ""}
-                            </span>
+                            </time>
                         </div>
                         {post.tags && post.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
+                            <ul className="flex flex-wrap gap-1">
                                 {post.tags.map((tag) => (
-                                    <span key={tag} className="px-4 py-2 rounded-xl border-[var(--border-primary)] border-[0.4px]">
+                                    <li key={tag} className="px-4 py-2 rounded-xl border-[var(--border-primary)] border-[0.4px]">
                                         {tag}
-                                    </span>
+                                    </li>
                                 ))}
-                            </div>
+                            </ul>
                         )}
                         {post.buttonText && post.buttonLink && (
                             <Button href={post.buttonLink} openInNewTab>
@@ -717,14 +717,14 @@ export default function PostContent({
                             </Button>
                         )}
                     </div>
-                </div>
+                </header>
 
                 <div className="relative w-full">
-                    <article className={`w-full ${post.layout === "full" ? "" : "max-w-[640px]"}`}>
+                    <section className={`w-full ${post.layout === "full" ? "" : "max-w-[640px]"}`}>
                         <ReactMarkdown components={markdownComponents}>
                             {processContent(post.content || "")}
                         </ReactMarkdown>
-                    </article>
+                    </section>
 
                     {isDefaultLayout && headings.length > 0 && (
                         <aside className="hidden xl:block absolute top-0 left-[100%] ml-8 w-[200px] h-full pointer-events-none">
@@ -735,30 +735,31 @@ export default function PostContent({
                     )}
                 </div>
 
-                <div className="w-full flex justify-between items-center pt-4 md:pt-6 border-t border-[var(--border-primary)]">
+                <nav className="w-full flex justify-between items-center pt-4 md:pt-6 border-t border-[var(--border-primary)]" aria-label="Post navigation">
                     {prevPost ? <PostNavigationLink direction="previous" href={`/${type}/${prevPost.slug}`} /> : <span />}
                     {nextPost ? <PostNavigationLink direction="next" href={`/${type}/${nextPost.slug}`} /> : <span />}
-                </div>
+                </nav>
 
                 {filteredOtherPosts.length > 0 && (
-                    <div className="w-full flex flex-col gap-5">
-                        <h3 className="h4 text-[var(--content-primary)]">More {type}</h3>
-                        <div className="flex flex-col gap-4">
+                    <section className="w-full flex flex-col gap-5">
+                        <h2 className="h4 text-[var(--content-primary)]">More {type}</h2>
+                        <ul className="flex flex-col gap-4">
                             {filteredOtherPosts.map((otherPost) => (
-                                <Card
-                                    key={otherPost.slug}
-                                    image={otherPost.coverImage || ""}
-                                    title={otherPost.title}
-                                    description={otherPost.description}
-                                    link={`/${type}/${otherPost.slug}`}
-                                    variant="list"
-                                    aspectRatio="aspect-video"
-                                />
+                                <li key={otherPost.slug}>
+                                    <Card
+                                        image={otherPost.coverImage || ""}
+                                        title={otherPost.title}
+                                        description={otherPost.description}
+                                        link={`/${type}/${otherPost.slug}`}
+                                        variant="list"
+                                        aspectRatio="aspect-video"
+                                    />
+                                </li>
                             ))}
-                        </div>
-                    </div>
+                        </ul>
+                    </section>
                 )}
             </motion.div>
-        </main>
+        </article>
     );
 }
