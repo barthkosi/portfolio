@@ -24,39 +24,41 @@ export default function FeaturedWorkSection() {
                 <h2 className="h4">Featured Work</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full">
                 {featuredWorkItems.slice(0, 2).map((item) => (
-                    <Card
-                        key={item.id}
-                        image={item.image}
-                        title={item.title}
-                        description={item.description}
-                        link={item.link}
-                        tags={item.tags}
-                        aspectRatio={item.aspectRatio}
-                        shimmerAspectRatio={item.aspectRatio === "auto" ? "3 / 2" : item.aspectRatio}
-                        variant="list-stacked"
-                        locked={item.locked}
-                    />
+                    <li key={item.id}>
+                        <Card
+                            image={item.image}
+                            title={item.title}
+                            description={item.description}
+                            link={item.link}
+                            tags={item.tags}
+                            aspectRatio={item.aspectRatio}
+                            shimmerAspectRatio={item.aspectRatio === "auto" ? "3 / 2" : item.aspectRatio}
+                            variant="list-stacked"
+                            locked={item.locked}
+                        />
+                    </li>
                 ))}
-            </div>
+            </ul>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
+            <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
                 {featuredWorkItems.slice(2).map((item) => (
-                    <Card
-                        key={item.id}
-                        image={item.image}
-                        title={item.title}
-                        description={item.description}
-                        link={item.link}
-                        tags={item.tags}
-                        aspectRatio={item.aspectRatio}
-                        shimmerAspectRatio={item.aspectRatio === "auto" ? "3 / 2" : item.aspectRatio}
-                        variant="list-stacked"
-                        locked={item.locked}
-                    />
+                    <li key={item.id}>
+                        <Card
+                            image={item.image}
+                            title={item.title}
+                            description={item.description}
+                            link={item.link}
+                            tags={item.tags}
+                            aspectRatio={item.aspectRatio}
+                            shimmerAspectRatio={item.aspectRatio === "auto" ? "3 / 2" : item.aspectRatio}
+                            variant="list-stacked"
+                            locked={item.locked}
+                        />
+                    </li>
                 ))}
-            </div>
+            </ul>
 
             <Button to="/work" variant="secondary">View All Work</Button>
         </section>

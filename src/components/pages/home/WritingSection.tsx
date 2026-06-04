@@ -20,7 +20,7 @@ export default function WritingSection() {
         <section className="overflow-visible flex flex-col lg:flex-row items-center gap-8 px-4 md:px-8 py-8 md:py-12">
             <div className="w-full max-w-[400px] flex flex-col gap-2 items-center lg:items-start text-center lg:text-left lg:top-[134px] sticky self-start mx-auto">
                 <div className="w-full">
-                    <h3>Writing</h3>
+                    <h2 className="h3">Writing</h2>
                 </div>
                 <div className="w-full">
                     <p className="text-[var(--content-secondary)]">I write about tech, design and the messy human condition.</p>
@@ -32,9 +32,9 @@ export default function WritingSection() {
                 </div>
             </div>
 
-            <div className="w-full flex flex-col gap-5 lg:gap-20">
+            <ul className="w-full flex flex-col gap-5 lg:gap-20">
                 {homeWriting.map((item, index) => (
-                    <div
+                    <li
                         key={item.id}
                         className={index === 0 ? "w-full lg:top-[134px] lg:sticky self-start" : "w-full lg:top-[134px] sticky self-start"}
                     >
@@ -46,9 +46,9 @@ export default function WritingSection() {
                             variant="list-stacked"
                             locked={item.locked}
                         />
-                    </div>
+                    </li>
                 ))}
-            </div>
+            </ul>
 
             <div className="w-fit lg:hidden">
                 <Button to="/writing" variant="secondary">

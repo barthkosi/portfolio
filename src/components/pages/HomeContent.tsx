@@ -11,7 +11,7 @@ import {
 
 export default function HomeContent() {
     return (
-        <main>
+        <>
             <div className='overflow-hidden flex flex-col items-center gap-8 lg:gap-16'>
                 <HeroSection />
                 <FeaturedWorkSection />
@@ -20,6 +20,6 @@ export default function HomeContent() {
             <ExplorationsSection />
             <WritingSection />
             <JoinFamilySection />
-        </main>
+        </>
     );
 }
