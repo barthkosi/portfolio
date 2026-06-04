@@ -3,10 +3,10 @@
 import {
     HeroSection,
     FeaturedWorkSection,
+    AboutSection,
     ExplorationsSection,
     WritingSection,
-    JoinFamilySection,
-    AboutSection
+    JoinFamilySection    
 } from "@/components/pages/home";
 
 export default function HomeContent() {
