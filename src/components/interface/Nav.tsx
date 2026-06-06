@@ -11,6 +11,18 @@ import { anim, physics, pressScale } from "@/lib/transitions";
 import navData from "@/data/navigation.json";
 import socialData from "@/data/social-links.json";
 
+const NAV_MENU_VAULT_LABEL_TRANSITION = {
+    ...physics.standard,
+    delay: 0.55,
+    duration: 0.16,
+};
+
+const NAV_MENU_SOCIAL_LABEL_TRANSITION = {
+    ...physics.standard,
+    delay: 0.55,
+    duration: 0.16,
+};
+
 export default function Nav() {
     const pathname = usePathname();
     const [menuState, setMenuState] = useState({ isOpen: false, path: pathname });
@@ -231,8 +243,8 @@ export default function Nav() {
                             visible: {
                                 opacity: 1,
                                 transition: {
-                                    staggerChildren: 0.08,
-                                    delayChildren: 0.1,
+                                    staggerChildren: 0.035,
+                                    delayChildren: 0.04,
                                 },
                             },
                         }}
@@ -262,7 +274,7 @@ export default function Nav() {
                             <motion.div
                                 variants={{
                                     hidden: { opacity: 0 },
-                                    visible: { opacity: 1, transition: { ...physics.standard, delay: 1.6 } },
+                                    visible: { opacity: 1, transition: NAV_MENU_VAULT_LABEL_TRANSITION },
                                 }}
                             >
                                 <div className="label-s text-[var(--content-tertiary)]">Vault</div>
@@ -288,7 +300,7 @@ export default function Nav() {
                             <motion.div
                                 variants={{
                                     hidden: { opacity: 0 },
-                                    visible: { opacity: 1, transition: { ...physics.standard, delay: 1.6 } },
+                                    visible: { opacity: 1, transition: NAV_MENU_SOCIAL_LABEL_TRANSITION },
                                 }}
                             >
                                 <div className="label-s text-[var(--content-tertiary)]">Social</div>
@@ -317,13 +329,8 @@ export default function Nav() {
                         <motion.div
                             className="w-full"
                             variants={{
-                                hidden: { opacity: 0, scaleX: 0, originX: 0 },
-                                visible: {
-                                    opacity: 1,
-                                    scaleX: 1,
-                                    originX: 0,
-                                    transition: physics.bouncy,
-                                },
+                                hidden: anim.fadeDownBouncyBouncy.hidden,
+                                visible: anim.fadeDownBouncyBouncy.visible,
                             }}
                         >
                             <Button
