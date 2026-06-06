@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Illustrations by Barth Kosi",
         description: "A visual diary of forms. I believe only in continued iteration.",
-        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v3-illustrations-og.avif" }],
+        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v1780760350/og/illustrations.png" }],
     },
 };
 

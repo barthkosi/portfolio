@@ -13,13 +13,13 @@ export const metadata: Metadata = {
         url: SITE_URL,
         title: "Barth Kosi - Design & Engineering",
         description: "Barth Kosi creates visual systems and digital experiences. Explore my portfolio of web interactions, engineered solutions, and dynamic motion design.",
-        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/opengraph.avif" }],
+        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v1780760347/og/main.png" }],
     },
     twitter: {
         card: "summary_large_image",
         title: "Barth Kosi - Design & Engineering",
         description: "Barth Kosi creates visual systems and digital experiences. Explore my portfolio of web interactions, engineered solutions, and dynamic motion design.",
-        images: ["https://res.cloudinary.com/barthkosi/image/upload/opengraph.avif"],
+        images: ["https://res.cloudinary.com/barthkosi/image/upload/v1780760347/og/main.png"],
     },
 };
 

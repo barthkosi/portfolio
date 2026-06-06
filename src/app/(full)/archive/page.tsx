@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Archive by Barth Kosi",
         description: "A comprehensive archive of my work and experiments.",
-        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v3-archive-og.avif" }],
+        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v1780760353/og/archive.png" }],
     },
 };
 
