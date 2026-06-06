@@ -63,6 +63,21 @@ export function getCloudinaryOptimizedVideoSrc(src: string) {
     return `${src.slice(0, insertIndex)}${transformation}/${src.slice(insertIndex)}`;
 }
 
+export function getCloudinaryVideoThumbnailSrc(src: string, width = 1200) {
+    const uploadIndex = src.indexOf(CLOUDINARY_VIDEO_UPLOAD_SEGMENT);
+
+    if (uploadIndex === -1) {
+        return src;
+    }
+
+    const insertIndex = uploadIndex + CLOUDINARY_VIDEO_UPLOAD_SEGMENT.length;
+    const requestedWidth = Math.max(1, Math.round(width));
+    const transformation = `so_1,w_${requestedWidth},c_limit,f_jpg,q_auto:best`;
+    const assetPath = src.slice(insertIndex).replace(/\.(mp4|webm|ogg|mov|avi|ogv)(?=([?#]|$))/i, ".jpg");
+
+    return `${src.slice(0, insertIndex)}${transformation}/${assetPath}`;
+}
+
 export function getOriginalImageSource(src: string, baseUrl?: string) {
     const trimmedSrc = src.trim();
 
