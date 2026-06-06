@@ -469,7 +469,7 @@ export default function ContextMenu() {
             {isOpen && (
                 <motion.div
                     key={openKey}
-                    className="fixed z-[100] min-w-[220px] bg-[var(--background-secondary)] border border-[var(--border-primary)] rounded-xl shadow-2xl p-1 backdrop-blur-md cursor-pointer"
+                    className="fixed z-[120] min-w-[220px] bg-[var(--background-secondary)] border border-[var(--border-primary)] rounded-xl shadow-2xl p-1 backdrop-blur-md cursor-pointer"
                     variants={{
                         initial: { opacity: 0, scale: 0.98, y: 4 },
                         animate: { opacity: 1, scale: 1, y: 0 },
