@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Konva from "konva";
+import { AnimatePresence, motion } from "motion/react";
+import { createPortal } from "react-dom";
 import archiveData from "@/data/archive.json";
+import Button from "@/components/interface/Button";
 
 /* -------------------------------------------------------------------------- */
 /*                                    Config                                  */
@@ -21,6 +24,8 @@ const MAX_SCALE = 1.5;
 const DRAG_DECELERATION = 0.79;
 const WHEEL_IMPULSE = 0.18;
 const CLICK_MOVE_THRESHOLD = 6;
+const OPEN_CENTER_THRESHOLD = 24;
+const OPEN_AFTER_CENTER_DELAY = 420;
 
 const TRACKPAD_ZOOM_SENSITIVITY = 0.0015;
 const TRACKPAD_PINCH_ZOOM_SENSITIVITY = 0.012;
@@ -81,6 +86,37 @@ type Tile = {
 type LoadCandidate = {
     tile: Tile;
     distanceFromCenter: number;
+};
+
+type ActiveArchiveTile = {
+    image: string;
+    previewImage: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    naturalWidth: number;
+    naturalHeight: number;
+};
+
+type OpenArchiveImage = {
+    image: string;
+    previewImage: string;
+    origin: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
+    naturalWidth: number;
+    naturalHeight: number;
+};
+
+type Rect = {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 };
 
 const archive = archiveData as ArchiveItem[];
@@ -207,13 +243,66 @@ const getImageRequestWidth = (itemWidth: number) => {
     );
 };
 
+const getContainedRect = (
+    contentWidth: number,
+    contentHeight: number,
+    viewportWidth: number,
+    viewportHeight: number
+): Rect => {
+    const marginX = viewportWidth < MOBILE_BREAKPOINT ? 24 : 70;
+    const marginY = viewportWidth < MOBILE_BREAKPOINT ? 72 : 40;
+    const availableWidth = Math.max(1, viewportWidth - marginX * 2);
+    const availableHeight = Math.max(1, viewportHeight - marginY * 2);
+    const scale = Math.min(
+        availableWidth / contentWidth,
+        availableHeight / contentHeight
+    );
+    const width = contentWidth * scale;
+    const height = contentHeight * scale;
+
+    return {
+        x: (viewportWidth - width) / 2,
+        y: (viewportHeight - height) / 2,
+        width,
+        height,
+    };
+};
+
 /* -------------------------------------------------------------------------- */
 /*                                  Component                                 */
 /* -------------------------------------------------------------------------- */
 
 export default function ArchiveContent() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const activeTileRef = useRef<Tile | null>(null);
+    const openActiveTileRef = useRef<(() => void) | null>(null);
+    const activeTileClearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+        null
+    );
+    const isActiveTileControlHoveredRef = useRef(false);
     const [sceneReady, setSceneReady] = useState(false);
+    const [activeTile, setActiveTile] = useState<ActiveArchiveTile | null>(null);
+    const [openImage, setOpenImage] = useState<OpenArchiveImage | null>(null);
+    const [isOpenImageLoaded, setIsOpenImageLoaded] = useState(false);
+    const portalRoot =
+        typeof document === "undefined" ? null : document.body;
+
+    useEffect(() => {
+        if (!openImage) return;
+
+        const image = new Image();
+        image.onload = () => setIsOpenImageLoaded(true);
+        image.src = openImage.image;
+
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                setOpenImage(null);
+            }
+        };
+
+        window.addEventListener("keydown", handleEscape);
+        return () => window.removeEventListener("keydown", handleEscape);
+    }, [openImage]);
 
     useEffect(() => {
         const container = containerRef.current;
@@ -277,6 +366,7 @@ export default function ArchiveContent() {
         let activeImageLoads = 0;
         let imageLoadTimer: ReturnType<typeof setTimeout> | null = null;
         let imageLoadResumeTimer: ReturnType<typeof setTimeout> | null = null;
+        let openAfterCenterTimer: ReturnType<typeof setTimeout> | null = null;
         let isInteractionActive = false;
         let hasRevealedScene = false;
 
@@ -675,6 +765,7 @@ export default function ArchiveContent() {
             }
 
             queueTileImages(loadCandidates);
+            syncActiveTileBounds();
             layer.batchDraw();
         };
 
@@ -730,6 +821,67 @@ export default function ArchiveContent() {
             return null;
         };
 
+        const getTileScreenBounds = (tile: Tile): ActiveArchiveTile | null => {
+            if (
+                tile.renderedX === null ||
+                tile.renderedY === null ||
+                tile.renderedScale === null
+            ) {
+                return null;
+            }
+
+            const containerBounds = container.getBoundingClientRect();
+
+            return {
+                image: tile.item.image,
+                previewImage:
+                    tile.imageElement?.src ||
+                    getOptimizedImageSrc(tile.item.image, imageRequestWidth),
+                x: containerBounds.left + tile.renderedX,
+                y: containerBounds.top + tile.renderedY,
+                width: tile.width * tile.renderedScale,
+                height: tile.height * tile.renderedScale,
+                naturalWidth: tile.item.width,
+                naturalHeight: tile.item.height,
+            };
+        };
+
+        const setActiveTileFromTile = (tile: Tile | null) => {
+            if (activeTileClearTimerRef.current !== null) {
+                clearTimeout(activeTileClearTimerRef.current);
+                activeTileClearTimerRef.current = null;
+            }
+
+            activeTileRef.current = tile;
+
+            if (!tile) {
+                setActiveTile(null);
+                return;
+            }
+
+            setActiveTile(getTileScreenBounds(tile));
+        };
+
+        const syncActiveTileBounds = () => {
+            const tile = activeTileRef.current;
+            if (!tile) return;
+
+            const bounds = getTileScreenBounds(tile);
+
+            if (!bounds) {
+                setActiveTileFromTile(null);
+                return;
+            }
+
+            const isVisible =
+                bounds.x + bounds.width >= 0 &&
+                bounds.x <= stage.width() &&
+                bounds.y + bounds.height >= 0 &&
+                bounds.y <= stage.height();
+
+            setActiveTile(isVisible ? bounds : null);
+        };
+
         const centerTile = (tile: Tile) => {
             if (
                 tile.renderedX === null ||
@@ -760,6 +912,69 @@ export default function ArchiveContent() {
                 y: dy * impulseScale,
             };
             startAnimation();
+        };
+
+        const isTileCentered = (tile: Tile) => {
+            if (
+                tile.renderedX === null ||
+                tile.renderedY === null ||
+                tile.renderedScale === null
+            ) {
+                return true;
+            }
+
+            const tileCenterX =
+                tile.renderedX + (tile.width * tile.renderedScale) / 2;
+            const tileCenterY =
+                tile.renderedY + (tile.height * tile.renderedScale) / 2;
+
+            return (
+                Math.abs(tileCenterX - stage.width() / 2) <=
+                    OPEN_CENTER_THRESHOLD &&
+                Math.abs(tileCenterY - stage.height() / 2) <=
+                    OPEN_CENTER_THRESHOLD
+            );
+        };
+
+        const openTileFromCurrentBounds = (tile: Tile) => {
+            const bounds = getTileScreenBounds(tile);
+
+            if (!bounds) return;
+
+            setIsOpenImageLoaded(false);
+            setOpenImage({
+                image: bounds.image,
+                previewImage: bounds.previewImage,
+                origin: {
+                    x: bounds.x,
+                    y: bounds.y,
+                    width: bounds.width,
+                    height: bounds.height,
+                },
+                naturalWidth: bounds.naturalWidth,
+                naturalHeight: bounds.naturalHeight,
+            });
+        };
+
+        openActiveTileRef.current = () => {
+            const tile = activeTileRef.current;
+
+            if (!tile) return;
+
+            if (isTileCentered(tile)) {
+                openTileFromCurrentBounds(tile);
+                return;
+            }
+
+            centerTile(tile);
+            if (openAfterCenterTimer !== null) {
+                clearTimeout(openAfterCenterTimer);
+            }
+
+            openAfterCenterTimer = setTimeout(() => {
+                openAfterCenterTimer = null;
+                openTileFromCurrentBounds(tile);
+            }, OPEN_AFTER_CENTER_DELAY);
         };
 
         /* ------------------------------------------------------------------ */
@@ -903,6 +1118,7 @@ export default function ArchiveContent() {
                 return;
             }
 
+            setActiveTileFromTile(null);
             pauseImageLoading();
             isDragging = true;
             hasDraggedSincePointerStart = false;
@@ -961,6 +1177,7 @@ export default function ArchiveContent() {
         const handlePointerEnd = (
             event?: Konva.KonvaEventObject<MouseEvent | TouchEvent>
         ) => {
+            const pointer = stage.getPointerPosition() ?? pointerStart;
             const shouldCenterClickedTile =
                 isDragging &&
                 event?.type === "mouseup" &&
@@ -968,7 +1185,16 @@ export default function ArchiveContent() {
                 event.evt.button === 0 &&
                 !hasDraggedSincePointerStart;
             const clickedTile = shouldCenterClickedTile
-                ? getTileAtPoint(stage.getPointerPosition() ?? pointerStart)
+                ? getTileAtPoint(pointer)
+                : null;
+            const shouldSelectTouchedTile =
+                isDragging &&
+                event &&
+                isTouchEvent(event.evt) &&
+                event.evt.touches.length < 2 &&
+                !hasDraggedSincePointerStart;
+            const touchedTile = shouldSelectTouchedTile
+                ? getTileAtPoint(pointer)
                 : null;
 
             if (event && isTouchEvent(event.evt)) {
@@ -982,12 +1208,56 @@ export default function ArchiveContent() {
             isDragging = false;
             container.style.cursor = CURSOR_GRAB;
 
+            if (touchedTile) {
+                setActiveTileFromTile(touchedTile);
+                startAnimation();
+                return;
+            }
+
             if (clickedTile) {
                 centerTile(clickedTile);
                 return;
             }
 
             startAnimation();
+        };
+
+        const handleMouseMove = (event: MouseEvent) => {
+            if (isDragging) return;
+
+            if (activeTileClearTimerRef.current !== null) {
+                clearTimeout(activeTileClearTimerRef.current);
+                activeTileClearTimerRef.current = null;
+            }
+
+            const rect = container.getBoundingClientRect();
+            const tile = getTileAtPoint({
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top,
+            });
+
+            if (tile === activeTileRef.current) return;
+
+            setActiveTileFromTile(tile);
+        };
+
+        const handleMouseLeave = (event: MouseEvent) => {
+            if (
+                event.relatedTarget instanceof Node &&
+                container.parentElement?.contains(event.relatedTarget)
+            ) {
+                return;
+            }
+
+            if (!isDragging && activeTileClearTimerRef.current === null) {
+                activeTileClearTimerRef.current = setTimeout(() => {
+                    activeTileClearTimerRef.current = null;
+
+                    if (!isActiveTileControlHoveredRef.current) {
+                        setActiveTileFromTile(null);
+                    }
+                }, 120);
+            }
         };
 
         const endTrackpadPinchGesture = () => {
@@ -1143,6 +1413,8 @@ export default function ArchiveContent() {
         container.addEventListener("touchcancel", handleContainerTouchEnd, {
             passive: false,
         });
+        container.addEventListener("mousemove", handleMouseMove);
+        container.addEventListener("mouseleave", handleMouseLeave);
         container.addEventListener("touchend", handlePinchEnd);
         container.addEventListener("touchcancel", handlePinchEnd);
         container.addEventListener("contextmenu", handleContextMenu);
@@ -1158,6 +1430,7 @@ export default function ArchiveContent() {
 
         return () => {
             isMounted = false;
+            openActiveTileRef.current = null;
             tileGeneration += 1;
             stopAnimation();
 
@@ -1185,6 +1458,15 @@ export default function ArchiveContent() {
                 clearTimeout(imageLoadResumeTimer);
             }
 
+            if (openAfterCenterTimer !== null) {
+                clearTimeout(openAfterCenterTimer);
+            }
+
+            if (activeTileClearTimerRef.current !== null) {
+                clearTimeout(activeTileClearTimerRef.current);
+                activeTileClearTimerRef.current = null;
+            }
+
             window.removeEventListener("resize", handleResize);
             window.removeEventListener("keydown", handleKeyDown);
             window.removeEventListener("keyup", handleKeyUp);
@@ -1199,6 +1481,8 @@ export default function ArchiveContent() {
                 "touchcancel",
                 handleContainerTouchEnd
             );
+            container.removeEventListener("mousemove", handleMouseMove);
+            container.removeEventListener("mouseleave", handleMouseLeave);
             container.removeEventListener("touchend", handlePinchEnd);
             container.removeEventListener("touchcancel", handlePinchEnd);
             container.removeEventListener("contextmenu", handleContextMenu);
@@ -1208,9 +1492,19 @@ export default function ArchiveContent() {
         };
     }, []);
 
+    const openImageTarget =
+        openImage && typeof window !== "undefined"
+            ? getContainedRect(
+                  openImage.naturalWidth,
+                  openImage.naturalHeight,
+                  window.innerWidth,
+                  window.innerHeight
+              )
+            : null;
+
     return (
         <div
-            className="w-full h-full"
+            className="relative w-full h-full"
             style={{
                 opacity: sceneReady ? 1 : 0,
                 transform: `scale(${sceneReady ? 1 : 1.2})`,
@@ -1229,6 +1523,152 @@ export default function ArchiveContent() {
                     WebkitOverflowScrolling: "auto",
                 }}
             />
+
+            {portalRoot &&
+                createPortal(
+                    <>
+                        <AnimatePresence>
+                            {activeTile && !openImage && (
+                                <motion.div
+                                    className="fixed z-[100] pointer-events-auto"
+                                    style={{
+                                        left: activeTile.x + activeTile.width / 2,
+                                        top: activeTile.y + activeTile.height - 8,
+                                        translate: "-50% -100%",
+                                    }}
+                                    onMouseEnter={() => {
+                                        isActiveTileControlHoveredRef.current = true;
+
+                                        if (activeTileClearTimerRef.current !== null) {
+                                            clearTimeout(activeTileClearTimerRef.current);
+                                            activeTileClearTimerRef.current = null;
+                                        }
+                                    }}
+                                    onMouseLeave={() => {
+                                        isActiveTileControlHoveredRef.current = false;
+                                        activeTileRef.current = null;
+                                        setActiveTile(null);
+                                    }}
+                                    initial={{ opacity: 0, y: 4, scale: 0.96 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: 4, scale: 0.96 }}
+                                    transition={{
+                                        type: "spring",
+                                        duration: 0.3,
+                                        bounce: 0,
+                                    }}
+                                >
+                                    <Button
+                                        size="sm"
+                                        onClick={() => openActiveTileRef.current?.()}
+                                        className="min-h-10 px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+                                    >
+                                        Open
+                                    </Button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <AnimatePresence>
+                            {openImage && openImageTarget && (
+                                <motion.div
+                                    className="fixed inset-0 z-[110] bg-black/72"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{
+                                        duration: 0.2,
+                                        ease: [0.23, 1, 0.32, 1],
+                                    }}
+                                    onClick={() => setOpenImage(null)}
+                                >
+                                    <motion.div
+                                        className="fixed overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.4)] outline outline-1 outline-white/10"
+                                        style={{
+                                            left: openImageTarget.x,
+                                            top: openImageTarget.y,
+                                            width: openImageTarget.width,
+                                            height: openImageTarget.height,
+                                            transformOrigin: "top left",
+                                        }}
+                                        initial={{
+                                            x: openImage.origin.x - openImageTarget.x,
+                                            y: openImage.origin.y - openImageTarget.y,
+                                            scale:
+                                                openImage.origin.width /
+                                                openImageTarget.width,
+                                            opacity: 1,
+                                        }}
+                                        animate={{
+                                            x: 0,
+                                            y: 0,
+                                            scale: 1,
+                                            opacity: 1,
+                                        }}
+                                        exit={{
+                                            x: openImage.origin.x - openImageTarget.x,
+                                            y: openImage.origin.y - openImageTarget.y,
+                                            scale:
+                                                openImage.origin.width /
+                                                openImageTarget.width,
+                                            opacity: 0,
+                                        }}
+                                        transition={{
+                                            type: "spring",
+                                            duration: 0.45,
+                                            bounce: 0,
+                                        }}
+                                        onClick={(event) => event.stopPropagation()}
+                                    >
+                                        <img
+                                            src={
+                                                isOpenImageLoaded
+                                                    ? openImage.image
+                                                    : openImage.previewImage
+                                            }
+                                            alt=""
+                                            className="h-full w-full object-contain"
+                                        />
+                                    </motion.div>
+
+                                    <button
+                                        type="button"
+                                        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)] backdrop-blur-md transition-[background-color,transform] duration-150 hover:bg-white/16 active:scale-[0.96] md:right-6 md:top-6"
+                                        aria-label="Close image"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            setOpenImage(null);
+                                        }}
+                                    >
+                                        <svg
+                                            width="32"
+                                            height="32"
+                                            viewBox="0 0 32 32"
+                                            fill="none"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M8 8L25 25"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                fill="none"
+                                            />
+                                            <path
+                                                d="M8 25L25 8"
+                                                stroke="currentColor"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                fill="none"
+                                            />
+                                        </svg>
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </>,
+                    portalRoot
+                )}
         </div>
     );
 }
