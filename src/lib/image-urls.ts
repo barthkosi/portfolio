@@ -57,8 +57,12 @@ export function getCloudinaryOptimizedVideoSrc(src: string) {
         return src;
     }
 
-    const insertIndex = uploadIndex + CLOUDINARY_VIDEO_UPLOAD_SEGMENT.length;
     const transformation = "f_auto,q_auto:eco,vc_auto";
+    if (src.includes(transformation)) {
+        return src;
+    }
+
+    const insertIndex = uploadIndex + CLOUDINARY_VIDEO_UPLOAD_SEGMENT.length;
 
     return `${src.slice(0, insertIndex)}${transformation}/${src.slice(insertIndex)}`;
 }
