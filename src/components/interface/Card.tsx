@@ -1,7 +1,11 @@
 "use client";
 
 import { pressScale } from "@/lib/transitions";
-import { getCloudinaryOptimizedVideoSrc, isCloudinaryVideoUrl } from "@/lib/image-urls";
+import {
+    getCloudinaryOptimizedVideoSrc,
+    getCloudinaryVideoThumbnailSrc,
+    isCloudinaryVideoUrl,
+} from "@/lib/image-urls";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
@@ -98,9 +102,11 @@ function CardMedia({
     });
     const isMounted = useRef(true);
     const isVideo = isVideoUrl(image);
-    const mediaSrc = isVideo && isCloudinaryVideoUrl(image)
+    const isCloudinaryVideo = isVideo && isCloudinaryVideoUrl(image);
+    const mediaSrc = isCloudinaryVideo
         ? getCloudinaryOptimizedVideoSrc(image)
         : image;
+    const posterSrc = isCloudinaryVideo ? getCloudinaryVideoThumbnailSrc(image, imageWidth ?? 1200) : undefined;
     const isAuto = aspectRatio === "auto";
     const normalizedAspectRatio = normalizeAspectRatio(aspectRatio);
     const normalizedShimmerAspectRatio = normalizeAspectRatio(shimmerAspectRatio);
@@ -159,7 +165,7 @@ function CardMedia({
             {locked && <LockedBadge />}
 
             <AnimatePresence>
-                {status === "loading" && (
+                {status === "loading" && !posterSrc && (
                     <motion.div
                         initial={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -167,6 +173,20 @@ function CardMedia({
                     />
                 )}
             </AnimatePresence>
+
+            {posterSrc && status === "loading" && (
+                <Image
+                    src={posterSrc}
+                    alt={title ? `Video thumbnail for ${title}` : "Video thumbnail"}
+                    fill
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className={cn(
+                        "absolute inset-0 h-full w-full object-cover",
+                        locked && "grayscale"
+                    )}
+                    priority={false}
+                />
+            )}
 
             {status === "error" && (
                 <div
@@ -182,13 +202,18 @@ function CardMedia({
             {isVideo ? (
                 <video
                     src={mediaSrc}
+                    poster={posterSrc}
                     className={mediaClasses}
                     data-original-src={image}
                     autoPlay
                     muted
                     loop
                     playsInline
+                    preload="auto"
+                    onLoadedMetadata={handleLoad}
                     onLoadedData={handleLoad}
+                    onCanPlay={handleLoad}
+                    onPlaying={handleLoad}
                     onError={handleError}
                 />
             ) : isAuto ? (
