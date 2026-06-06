@@ -201,23 +201,23 @@ export default function ArchiveContent() {
                                         }}
                                     >
                                         <svg
-                                            width="32"
-                                            height="32"
+                                            width="20"
+                                            height="20"
                                             viewBox="0 0 32 32"
                                             fill="none"
                                             aria-hidden="true"
                                         >
                                             <path
-                                                d="M8 8L25 25"
+                                                d="M8 8L24 24"
                                                 stroke="currentColor"
-                                                strokeWidth="2"
+                                                strokeWidth="2.5"
                                                 strokeLinecap="round"
                                                 fill="none"
                                             />
                                             <path
-                                                d="M8 25L25 8"
+                                                d="M8 24L24 8"
                                                 stroke="currentColor"
-                                                strokeWidth="2"
+                                                strokeWidth="2.5"
                                                 strokeLinecap="round"
                                                 fill="none"
                                             />
