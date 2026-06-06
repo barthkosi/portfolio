@@ -59,32 +59,13 @@ export default function Nav() {
             animate={anim.fadeDown.animate}
             exit={anim.fadeDown.exit}
         >
-            {/* Progressive backdrop blur layers — hidden when menu is open */}
+            {/* Fading background cap — hidden when menu is open */}
             {!isOpen && (
                 <div className="absolute inset-0 -z-10 pointer-events-none">
-                    {[0, 2, 4, 6, 8].map((blur, i, arr) => {
-                        const opacity = 1 - (i / arr.length) * 0.1;
-                        return (
-                            <div
-                                key={blur}
-                                className="pointer-events-none absolute inset-0"
-                                style={{
-                                    backdropFilter: `blur(${blur}px)`,
-                                    WebkitBackdropFilter: `blur(${blur}px)`,
-                                    maskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
-                                    WebkitMaskImage: "linear-gradient(to bottom, black 0%, transparent 100%)",
-                                    opacity,
-                                    zIndex: i,
-                                }}
-                            />
-                        );
-                    })}
-                    {/* Solid gradient cap — fades the background colour from top */}
                     <div
                         className="pointer-events-none absolute inset-0"
                         style={{
-                            background: "linear-gradient(to bottom, var(--background-primary), transparent)",
-                            zIndex: 5,
+                            background: "linear-gradient(to bottom, var(--background-primary) 1%, transparent 100%)",
                         }}
                     />
                 </div>
