@@ -1620,6 +1620,7 @@ export default function ArchiveContent() {
                                         }}
                                         onClick={(event) => event.stopPropagation()}
                                     >
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={
                                                 isOpenImageLoaded
