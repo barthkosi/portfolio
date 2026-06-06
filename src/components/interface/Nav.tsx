@@ -54,7 +54,7 @@ export default function Nav() {
 
     return (
         <motion.nav
-            className={`w-full flex flex-col ${isOpen ? "h-screen" : "h-[64px]"} md:h-[102px] p-4 md:p-8 items-start justify-between gap-6 sticky top-0 z-50 overflow-visible`}
+            className={`w-full flex flex-col ${isOpen ? "h-dvh" : "h-[64px]"} md:h-[102px] p-4 md:p-8 items-start justify-between gap-6 sticky top-0 z-50 overflow-visible`}
             initial={anim.fadeDown.initial}
             animate={anim.fadeDown.animate}
             exit={anim.fadeDown.exit}
@@ -221,7 +221,8 @@ export default function Nav() {
             <AnimatePresence>
                 {isOpen && (
                     <motion.div
-                        className="md:hidden absolute top-[64px] left-0 w-full h-screen px-4 py-4 h4 flex flex-col gap-3 text-[var(--content-primary)]"
+                        data-lenis-prevent
+                        className="md:hidden absolute top-[64px] left-0 w-full h-[calc(100dvh-64px)] overflow-y-auto px-4 pt-4 pb-12 h4 flex flex-col gap-3 text-[var(--content-primary)]"
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
