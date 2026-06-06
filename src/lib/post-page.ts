@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getContent, type ContentItem, type ContentType } from "@/lib/content";
+import { getCloudinaryVideoThumbnailSrc, isCloudinaryVideoUrl } from "@/lib/image-urls";
 import { SITE_URL } from "@/lib/site";
 
 export interface PostPageData {
@@ -23,6 +24,9 @@ export function getPostMetadata(type: ContentType, slug: string): Metadata {
     }
 
     const image = post.coverImage || post.bannerImage;
+    const socialImage = image && isCloudinaryVideoUrl(image)
+        ? getCloudinaryVideoThumbnailSrc(image)
+        : image;
 
     return {
         title: post.title,
@@ -30,9 +34,15 @@ export function getPostMetadata(type: ContentType, slug: string): Metadata {
         alternates: {
             canonical: `${SITE_URL}${getCanonicalPath(type, slug)}`,
         },
-        openGraph: image
+        openGraph: socialImage
             ? {
-                  images: [{ url: image }],
+                  images: [{ url: socialImage }],
+              }
+            : undefined,
+        twitter: socialImage
+            ? {
+                  card: "summary_large_image",
+                  images: [socialImage],
               }
             : undefined,
     };
