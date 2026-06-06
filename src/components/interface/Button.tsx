@@ -99,7 +99,7 @@ export default function Button({
         'border',
         'bg-transparent',
         'inline-flex items-center justify-center',
-        'rounded-xl',
+        'rounded-3xl',
         'select-none',
         sizing.padding,
         sizing.text,
