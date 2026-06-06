@@ -674,7 +674,7 @@ export default function PostContent({
     return (
         <article className="flex flex-col">
             {post.bannerImage && (
-                <figure className="relative w-full overflow-hidden bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/6]">
+                <figure className="relative w-full overflow-hidden rounded-b-xl lg:rounded-b-3xl bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/6]">
                     <Image
                         loader={getImageLoader(post.bannerImage)}
                         src={post.bannerImage}
