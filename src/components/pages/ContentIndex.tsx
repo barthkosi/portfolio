@@ -87,7 +87,13 @@ export default function ContentIndex({
                 number={items.length}
                 description={description}
                 titleIcon={titleIcon}
-                onComplete={() => setIntroFinished(true)}
+                onComplete={() => {
+                    setIntroFinished(true);
+
+                    if (allTags.length === 0) {
+                        setShowCards(true);
+                    }
+                }}
             />
 
             <div className="w-full items-center lg:items-start flex flex-col">

@@ -78,6 +78,7 @@ function BookCard({
 
 export default function ReadingListContent() {
     const isClient = useIsClient();
+    const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [areBooksVisible, setAreBooksVisible] = useState(false);
     const [activeTag, setActiveTag] = useState<string | null>(FAVORITES_TAG);
     const [filterAnimationKey, setFilterAnimationKey] = useState(0);
@@ -128,7 +129,7 @@ export default function ReadingListContent() {
                 title="Reading List"
                 number={books.length}
                 description="Reading more is one of my biggest goals. This list shifts and grows as new titles find their way into my hands"
-                onComplete={() => setAreBooksVisible(true)}
+                onComplete={() => setIsFilterVisible(true)}
             />
 
             <div className="w-full items-center lg:items-start flex flex-col">
@@ -136,7 +137,8 @@ export default function ReadingListContent() {
                     tags={allTags}
                     activeTag={activeTag}
                     onTagSelect={handleTagSelect}
-                    animate={areBooksVisible}
+                    animate={isFilterVisible}
+                    onAnimationComplete={() => setAreBooksVisible(true)}
                 />
 
                 <Masonry

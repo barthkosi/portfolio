@@ -37,7 +37,11 @@ export default function Filter({ tags, activeTag, onTagSelect, animate = false, 
             variants={containerVariants}
             initial="hidden"
             animate={animate ? "visible" : "hidden"}
-            onAnimationComplete={() => onAnimationComplete && onAnimationComplete()}
+            onAnimationComplete={(definition) => {
+                if (definition === "visible") {
+                    onAnimationComplete?.();
+                }
+            }}
         >
             <motion.button
                 variants={itemVariants}
