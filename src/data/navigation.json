@@ -11,16 +11,16 @@
             "description": "Personal projects"
         },
         {
-            "label": "Illustrations",
-            "href": "/illustrations",
-            "description": "Experiments with lines"
+            "label": "Writing",
+            "href": "/writing",
+            "description": "On the human condition"
         }
     ],
     "vault": [
         {
-            "label": "Archive",
-            "href": "/archive",
-            "description": "Gallery of my work"
+            "label": "Illustrations",
+            "href": "/illustrations",
+            "description": "Experiments with lines"
         },
         {
             "label": "Reading List",
@@ -28,9 +28,9 @@
             "description": "Books I recommend"
         },
         {
-            "label": "Writing",
-            "href": "/writing",
-            "description": "On the human condition"
+            "label": "Archive",
+            "href": "/archive",
+            "description": "Gallery of my work"
         }
     ]
 }
