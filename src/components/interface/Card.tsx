@@ -10,7 +10,12 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import {
+    getSharedMediaRect,
+    useSharedMediaTransition,
+} from "@/components/SharedMediaTransitionProvider";
 
 type CardProps = {
     image: string;
@@ -24,6 +29,7 @@ type CardProps = {
     imageWidth?: number;
     imageHeight?: number;
     locked?: boolean;
+    bannerImage?: string;
 };
 
 type LoadingStatus = "loading" | "ready" | "error";
@@ -84,6 +90,7 @@ interface CardMediaProps {
     imageWidth?: number;
     imageHeight?: number;
     locked?: boolean;
+    onMediaElement?: (element: HTMLDivElement | null) => void;
 }
 
 function CardMedia({
@@ -94,6 +101,7 @@ function CardMedia({
     imageWidth,
     imageHeight,
     locked,
+    onMediaElement,
 }: CardMediaProps) {
     const [status, setStatus] = useState<LoadingStatus>("loading");
     const [imageDimensions, setImageDimensions] = useState({
@@ -159,6 +167,7 @@ function CardMedia({
 
     return (
         <div
+            ref={onMediaElement}
             className="relative overflow-hidden rounded-xl bg-[var(--background-secondary)] w-full transition-all duration-500"
             style={containerAspectRatio === "auto" ? undefined : { aspectRatio: containerAspectRatio }}
         >
@@ -269,7 +278,11 @@ export default function Card({
     imageWidth,
     imageHeight,
     locked = false,
+    bannerImage,
 }: CardProps) {
+    const router = useRouter();
+    const mediaElementRef = useRef<HTMLDivElement | null>(null);
+    const { startTransition } = useSharedMediaTransition();
     const isList = variant === "list";
     const isStacked = variant === "list-stacked";
     const isAnyList = isList || isStacked;
@@ -278,6 +291,47 @@ export default function Card({
     const tapScale = isList ? 0.99 : 0.97;
     const pressMotion = pressScale({ hover: hoverScale, tap: tapScale });
     const textOpacityStyle = locked ? { opacity: 0.4 } : undefined;
+    const mediaKind = isVideoUrl(image) ? "video" : "image";
+    const transitionId = link?.startsWith("/")
+        ? link.replace(/^\/+/, "").replace(/\//g, ":")
+        : undefined;
+
+    const handleInternalClick = (event: React.MouseEvent) => {
+        if (
+            locked ||
+            !link ||
+            isExternal ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey ||
+            event.button !== 0
+        ) {
+            return;
+        }
+
+        if (!bannerImage) {
+            return;
+        }
+
+        const mediaElement = mediaElementRef.current;
+
+        if (!mediaElement || !transitionId) return;
+
+        event.preventDefault();
+
+        const imgOrVideo = mediaElement.querySelector("img, video") as HTMLImageElement | HTMLVideoElement | null;
+        const actualSrc = imgOrVideo ? imgOrVideo.currentSrc || imgOrVideo.src : image;
+
+        startTransition({
+            id: transitionId,
+            source: actualSrc,
+            bannerImage,
+            mediaKind,
+            origin: getSharedMediaRect(mediaElement),
+        });
+        router.push(link);
+    };
 
     const content = isAnyList ? (
         <div
@@ -295,6 +349,9 @@ export default function Card({
                     imageWidth={imageWidth}
                     imageHeight={imageHeight}
                     locked={locked}
+                    onMediaElement={(element) => {
+                        mediaElementRef.current = element;
+                    }}
                 />
             </div>
 
@@ -323,6 +380,9 @@ export default function Card({
                     imageWidth={imageWidth}
                     imageHeight={imageHeight}
                     locked={locked}
+                    onMediaElement={(element) => {
+                        mediaElementRef.current = element;
+                    }}
                 />
             </div>
 
@@ -367,7 +427,9 @@ export default function Card({
             data-card-link={link}
             data-card-title={title}
         >
-            <Link href={link}>{content}</Link>
+            <Link href={link} onClick={handleInternalClick}>
+                {content}
+            </Link>
         </motion.div>
     );
 }
