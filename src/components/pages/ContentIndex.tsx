@@ -126,6 +126,7 @@ export default function ContentIndex({
                                         <motion.li key={`${filterAnimationKey}-${item.slug}`} variants={cardVariants}>
                                             <Card
                                                 image={item.coverImage || ""}
+                                                bannerImage={item.bannerImage}
                                                 title={item.title}
                                                 description={item.description}
                                                 link={`/${type}/${item.slug}`}

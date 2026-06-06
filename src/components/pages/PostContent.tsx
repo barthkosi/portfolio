@@ -15,6 +15,10 @@ import {
     isCloudinaryImageUrl,
     isCloudinaryVideoUrl,
 } from "@/lib/image-urls";
+import {
+    getSharedMediaRect,
+    useSharedMediaTransition,
+} from "@/components/SharedMediaTransitionProvider";
 
 interface PostContentProps {
     post: ContentItem;
@@ -511,7 +515,11 @@ export default function PostContent({
     prevPost,
     nextPost,
 }: PostContentProps) {
+    const bannerRef = useRef<HTMLElement | null>(null);
+    const { activeTransition, registerTarget } = useSharedMediaTransition();
     const isDefaultLayout = post.layout !== "full";
+    const transitionId = `${type}:${post.slug}`;
+    const isSharedTransitionTarget = activeTransition?.id === transitionId;
     const markdownImageSizes = isDefaultLayout ? DEFAULT_MARKDOWN_IMAGE_SIZES : FULL_MARKDOWN_IMAGE_SIZES;
     const rowMarkdownImageSizes = isDefaultLayout ? DEFAULT_ROW_MARKDOWN_IMAGE_SIZES : FULL_ROW_MARKDOWN_IMAGE_SIZES;
     const headings = useMemo(
@@ -522,6 +530,35 @@ export default function PostContent({
         () => otherPosts.filter((otherPost) => !otherPost.locked),
         [otherPosts]
     );
+
+    useEffect(() => {
+        if (!isSharedTransitionTarget) return;
+
+        const register = () => {
+            const banner = bannerRef.current;
+
+            if (!banner) {
+                const width = Math.max(1, window.innerWidth - 32);
+                registerTarget(transitionId, {
+                    x: (window.innerWidth - width) / 2,
+                    y: 96,
+                    width,
+                    height: width * (6 / 16),
+                });
+                return;
+            }
+
+            registerTarget(transitionId, getSharedMediaRect(banner));
+        };
+
+        const frameId = requestAnimationFrame(register);
+        window.addEventListener("resize", register);
+
+        return () => {
+            cancelAnimationFrame(frameId);
+            window.removeEventListener("resize", register);
+        };
+    }, [isSharedTransitionTarget, registerTarget, transitionId]);
 
     const markdownComponents: Components = {
         p: ({ node, children, ...props }) => {
@@ -674,7 +711,11 @@ export default function PostContent({
     return (
         <article className="flex flex-col">
             {post.bannerImage && (
-                <figure className="relative w-full overflow-hidden rounded-b-xl lg:rounded-b-3xl bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/6]">
+                <figure
+                    ref={bannerRef}
+                    className="relative w-full overflow-hidden rounded-b-xl lg:rounded-b-3xl bg-[var(--background-primary)] -mt-[64px] md:-mt-[102px] aspect-[16/6]"
+                    style={{ opacity: isSharedTransitionTarget ? 0 : 1 }}
+                >
                     <Image
                         loader={getImageLoader(post.bannerImage)}
                         src={post.bannerImage}
@@ -748,6 +789,7 @@ export default function PostContent({
                                 <li key={otherPost.slug}>
                                     <Card
                                         image={otherPost.coverImage || ""}
+                                        bannerImage={otherPost.bannerImage}
                                         title={otherPost.title}
                                         description={otherPost.description}
                                         link={`/${type}/${otherPost.slug}`}
