@@ -96,7 +96,7 @@ export default function ArchiveContent() {
                         <AnimatePresence>
                             {activeTile && !openImage && (
                                 <motion.div
-                                    className="fixed z-[100] pointer-events-auto"
+                                    className="fixed z-40 pointer-events-auto"
                                     style={{
                                         left: activeTile.x + activeTile.width / 2,
                                         top: activeTile.y + activeTile.height - 8,
