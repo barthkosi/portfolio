@@ -15,6 +15,7 @@ export const MOBILE_MIN_SCALE_FLOOR = 0.2;
 export const MAX_SCALE = 1.5;
 
 export const DRAG_DECELERATION = 0.95;
+export const TAPPING_DECELERATION = 0.75;
 export const WHEEL_IMPULSE = 0.18;
 export const CLICK_MOVE_THRESHOLD = 6;
 export const OPEN_CENTER_THRESHOLD = 24;

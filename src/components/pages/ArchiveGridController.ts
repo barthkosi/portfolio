@@ -4,6 +4,7 @@ import {
     GAP,
     MAX_SCALE,
     DRAG_DECELERATION,
+    TAPPING_DECELERATION,
     WHEEL_IMPULSE,
     CLICK_MOVE_THRESHOLD,
     OPEN_CENTER_THRESHOLD,
@@ -732,7 +733,7 @@ export class ArchiveGridController {
         };
         const dx = nextOffset.x - this.offset.x;
         const dy = nextOffset.y - this.offset.y;
-        const impulseScale = (1 - DRAG_DECELERATION) / DRAG_DECELERATION;
+        const impulseScale = (1 - TAPPING_DECELERATION) / TAPPING_DECELERATION;
 
         this.pauseImageLoading();
         this.stopAnimation();
@@ -840,8 +841,11 @@ export class ArchiveGridController {
             Math.abs(this.velocity.x) >= 0.01 ||
             Math.abs(this.velocity.y) >= 0.01
         ) {
-            this.velocity.x *= DRAG_DECELERATION;
-            this.velocity.y *= DRAG_DECELERATION;
+            const deceleration = this.momentumTargetOffset
+                ? TAPPING_DECELERATION
+                : DRAG_DECELERATION;
+            this.velocity.x *= deceleration;
+            this.velocity.y *= deceleration;
 
             this.offset.x += this.velocity.x;
             this.offset.y += this.velocity.y;
