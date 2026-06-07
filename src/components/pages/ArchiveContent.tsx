@@ -39,6 +39,17 @@ export default function ArchiveContent() {
     }, [openImage]);
 
     useEffect(() => {
+        if (openImage) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, [openImage]);
+
+    useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
 
