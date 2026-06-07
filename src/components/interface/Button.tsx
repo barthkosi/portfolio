@@ -8,7 +8,7 @@ const MotionLink = motion(Link)
 
 
 type ButtonVariant = 'primary' | 'secondary'
-type ButtonSize = 'sm' | 'md' | 'lg'
+type ButtonSize = 'xs' | 'sm' | 'md' | 'lg'
 
 type ButtonProps = {
     variant?: ButtonVariant
@@ -25,6 +25,10 @@ const sizeStyles: Record<ButtonSize, {
     padding: string
     text: string
 }> = {
+    xs: {
+        padding: 'px-2 py-1',
+        text: 'label-xs',
+    },
     sm: {
         padding: 'px-6 py-2',
         text: 'label-s',

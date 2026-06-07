@@ -118,9 +118,9 @@ export default function ArchiveContent() {
                                     }}
                                 >
                                     <Button
-                                        size="sm"
+                                        size="xs"
                                         onClick={() => controllerRef.current?.openActiveTile()}
-                                        className="min-h-10 px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
+                                        className="shadow-[0_8px_24px_rgba(0,0,0,0.18)]"
                                     >
                                         Open
                                     </Button>
