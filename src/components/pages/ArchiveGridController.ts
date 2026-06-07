@@ -809,6 +809,17 @@ export class ArchiveGridController {
         }, OPEN_AFTER_CENTER_DELAY);
     };
 
+    public setTileImageOpacity = (imageUrl: string, opacity: number) => {
+        const tile = this.tiles.find((t) => t.item.image === imageUrl);
+        if (tile) {
+            if (tile.imageNode) {
+                tile.imageNode.opacity(opacity);
+            }
+            tile.placeholder.opacity(opacity);
+            this.layer.batchDraw();
+        }
+    };
+
     public setActiveTileControlHovered = (hovered: boolean) => {
         this.isActiveTileControlHovered = hovered;
         if (hovered) {

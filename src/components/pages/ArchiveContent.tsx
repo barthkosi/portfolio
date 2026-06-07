@@ -18,8 +18,15 @@ export default function ArchiveContent() {
     const [activeTile, setActiveTile] = useState<ActiveArchiveTile | null>(null);
     const [openImage, setOpenImage] = useState<OpenArchiveImage | null>(null);
     const [isOpenImageLoaded, setIsOpenImageLoaded] = useState(false);
+    const lastOpenedImageRef = useRef<string | null>(null);
     const portalRoot =
         typeof document === "undefined" ? null : document.body;
+
+    useEffect(() => {
+        if (openImage) {
+            lastOpenedImageRef.current = openImage.image;
+        }
+    }, [openImage]);
 
     useEffect(() => {
         if (!openImage) return;
@@ -139,27 +146,37 @@ export default function ArchiveContent() {
                             )}
                         </AnimatePresence>
 
-                        <AnimatePresence>
+                        <AnimatePresence
+                            onExitComplete={() => {
+                                if (lastOpenedImageRef.current) {
+                                    controllerRef.current?.setTileImageOpacity(
+                                        lastOpenedImageRef.current,
+                                        1
+                                    );
+                                    lastOpenedImageRef.current = null;
+                                }
+                            }}
+                        >
                             {openImage && openImageTarget && (
                                 <motion.div
-                                    className="fixed inset-0 z-[110] bg-black/72"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{
-                                        opacity: 0,
-                                        transition: {
+                                    className="fixed inset-0 z-[110] pointer-events-none"
+                                >
+                                    {/* Backdrop */}
+                                    <motion.div
+                                        className="absolute inset-0 bg-black/72 pointer-events-auto"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{
                                             duration: 0.45,
                                             ease: [0.23, 1, 0.32, 1],
-                                        },
-                                    }}
-                                    transition={{
-                                        duration: 0.2,
-                                        ease: [0.23, 1, 0.32, 1],
-                                    }}
-                                    onClick={() => setOpenImage(null)}
-                                >
+                                        }}
+                                        onClick={() => setOpenImage(null)}
+                                    />
+
+                                    {/* Zooming Image Wrapper */}
                                     <motion.div
-                                        className="fixed overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.4)] outline outline-1 outline-white/10"
+                                        className="fixed overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.4)] outline outline-1 outline-white/10 pointer-events-auto"
                                         style={{
                                             left: openImageTarget.x,
                                             top: openImageTarget.y,
@@ -194,6 +211,14 @@ export default function ArchiveContent() {
                                             duration: 0.45,
                                             bounce: 0,
                                         }}
+                                        onAnimationComplete={() => {
+                                            if (openImage && lastOpenedImageRef.current) {
+                                                controllerRef.current?.setTileImageOpacity(
+                                                    lastOpenedImageRef.current,
+                                                    0
+                                                );
+                                            }
+                                        }}
                                         onClick={(event) => event.stopPropagation()}
                                     >
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -208,10 +233,15 @@ export default function ArchiveContent() {
                                         />
                                     </motion.div>
 
-                                    <button
+                                    {/* Close Button */}
+                                    <motion.button
                                         type="button"
-                                        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)] backdrop-blur-md transition-[background-color,transform] duration-150 hover:bg-white/16 active:scale-[0.96] md:right-6 md:top-6"
+                                        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)] backdrop-blur-md transition-[background-color,transform] duration-150 hover:bg-white/16 active:scale-[0.96] md:right-6 md:top-6 pointer-events-auto"
                                         aria-label="Close image"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.2 }}
                                         onClick={(event) => {
                                             event.stopPropagation();
                                             setOpenImage(null);
@@ -239,7 +269,7 @@ export default function ArchiveContent() {
                                                 fill="none"
                                             />
                                         </svg>
-                                    </button>
+                                    </motion.button>
                                 </motion.div>
                             )}
                         </AnimatePresence>
