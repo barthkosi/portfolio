@@ -67,6 +67,15 @@ function parseCloudinaryAssetUrl(value) {
 
         let assetParts = parts.slice(uploadIndex + 1);
 
+        // Filter out any transformation segments.
+        assetParts = assetParts.filter(part => {
+            if (/^v\d+$/.test(part)) return true;
+            const transformParams = ['w_', 'h_', 'c_', 'f_', 'q_', 'so_', 'co_', 'e_', 'fl_', 'pg_', 'bo_', 'b_', 'a_', 'o_', 'r_'];
+            const isTransform = transformParams.some(param => part.startsWith(param) || part.includes(',' + param)) || 
+                part.includes(',w_') || part.includes(',h_') || part.includes(',c_') || part.includes(',f_') || part.includes(',q_') || part.includes(',so_');
+            return !isTransform;
+        });
+
         if (/^v\d+$/.test(assetParts[0])) {
             assetParts = assetParts.slice(1);
         }

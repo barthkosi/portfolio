@@ -468,6 +468,20 @@
         "height": 768,
         "aspectRatio": "1364/768"
     },
+    "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/3d-ascii-demo.jpg": {
+        "publicId": "3d-ascii-demo",
+        "resourceType": "video",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920/1080"
+    },
+    "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/liquid-glass-demo.jpg": {
+        "publicId": "liquid-glass-demo",
+        "resourceType": "video",
+        "width": 1920,
+        "height": 1080,
+        "aspectRatio": "1920/1080"
+    },
     "https://res.cloudinary.com/barthkosi/video/upload/vinyl-demo.webm": {
         "publicId": "vinyl-demo",
         "resourceType": "video",
