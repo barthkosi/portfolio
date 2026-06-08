@@ -33,7 +33,6 @@ type SharedMediaTransition = {
     mediaKind: MediaKind;
     origin: TransitionRect;
     target?: TransitionRect;
-    showBanner: boolean;
 };
 
 type StartTransitionInput = {
@@ -146,7 +145,6 @@ export default function SharedMediaTransitionProvider({
             clearTimers();
             setTransition({
                 ...input,
-                showBanner: true,
             });
         },
         [clearTimers]
@@ -258,18 +256,11 @@ export default function SharedMediaTransitionProvider({
                                     )}
 
                                     {transition.bannerImage && (
-                                        <motion.img
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
                                             src={transition.bannerImage}
                                             alt=""
                                             className="absolute inset-0 h-full w-full object-cover"
-                                            initial={{ opacity: 0 }}
-                                            animate={{
-                                                opacity: transition.showBanner ? 1 : 0,
-                                            }}
-                                            transition={{
-                                                duration: 0.68,
-                                                ease: [0.23, 1, 0.32, 1],
-                                            }}
                                         />
                                     )}
                                 </motion.div>
