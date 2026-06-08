@@ -23,14 +23,22 @@ const NAV_MENU_SOCIAL_LABEL_TRANSITION = {
     duration: 0.16,
 };
 
+let hasAnimatedGlobal = false;
+
 export default function Nav() {
     const pathname = usePathname();
+    const [hasAnimated, setHasAnimated] = useState(hasAnimatedGlobal);
     const [menuState, setMenuState] = useState({ isOpen: false, path: pathname });
     const [showVault, setShowVault] = useState(false);
     const [showSocial, setShowSocial] = useState(false);
     const isOpen = menuState.isOpen && menuState.path === pathname;
     const navLinkPressMotion = pressScale({ hover: 1.02, tap: 0.98 });
     const navBrandPressMotion = pressScale({ hover: 1.02, tap: 0.98 });
+
+    useEffect(() => {
+        hasAnimatedGlobal = true;
+        setHasAnimated(true);
+    }, []);
 
     useEffect(() => {
         let wasMobile = window.innerWidth < 768;
@@ -67,7 +75,7 @@ export default function Nav() {
     return (
         <motion.nav
             className={`w-full flex flex-col ${isOpen ? "h-dvh" : "h-[64px]"} md:h-[102px] p-4 md:p-8 items-start justify-between gap-6 sticky top-0 z-50 overflow-visible`}
-            initial={anim.fadeDown.initial}
+            initial={hasAnimated ? false : anim.fadeDown.initial}
             animate={anim.fadeDown.animate}
             exit={anim.fadeDown.exit}
         >
