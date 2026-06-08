@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import InfoBlock from "@/components/interface/InfoBlock";
@@ -16,7 +15,6 @@ interface ContentIndexProps {
     items: ContentItem[];
     allTags: string[];
     type: ContentType;
-    titleIcon?: ReactNode;
 }
 
 const containerVariants: Variants = {
@@ -47,13 +45,11 @@ export default function ContentIndex({
     items,
     allTags,
     type,
-    titleIcon,
 }: ContentIndexProps) {
     const [activeTag, setActiveTag] = useState<string | null>(null);
     const [introFinished, setIntroFinished] = useState(false);
     const [showCards, setShowCards] = useState(false);
     const [filterAnimationKey, setFilterAnimationKey] = useState(0);
-
     const filteredItems = useMemo(
         () =>
             activeTag
@@ -86,7 +82,6 @@ export default function ContentIndex({
                 title={title}
                 number={items.length}
                 description={description}
-                titleIcon={titleIcon}
                 onComplete={() => {
                     setIntroFinished(true);
 
