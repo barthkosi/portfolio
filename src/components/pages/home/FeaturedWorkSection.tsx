@@ -10,6 +10,7 @@ type FeaturedWorkItem = {
     title: string;
     description: string;
     link: string;
+    bannerImage?: string;
     tags?: string[];
     aspectRatio?: string;
     locked?: boolean;
@@ -29,6 +30,7 @@ export default function FeaturedWorkSection() {
                     <li key={item.id}>
                         <Card
                             image={item.image}
+                            bannerImage={item.bannerImage}
                             title={item.title}
                             description={item.description}
                             link={item.link}
@@ -47,6 +49,7 @@ export default function FeaturedWorkSection() {
                     <li key={item.id}>
                         <Card
                             image={item.image}
+                            bannerImage={item.bannerImage}
                             title={item.title}
                             description={item.description}
                             link={item.link}

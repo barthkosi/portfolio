@@ -10,6 +10,7 @@ type HomeExplorationItem = {
     title: string;
     description: string;
     link: string;
+    bannerImage?: string;
     locked?: boolean;
 };
 
@@ -28,6 +29,7 @@ export default function ExplorationsSection() {
                     <li key={item.id} className="w-full">
                         <Card
                             image={item.image}
+                            bannerImage={item.bannerImage}
                             title={item.title}
                             description={item.description}
                             link={item.link}

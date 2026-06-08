@@ -10,6 +10,7 @@ type HomeWritingItem = {
     title: string;
     description: string;
     link: string;
+    bannerImage?: string;
     locked?: boolean;
 };
 
@@ -40,6 +41,7 @@ export default function WritingSection() {
                     >
                         <Card
                             image={item.image}
+                            bannerImage={item.bannerImage}
                             title={item.title}
                             description={item.description}
                             link={item.link}

@@ -3,7 +3,7 @@ title: "Liquid Glass Shader"
 date: "2025-06-16" 
 description: "Recreated liquid glass in the browser with shaders."
 coverImage: "https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-demo.mp4"
-bannerImage: ""
+bannerImage: "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/liquid-glass-demo.jpg"
 tags: ["Unicorn Studio" , "Shader"]
 buttonText: "View Live"
 buttonLink: "https://liquidglassexploration.framer.website/"

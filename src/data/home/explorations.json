@@ -4,20 +4,23 @@
         "image": "https://res.cloudinary.com/barthkosi/video/upload/3d-ascii-demo.mp4",
         "title": "3D to ASCII Viewer",
         "description": "A webapp that allows users to convert 3d models to ASCII art.",
-        "link": "/explorations/ascii"
+        "link": "/explorations/ascii",
+        "bannerImage": "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/3d-ascii-demo.jpg"
     },
     {
         "id": "liquid-glass",
         "image": "https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-demo.mp4",
         "title": "Liquid glass shader",
         "description": "Recreated liquid glass in the browser with shaders.",
-        "link": "/explorations/glass"
+        "link": "/explorations/glass",
+        "bannerImage": "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/liquid-glass-demo.jpg"
     },
     {
         "id": "vinyl-player",
         "image": "https://res.cloudinary.com/barthkosi/video/upload/vinyl-player-demo.mp4",
         "title": "Vinyl player",
         "description": "A fully functioning vinyl player built in framer.",
-        "link": "/explorations/vinyl"
+        "link": "/explorations/vinyl",
+        "bannerImage": "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player-cover.avif"
     }
 ]
