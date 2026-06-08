@@ -398,8 +398,23 @@ export default function Card({
         </div>
     );
 
+    const preloader = bannerImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+            src={bannerImage}
+            alt=""
+            style={{ display: "none" }}
+            aria-hidden="true"
+        />
+    ) : null;
+
     if (locked || !link) {
-        return <div className="w-full">{content}</div>;
+        return (
+            <div className="w-full">
+                {content}
+                {preloader}
+            </div>
+        );
     }
 
     if (isExternal) {
@@ -415,6 +430,7 @@ export default function Card({
                 data-card-title={title}
             >
                 {content}
+                {preloader}
             </motion.a>
         );
     }
@@ -430,6 +446,7 @@ export default function Card({
             <Link href={link} onClick={handleInternalClick}>
                 {content}
             </Link>
+            {preloader}
         </motion.div>
     );
 }

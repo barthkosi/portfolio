@@ -54,7 +54,6 @@ type SharedMediaTransitionContextValue = {
 const SharedMediaTransitionContext =
     createContext<SharedMediaTransitionContextValue | null>(null);
 
-const BANNER_FADE_DELAY = 260;
 const OVERLAY_CLEAR_DELAY = 760;
 
 const rectFromDomRect = (rect: DOMRect): TransitionRect => ({
@@ -147,7 +146,7 @@ export default function SharedMediaTransitionProvider({
             clearTimers();
             setTransition({
                 ...input,
-                showBanner: false,
+                showBanner: true,
             });
         },
         [clearTimers]
@@ -166,26 +165,13 @@ export default function SharedMediaTransitionProvider({
 
             clearTimers();
 
-            const fadeTimer = setTimeout(() => {
-                setTransition((current) => {
-                    if (!current || current.id !== id || !current.bannerImage) {
-                        return current;
-                    }
-
-                    return {
-                        ...current,
-                        showBanner: true,
-                    };
-                });
-            }, BANNER_FADE_DELAY);
-
             const clearTimer = setTimeout(() => {
                 setTransition((current) =>
                     current?.id === id ? null : current
                 );
             }, OVERLAY_CLEAR_DELAY);
 
-            timersRef.current = [fadeTimer, clearTimer];
+            timersRef.current = [clearTimer];
         },
         [clearTimers]
     );
