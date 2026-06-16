@@ -239,20 +239,6 @@
         ]
     },
     {
-        "id": "dear-self",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/v1779941460/dear-self.jpg",
-        "publicId": "dear-self",
-        "width": 1000,
-        "height": 1599,
-        "aspectRatio": 1.599,
-        "title": "Dear Self",
-        "author": "Patience Tamarra",
-        "link": "https://openlibrary.org",
-        "tags": [
-            "Other"
-        ]
-    },
-    {
         "id": "design-for-how-people-think",
         "image": "https://res.cloudinary.com/barthkosi/image/upload/v1779903936/design-for-how-people-think.jpg",
         "publicId": "design-for-how-people-think",
