@@ -737,9 +737,11 @@ main[data-page-transition="none"] {
   height: 16px !important;
 }
 
-/* Hide the scrollbar arrow buttons */
+/* Hide the scrollbar arrow buttons completely */
 ::-webkit-scrollbar-button {
-  display: none;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 ::-webkit-scrollbar-track {
