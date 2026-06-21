@@ -737,6 +737,11 @@ main[data-page-transition="none"] {
   height: 16px !important;
 }
 
+/* Hide the scrollbar arrow buttons */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
 ::-webkit-scrollbar-track {
   background: transparent !important;
 }
