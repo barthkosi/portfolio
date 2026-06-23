@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import DisableZoom from "@/components/DisableZoom";
 import ContextMenu from "@/components/interface/ContextMenu";
 import SharedMediaTransitionProvider from "@/components/SharedMediaTransitionProvider";
+import ThemeColorMeta from "@/components/ThemeColorMeta";
 import {
     SITE_DESCRIPTION,
     SITE_NAME,
@@ -112,6 +113,10 @@ export const viewport: Viewport = {
     initialScale: 1,
     maximumScale: 1,
     userScalable: false,
+    themeColor: [
+        { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
+        { media: "(prefers-color-scheme: dark)",  color: "#0D0D0D" },
+    ],
 };
 
 export default function RootLayout({
@@ -132,6 +137,7 @@ export default function RootLayout({
                     enableSystem
                     disableTransitionOnChange
                 >
+                    <ThemeColorMeta />
                     <SharedMediaTransitionProvider>
                         <ContextMenu />
                         <ScrollToTop />
