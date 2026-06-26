@@ -6,7 +6,6 @@ import ScrollToTop from "@/components/ScrollToTop";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import DisableZoom from "@/components/DisableZoom";
 import ContextMenu from "@/components/interface/ContextMenu";
-import SharedMediaTransitionProvider from "@/components/SharedMediaTransitionProvider";
 import ThemeColorMeta from "@/components/ThemeColorMeta";
 import {
     SITE_DESCRIPTION,
@@ -138,12 +137,10 @@ export default function RootLayout({
                     disableTransitionOnChange
                 >
                     <ThemeColorMeta />
-                    <SharedMediaTransitionProvider>
-                        <ContextMenu />
-                        <ScrollToTop />
-                        <DisableZoom />
-                        <SmoothScrollProvider>{children}</SmoothScrollProvider>
-                    </SharedMediaTransitionProvider>
+                    <ContextMenu />
+                    <ScrollToTop />
+                    <DisableZoom />
+                    <SmoothScrollProvider>{children}</SmoothScrollProvider>
                 </ThemeProvider>
                 <Analytics />
             </body>
