@@ -40,7 +40,7 @@ export default function ExplorationsSection() {
                 ))}
             </ul>
 
-            <Button to="/explorations" variant="secondary">
+            <Button href="/explorations" variant="secondary">
                 See More
             </Button>
         </section>

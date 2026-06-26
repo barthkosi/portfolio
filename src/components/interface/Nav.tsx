@@ -37,6 +37,7 @@ export default function Nav() {
 
     useEffect(() => {
         hasAnimatedGlobal = true;
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setHasAnimated(true);
     }, []);
 

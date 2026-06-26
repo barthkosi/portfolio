@@ -68,7 +68,7 @@ export default function HeroSection() {
                     >
                         Schedule a Call
                     </Button>
-                    <Button to="/work" variant="secondary">
+                    <Button href="/work" variant="secondary">
                         View Work
                     </Button>
                 </motion.div>

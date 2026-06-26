@@ -6,7 +6,7 @@ import InfoBlock from "@/components/interface/InfoBlock";
 import Card from "@/components/interface/Card";
 import Filter from "@/components/interface/Filter";
 import type { ContentItem, ContentType } from "@/lib/content";
-import { Motion, springBouncy } from "@/lib/transitions";
+import { anim, springBouncy } from "@/lib/transitions";
 
 interface ContentIndexProps {
     title: string;
@@ -137,14 +137,14 @@ export default function ContentIndex({
                         ))}
                     </motion.div>
                 ) : (
-                    <Motion
-                        type="fadeUpBouncy"
+                    <motion.div
+                        variants={anim.fadeUpBouncy}
                         className="flex flex-col my-auto items-center w-full gap-7"
                         initial="initial"
                         animate={introFinished ? "animate" : "initial"}
                     >
                         <p className="h5 my-auto h-full text-[var(--content-primary)]">{emptyMessage}</p>
-                    </Motion>
+                    </motion.div>
                 )}
             </div>
         </section>

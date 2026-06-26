@@ -32,7 +32,7 @@ export default function NotFound() {
                         <p className="body-l mb-8 max-w-md">
                             Oops! The page you&apos;re looking for doesn&apos;t exist. It might have been moved or deleted.
                         </p>
-                        <Button to="/" variant="secondary">
+                        <Button href="/" variant="secondary">
                             Go to Home
                         </Button>
                     </section>

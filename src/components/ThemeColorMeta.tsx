@@ -30,6 +30,7 @@ export default function ThemeColorMeta() {
 
     // Step 1: mark as mounted so we know next-themes has resolved the real theme
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, []);
 

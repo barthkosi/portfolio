@@ -27,7 +27,7 @@ export default function WritingSection() {
                     <p className="text-[var(--content-secondary)]">I write about tech, design and the messy human condition.</p>
                 </div>
                 <div className="hidden lg:block">
-                    <Button to="/writing" variant="secondary">
+                    <Button href="/writing" variant="secondary">
                         See Writing
                     </Button>
                 </div>
@@ -53,7 +53,7 @@ export default function WritingSection() {
             </ul>
 
             <div className="w-fit lg:hidden">
-                <Button to="/writing" variant="secondary">
+                <Button href="/writing" variant="secondary">
                     See Writing
                 </Button>
             </div>

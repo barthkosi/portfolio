@@ -16,7 +16,6 @@ type ButtonProps = {
     children: React.ReactNode
     onClick?: () => void
     href?: string
-    to?: string
     openInNewTab?: boolean
     className?: string
 }
@@ -89,7 +88,6 @@ export default function Button({
     children,
     onClick,
     href,
-    to,
     openInNewTab = false,
     className = '',
 }: ButtonProps) {
@@ -131,9 +129,21 @@ export default function Button({
     }
 
     if (href) {
-        const MotionLink = motion.a
+        const isInternal = href.startsWith('/') || href.startsWith('#');
+        if (isInternal) {
+            return (
+                <MotionLink
+                    {...motionConfig}
+                    href={href}
+                    className={baseClassName}
+                >
+                    {children}
+                </MotionLink>
+            )
+        }
+
         return (
-            <MotionLink
+            <motion.a
                 {...motionConfig}
                 href={href}
                 target={openInNewTab ? '_blank' : undefined}
@@ -141,19 +151,7 @@ export default function Button({
                 className={baseClassName}
             >
                 {children}
-            </MotionLink>
-        )
-    }
-
-    if (to) {
-        return (
-            <MotionLink
-                {...motionConfig}
-                href={to}
-                className={baseClassName}
-            >
-                {children}
-            </MotionLink>
+            </motion.a>
         )
     }
 

@@ -63,7 +63,7 @@ export default function FeaturedWorkSection() {
                 ))}
             </ul>
 
-            <Button to="/work" variant="secondary">View All Work</Button>
+            <Button href="/work" variant="secondary">View All Work</Button>
         </section>
     );
 }

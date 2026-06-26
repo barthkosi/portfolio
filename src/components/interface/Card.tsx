@@ -270,7 +270,6 @@ export default function Card({
     imageWidth,
     imageHeight,
     locked = false,
-    bannerImage,
 }: CardProps) {
     const isList = variant === "list";
     const isStacked = variant === "list-stacked";
