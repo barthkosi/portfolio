@@ -15,10 +15,7 @@ import {
     isCloudinaryImageUrl,
     isCloudinaryVideoUrl,
 } from "@/lib/image-urls";
-import {
-    getSharedMediaRect,
-    useSharedMediaTransition,
-} from "@/components/SharedMediaTransitionProvider";
+
 
 interface PostContentProps {
     post: ContentItem;
