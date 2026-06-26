@@ -40,18 +40,24 @@ export default function ThemeColorMeta() {
 
         const color = resolvedTheme === "dark" ? THEME_COLORS.dark : THEME_COLORS.light;
 
-        // Remove all existing theme-color meta tags (including the two
-        // media-queried SSR tags from Next.js viewport.themeColor).
-        document
-            .querySelectorAll('meta[name="theme-color"]')
-            .forEach((el) => el.remove());
-
-        // Insert one clean tag with no media attribute — Chrome Android's
-        // preferred format.
-        const meta = document.createElement("meta");
-        meta.name = "theme-color";
-        meta.content = color;
-        document.head.appendChild(meta);
+        // Find existing theme-color meta tags (including the media-queried SSR ones)
+        const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+        
+        if (metaTags.length > 0) {
+            metaTags.forEach((el) => {
+                // Remove media attribute so Chrome Android reads it dynamically
+                if (el.hasAttribute("media")) {
+                    el.removeAttribute("media");
+                }
+                el.setAttribute("content", color);
+            });
+        } else {
+            // Insert fallback tag if none exists
+            const meta = document.createElement("meta");
+            meta.name = "theme-color";
+            meta.content = color;
+            document.head.appendChild(meta);
+        }
     }, [mounted, resolvedTheme]);
 
     return null;
