@@ -146,6 +146,14 @@ export default function SharedMediaTransitionProvider({
             setTransition({
                 ...input,
             });
+
+            // Safety timeout: if target page doesn't load/register within 6 seconds, clear transition
+            const safetyTimer = setTimeout(() => {
+                setTransition((current) => 
+                    current?.id === input.id && !current.target ? null : current
+                );
+            }, 6000);
+            timersRef.current = [safetyTimer];
         },
         [clearTimers]
     );
@@ -184,7 +192,7 @@ export default function SharedMediaTransitionProvider({
         [finishTransition, registerTarget, startTransition, transition]
     );
 
-    const target = transition?.target ?? getFallbackTarget();
+    const target = transition?.target ?? transition?.origin ?? getFallbackTarget();
 
     return (
         <SharedMediaTransitionContext.Provider value={value}>
