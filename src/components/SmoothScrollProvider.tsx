@@ -13,13 +13,7 @@ export default function SmoothScrollProvider({ children }: SmoothScrollProviderP
     const rafIdRef = useRef<number | null>(null);
 
     useEffect(() => {
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (time) => Math.min(1, 1.001 - Math.pow(2, -10 * time)),
-            orientation: "vertical",
-            smoothWheel: true,
-            touchInertiaExponent: 1.2,
-        });
+        const lenis = new Lenis();
 
         lenisRef.current = lenis;
 
