@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { createPortal } from "react-dom";
 import Button from "@/components/interface/Button";
@@ -45,7 +45,7 @@ export default function ArchiveContent() {
         return () => window.removeEventListener("keydown", handleEscape);
     }, [openImage]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (openImage) {
             document.body.style.overflow = "hidden";
         } else {
@@ -163,7 +163,7 @@ export default function ArchiveContent() {
                                 >
                                     {/* Backdrop */}
                                     <motion.div
-                                        className="absolute inset-0 bg-black/72 pointer-events-auto"
+                                        className="absolute inset-0 bg-black/72 pointer-events-auto cursor-zoom-out"
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
@@ -183,6 +183,7 @@ export default function ArchiveContent() {
                                             width: openImageTarget.width,
                                             height: openImageTarget.height,
                                             transformOrigin: "top left",
+                                            willChange: "transform",
                                         }}
                                         initial={{
                                             x: openImage.origin.x - openImageTarget.x,
@@ -191,12 +192,14 @@ export default function ArchiveContent() {
                                                 openImage.origin.width /
                                                 openImageTarget.width,
                                             opacity: 1,
+                                            borderRadius: "12px",
                                         }}
                                         animate={{
                                             x: 0,
                                             y: 0,
                                             scale: 1,
                                             opacity: 1,
+                                            borderRadius: "8px",
                                         }}
                                         exit={{
                                             x: openImage.origin.x - openImageTarget.x,
@@ -205,6 +208,7 @@ export default function ArchiveContent() {
                                                 openImage.origin.width /
                                                 openImageTarget.width,
                                             opacity: 1,
+                                            borderRadius: "12px",
                                         }}
                                         transition={{
                                             type: "spring",
