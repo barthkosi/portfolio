@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, cloneElement, type ReactElement, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 import Image, { type ImageLoaderProps } from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
@@ -194,6 +194,8 @@ function MediaWrapper({
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [openRect, setOpenRect] = useState<{ origin: Rect; target: Rect } | null>(null);
+    const [expandedSrc, setExpandedSrc] = useState<string | null>(null);
+    const [expandedMediaType, setExpandedMediaType] = useState<"img" | "video">("img");
     const portalRoot = typeof document === "undefined" ? null : document.body;
 
     const handleClick = () => {
@@ -202,15 +204,22 @@ function MediaWrapper({
         
         let contentWidth = rect.width;
         let contentHeight = rect.height;
+        let mediaSrc: string | null = null;
+        let mediaType: "img" | "video" = "img";
         
         const childNode = ref.current.querySelector("img, video") as HTMLImageElement | HTMLVideoElement | null;
         if (childNode) {
-            if ("naturalWidth" in childNode && childNode.naturalWidth) {
-                contentWidth = childNode.naturalWidth;
-                contentHeight = childNode.naturalHeight;
-            } else if ("videoWidth" in childNode && childNode.videoWidth) {
-                contentWidth = childNode.videoWidth;
-                contentHeight = childNode.videoHeight;
+            if (childNode instanceof HTMLImageElement) {
+                contentWidth = childNode.naturalWidth || rect.width;
+                contentHeight = childNode.naturalHeight || rect.height;
+                mediaSrc = childNode.currentSrc || childNode.src;
+                mediaType = "img";
+            } else if (childNode instanceof HTMLVideoElement) {
+                contentWidth = childNode.videoWidth || rect.width;
+                contentHeight = childNode.videoHeight || rect.height;
+                mediaSrc = childNode.currentSrc || childNode.src;
+                mediaType = "video";
+                childNode.pause();
             }
         } else {
             const arMatch = aspectRatio.match(/(\d+)\/(\d+)/);
@@ -219,9 +228,13 @@ function MediaWrapper({
                 contentHeight = parseInt(arMatch[2], 10) * 100;
             }
         }
+
+        if (!mediaSrc) return;
         
         const target = getContainedRect(contentWidth, contentHeight, window.innerWidth, window.innerHeight);
         
+        setExpandedSrc(mediaSrc);
+        setExpandedMediaType(mediaType);
         setOpenRect({
             origin: {
                 x: rect.x,
@@ -234,7 +247,24 @@ function MediaWrapper({
         setIsExpanded(true);
     };
 
-    useEffect(() => {
+    const handleClose = useCallback(() => {
+        if (ref.current) {
+            const rect = ref.current.getBoundingClientRect();
+            setOpenRect((prev) => prev ? {
+                ...prev,
+                origin: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+            } : prev);
+        }
+
+        const videoEl = ref.current?.querySelector("video") as HTMLVideoElement | null;
+        if (videoEl) {
+            videoEl.play();
+        }
+
+        setIsExpanded(false);
+    }, []);
+
+    useLayoutEffect(() => {
         if (isExpanded) {
             document.body.style.overflow = "hidden";
         } else {
@@ -248,11 +278,11 @@ function MediaWrapper({
     useEffect(() => {
         if (!isExpanded) return;
         const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setIsExpanded(false);
+            if (e.key === "Escape") handleClose();
         };
         window.addEventListener("keydown", handleEscape);
         return () => window.removeEventListener("keydown", handleEscape);
-    }, [isExpanded]);
+    }, [isExpanded, handleClose]);
 
     return (
         <>
@@ -275,7 +305,7 @@ function MediaWrapper({
 
             {portalRoot && createPortal(
                 <AnimatePresence>
-                    {isExpanded && openRect && (
+                    {isExpanded && openRect && expandedSrc && (
                         <motion.div className="fixed inset-0 z-[110] pointer-events-none">
                             <motion.div
                                 className="absolute inset-0 bg-black/72 pointer-events-auto cursor-zoom-out"
@@ -283,7 +313,7 @@ function MediaWrapper({
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
                                 transition={{ duration: 0.45, ease: [0.23, 1, 0.32, 1] }}
-                                onClick={() => setIsExpanded(false)}
+                                onClick={handleClose}
                             />
 
                             <motion.div
@@ -294,6 +324,7 @@ function MediaWrapper({
                                     width: openRect.target.width,
                                     height: openRect.target.height,
                                     transformOrigin: "top left",
+                                    willChange: "transform",
                                 }}
                                 initial={{
                                     x: openRect.origin.x - openRect.target.x,
@@ -319,9 +350,24 @@ function MediaWrapper({
                                 transition={{ type: "spring", duration: 0.45, bounce: 0 }}
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                {cloneElement(children, {
-                                    className: `${children.props.className || ""} h-full w-full object-cover`.trim(),
-                                })}
+                                {expandedMediaType === "video" ? (
+                                    /* eslint-disable-next-line jsx-a11y/media-has-caption */
+                                    <video
+                                        src={expandedSrc}
+                                        className="h-full w-full object-contain"
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                    />
+                                ) : (
+                                    /* eslint-disable-next-line @next/next/no-img-element */
+                                    <img
+                                        src={expandedSrc}
+                                        alt=""
+                                        className="h-full w-full object-contain"
+                                    />
+                                )}
                             </motion.div>
 
                             <motion.button
@@ -334,7 +380,7 @@ function MediaWrapper({
                                 transition={{ duration: 0.2 }}
                                 onClick={(event) => {
                                     event.stopPropagation();
-                                    setIsExpanded(false);
+                                    handleClose();
                                 }}
                             >
                                 <svg width="20" height="20" viewBox="0 0 32 32" fill="none" aria-hidden="true">
