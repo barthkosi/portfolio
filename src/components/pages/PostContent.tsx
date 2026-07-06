@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from "react";
 import Image, { type ImageLoaderProps } from "next/image";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import Button from "@/components/interface/Button";
 import Card from "@/components/interface/Card";
@@ -183,18 +183,28 @@ function MediaWrapper({
 }) {
     const [isLoaded, setIsLoaded] = useState(false);
     const wrapperAspectRatio = preserveAspectRatio || !isLoaded ? aspectRatio : "auto";
+    const ref = useRef<HTMLDivElement>(null);
+    const { scrollYProgress } = useScroll({
+        target: ref,
+        offset: ["start end", "center center"]
+    });
+    const scale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
 
     return (
         <div
+            ref={ref}
             className={`relative overflow-hidden rounded-[12px] w-full bg-[var(--background-secondary)] transition-all duration-300 ${isLoaded ? "" : "shimmer-loading"}`}
             style={{ aspectRatio: wrapperAspectRatio }}
             onLoadCapture={() => setIsLoaded(true)}
             onLoadedDataCapture={() => setIsLoaded(true)}
             onErrorCapture={() => setIsLoaded(true)}
         >
-            <div className={`w-full transition-opacity duration-500 ${isLoaded ? "opacity-100 h-auto" : "opacity-0 h-full"}`}>
+            <motion.div 
+                style={{ scale, transformOrigin: "center" }} 
+                className={`w-full transition-opacity duration-500 ${isLoaded ? "opacity-100 h-auto" : "opacity-0 h-full"}`}
+            >
                 {children}
-            </div>
+            </motion.div>
         </div>
     );
 }
