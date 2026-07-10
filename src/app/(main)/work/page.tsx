@@ -4,21 +4,27 @@ import WorkContent from "@/components/pages/WorkContent";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-    title: "Work",
-    description: "These entries document my process of building and refining tools that serve a purpose.",
-    alternates: {
-        canonical: `${SITE_URL}/work`,
-    },
-    openGraph: {
-        title: "Work by Barth Kosi",
-        description: "These entries document my process of building and refining tools that serve a purpose.",
-        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v1780760348/og/work.png" }],
-    },
+  title: "Work",
+  description:
+    "These entries document my process of building and refining tools that serve a purpose.",
+  alternates: {
+    canonical: `${SITE_URL}/work`,
+  },
+  openGraph: {
+    title: "Work by Barth Kosi",
+    description:
+      "These entries document my process of building and refining tools that serve a purpose.",
+    images: [
+      {
+        url: "https://res.cloudinary.com/barthkosi/image/upload/v1780760348/og/work.png",
+      },
+    ],
+  },
 };
 
 export default async function WorkPage() {
-    const projects = await getContent('work');
-    const tags = getAllTags(projects);
+  const projects = await getContent("work");
+  const tags = getAllTags(projects);
 
-    return <WorkContent initialProjects={projects} allTags={tags} />;
+  return <WorkContent initialProjects={projects} allTags={tags} />;
 }
