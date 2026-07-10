@@ -1,499 +1,499 @@
 {
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-404.avif": {
-        "publicId": "atoms-404",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1247,
-        "aspectRatio": "1920/1247"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-browser.avif": {
-        "publicId": "atoms-browser",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-core-2.avif": {
-        "publicId": "atoms-core-2",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1440,
-        "aspectRatio": "1920/1440"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-core-3.avif": {
-        "publicId": "atoms-core-3",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1440,
-        "aspectRatio": "1920/1440"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-core.avif": {
-        "publicId": "atoms-core",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-cover.avif": {
-        "publicId": "atoms-cover",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-demo.gif": {
-        "publicId": "atoms-demo",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-desktop.avif": {
-        "publicId": "atoms-desktop",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1366,
-        "aspectRatio": "1920/1366"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-extra-shots.avif": {
-        "publicId": "atoms-extra-shots",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1440,
-        "aspectRatio": "1920/1440"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-landing-hero.avif": {
-        "publicId": "atoms-landing-hero",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1366,
-        "aspectRatio": "1920/1366"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-logo.avif": {
-        "publicId": "atoms-logo",
-        "resourceType": "image",
-        "width": 5760,
-        "height": 3240,
-        "aspectRatio": "5760/3240"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-onboarding-1.avif": {
-        "publicId": "atoms-onboarding-1",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-onboarding-2.avif": {
-        "publicId": "atoms-onboarding-2",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-onboarding-3.avif": {
-        "publicId": "atoms-onboarding-3",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-profile.avif": {
-        "publicId": "atoms-profile",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1440,
-        "aspectRatio": "1920/1440"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-search-2.avif": {
-        "publicId": "atoms-search-2",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-search-3.avif": {
-        "publicId": "atoms-search-3",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/atoms-search.avif": {
-        "publicId": "atoms-search",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1920,
-        "aspectRatio": "1920/1920"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/bookworm-01.webp": {
-        "publicId": "bookworm-01",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/bookworm-02.webp": {
-        "publicId": "bookworm-02",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/bookworm-03.avif": {
-        "publicId": "bookworm-03",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/bw-collections-01.webp": {
-        "publicId": "bw-collections-01",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/bw-collections-02.webp": {
-        "publicId": "bw-collections-02",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/bw-cover.avif": {
-        "publicId": "bw-cover",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 608,
-        "aspectRatio": "1080/608"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/bw-logo.avif": {
-        "publicId": "bw-logo",
-        "resourceType": "image",
-        "width": 2528,
-        "height": 1042,
-        "aspectRatio": "2528/1042"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-activities.avif": {
-        "publicId": "explrar-activities",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 1215,
-        "aspectRatio": "2160/1215"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-badges.avif": {
-        "publicId": "explrar-badges",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 1215,
-        "aspectRatio": "2160/1215"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-banner.avif": {
-        "publicId": "explrar-banner",
-        "resourceType": "image",
-        "width": 3840,
-        "height": 1440,
-        "aspectRatio": "3840/1440"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-button-change.avif": {
-        "publicId": "explrar-button-change",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 608,
-        "aspectRatio": "1080/608"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-cover-blue.avif": {
-        "publicId": "explrar-cover-blue",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 608,
-        "aspectRatio": "1080/608"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-custom-dropdown.avif": {
-        "publicId": "explrar-custom-dropdown",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 608,
-        "aspectRatio": "1080/608"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-date-picker.avif": {
-        "publicId": "explrar-date-picker",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 1215,
-        "aspectRatio": "2160/1215"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-homescreen-2.avif": {
-        "publicId": "explrar-homescreen-2",
-        "resourceType": "image",
-        "width": 3840,
-        "height": 2880,
-        "aspectRatio": "3840/2880"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-homescreen.avif": {
-        "publicId": "explrar-homescreen",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 608,
-        "aspectRatio": "1080/608"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-itinerary-form.avif": {
-        "publicId": "explrar-itinerary-form",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 608,
-        "aspectRatio": "1080/608"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-logo-refresh.avif": {
-        "publicId": "explrar-logo-refresh",
-        "resourceType": "image",
-        "width": 3840,
-        "height": 2160,
-        "aspectRatio": "3840/2160"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-map.avif": {
-        "publicId": "explrar-map",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 1215,
-        "aspectRatio": "2160/1215"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-trip-plan.avif": {
-        "publicId": "explrar-trip-plan",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 1215,
-        "aspectRatio": "2160/1215"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/explrar-widget-tutorial.avif": {
-        "publicId": "explrar-widget-tutorial",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 2160,
-        "aspectRatio": "2160/2160"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/lillup.avif": {
-        "publicId": "lillup",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 608,
-        "aspectRatio": "1080/608"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-1-2025.avif": {
-        "publicId": "liquid-glass-preview-1-2025",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 1080,
-        "aspectRatio": "1440/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-2-2025.avif": {
-        "publicId": "liquid-glass-preview-2-2025",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 1080,
-        "aspectRatio": "1440/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-ring.avif": {
-        "publicId": "liquid-glass-ring",
-        "resourceType": "image",
-        "width": 1366,
-        "height": 768,
-        "aspectRatio": "1366/768"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/my-mind-vinyl.avif": {
-        "publicId": "my-mind-vinyl",
-        "resourceType": "image",
-        "width": 1366,
-        "height": 768,
-        "aspectRatio": "1366/768"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/old-explrar.avif": {
-        "publicId": "old-explrar",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 1215,
-        "aspectRatio": "2160/1215"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif": {
-        "publicId": "placeholder",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 1215,
-        "aspectRatio": "2160/1215"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/replacement-banner.avif": {
-        "publicId": "replacement-banner",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 810,
-        "aspectRatio": "2160/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/replacement.avif": {
-        "publicId": "replacement",
-        "resourceType": "image",
-        "width": 2160,
-        "height": 1215,
-        "aspectRatio": "2160/1215"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/spectrapay.avif": {
-        "publicId": "spectrapay",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/sui-image-v1.avif": {
-        "publicId": "sui-image-v1",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 1520,
-        "aspectRatio": "1080/1520"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/unproductive.avif": {
-        "publicId": "unproductive",
-        "resourceType": "image",
-        "width": 1080,
-        "height": 608,
-        "aspectRatio": "1080/608"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/vinyl-framer-setup.avif": {
-        "publicId": "vinyl-framer-setup",
-        "resourceType": "image",
-        "width": 1366,
-        "height": 768,
-        "aspectRatio": "1366/768"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player-cover.avif": {
-        "publicId": "vinyl-player-cover",
-        "resourceType": "image",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player.avif": {
-        "publicId": "vinyl-player",
-        "resourceType": "image",
-        "width": 1200,
-        "height": 800,
-        "aspectRatio": "1200/800"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-01.webp": {
-        "publicId": "x402-01",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-02.webp": {
-        "publicId": "x402-02",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-03.webp": {
-        "publicId": "x402-03",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-04.webp": {
-        "publicId": "x402-04",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-05.webp": {
-        "publicId": "x402-05",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-06.webp": {
-        "publicId": "x402-06",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-07.avif": {
-        "publicId": "x402-07",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-banner.avif": {
-        "publicId": "x402-banner",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 540,
-        "aspectRatio": "1440/540"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-cover.avif": {
-        "publicId": "x402-cover",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/image/upload/x402-filtered.webp": {
-        "publicId": "x402-filtered",
-        "resourceType": "image",
-        "width": 1440,
-        "height": 810,
-        "aspectRatio": "1440/810"
-    },
-    "https://res.cloudinary.com/barthkosi/video/upload/3d-ascii-demo.mp4": {
-        "publicId": "3d-ascii-demo",
-        "resourceType": "video",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-demo.mp4": {
-        "publicId": "liquid-glass-demo",
-        "resourceType": "video",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-preview-video-2025.webm": {
-        "publicId": "liquid-glass-preview-video-2025",
-        "resourceType": "video",
-        "width": 1364,
-        "height": 768,
-        "aspectRatio": "1364/768"
-    },
-    "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/3d-ascii-demo.jpg": {
-        "publicId": "3d-ascii-demo",
-        "resourceType": "video",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/liquid-glass-demo.jpg": {
-        "publicId": "liquid-glass-demo",
-        "resourceType": "video",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    },
-    "https://res.cloudinary.com/barthkosi/video/upload/vinyl-demo.webm": {
-        "publicId": "vinyl-demo",
-        "resourceType": "video",
-        "width": 886,
-        "height": 886,
-        "aspectRatio": "886/886"
-    },
-    "https://res.cloudinary.com/barthkosi/video/upload/vinyl-player-demo.mp4": {
-        "publicId": "vinyl-player-demo",
-        "resourceType": "video",
-        "width": 1920,
-        "height": 1080,
-        "aspectRatio": "1920/1080"
-    }
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-404.avif": {
+    "publicId": "atoms-404",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1247,
+    "aspectRatio": "1920/1247"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-browser.avif": {
+    "publicId": "atoms-browser",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-core-2.avif": {
+    "publicId": "atoms-core-2",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1440,
+    "aspectRatio": "1920/1440"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-core-3.avif": {
+    "publicId": "atoms-core-3",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1440,
+    "aspectRatio": "1920/1440"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-core.avif": {
+    "publicId": "atoms-core",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-cover.avif": {
+    "publicId": "atoms-cover",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-demo.gif": {
+    "publicId": "atoms-demo",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-desktop.avif": {
+    "publicId": "atoms-desktop",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1366,
+    "aspectRatio": "1920/1366"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-extra-shots.avif": {
+    "publicId": "atoms-extra-shots",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1440,
+    "aspectRatio": "1920/1440"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-landing-hero.avif": {
+    "publicId": "atoms-landing-hero",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1366,
+    "aspectRatio": "1920/1366"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-logo.avif": {
+    "publicId": "atoms-logo",
+    "resourceType": "image",
+    "width": 5760,
+    "height": 3240,
+    "aspectRatio": "5760/3240"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-onboarding-1.avif": {
+    "publicId": "atoms-onboarding-1",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-onboarding-2.avif": {
+    "publicId": "atoms-onboarding-2",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-onboarding-3.avif": {
+    "publicId": "atoms-onboarding-3",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-profile.avif": {
+    "publicId": "atoms-profile",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1440,
+    "aspectRatio": "1920/1440"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-search-2.avif": {
+    "publicId": "atoms-search-2",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-search-3.avif": {
+    "publicId": "atoms-search-3",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/atoms-search.avif": {
+    "publicId": "atoms-search",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1920,
+    "aspectRatio": "1920/1920"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/bookworm-01.webp": {
+    "publicId": "bookworm-01",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/bookworm-02.webp": {
+    "publicId": "bookworm-02",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/bookworm-03.avif": {
+    "publicId": "bookworm-03",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/bw-collections-01.webp": {
+    "publicId": "bw-collections-01",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/bw-collections-02.webp": {
+    "publicId": "bw-collections-02",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/bw-cover.avif": {
+    "publicId": "bw-cover",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 608,
+    "aspectRatio": "1080/608"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/bw-logo.avif": {
+    "publicId": "bw-logo",
+    "resourceType": "image",
+    "width": 2528,
+    "height": 1042,
+    "aspectRatio": "2528/1042"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-activities.avif": {
+    "publicId": "explrar-activities",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 1215,
+    "aspectRatio": "2160/1215"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-badges.avif": {
+    "publicId": "explrar-badges",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 1215,
+    "aspectRatio": "2160/1215"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-banner.avif": {
+    "publicId": "explrar-banner",
+    "resourceType": "image",
+    "width": 3840,
+    "height": 1440,
+    "aspectRatio": "3840/1440"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-button-change.avif": {
+    "publicId": "explrar-button-change",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 608,
+    "aspectRatio": "1080/608"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-cover-blue.avif": {
+    "publicId": "explrar-cover-blue",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 608,
+    "aspectRatio": "1080/608"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-custom-dropdown.avif": {
+    "publicId": "explrar-custom-dropdown",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 608,
+    "aspectRatio": "1080/608"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-date-picker.avif": {
+    "publicId": "explrar-date-picker",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 1215,
+    "aspectRatio": "2160/1215"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-homescreen-2.avif": {
+    "publicId": "explrar-homescreen-2",
+    "resourceType": "image",
+    "width": 3840,
+    "height": 2880,
+    "aspectRatio": "3840/2880"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-homescreen.avif": {
+    "publicId": "explrar-homescreen",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 608,
+    "aspectRatio": "1080/608"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-itinerary-form.avif": {
+    "publicId": "explrar-itinerary-form",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 608,
+    "aspectRatio": "1080/608"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-logo-refresh.avif": {
+    "publicId": "explrar-logo-refresh",
+    "resourceType": "image",
+    "width": 3840,
+    "height": 2160,
+    "aspectRatio": "3840/2160"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-map.avif": {
+    "publicId": "explrar-map",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 1215,
+    "aspectRatio": "2160/1215"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-trip-plan.avif": {
+    "publicId": "explrar-trip-plan",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 1215,
+    "aspectRatio": "2160/1215"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/explrar-widget-tutorial.avif": {
+    "publicId": "explrar-widget-tutorial",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 2160,
+    "aspectRatio": "2160/2160"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/lillup.avif": {
+    "publicId": "lillup",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 608,
+    "aspectRatio": "1080/608"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-1-2025.avif": {
+    "publicId": "liquid-glass-preview-1-2025",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 1080,
+    "aspectRatio": "1440/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-preview-2-2025.avif": {
+    "publicId": "liquid-glass-preview-2-2025",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 1080,
+    "aspectRatio": "1440/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/liquid-glass-ring.avif": {
+    "publicId": "liquid-glass-ring",
+    "resourceType": "image",
+    "width": 1366,
+    "height": 768,
+    "aspectRatio": "1366/768"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/my-mind-vinyl.avif": {
+    "publicId": "my-mind-vinyl",
+    "resourceType": "image",
+    "width": 1366,
+    "height": 768,
+    "aspectRatio": "1366/768"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/old-explrar.avif": {
+    "publicId": "old-explrar",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 1215,
+    "aspectRatio": "2160/1215"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/placeholder.avif": {
+    "publicId": "placeholder",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 1215,
+    "aspectRatio": "2160/1215"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/replacement-banner.avif": {
+    "publicId": "replacement-banner",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 810,
+    "aspectRatio": "2160/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/replacement.avif": {
+    "publicId": "replacement",
+    "resourceType": "image",
+    "width": 2160,
+    "height": 1215,
+    "aspectRatio": "2160/1215"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/spectrapay.avif": {
+    "publicId": "spectrapay",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/sui-image-v1.avif": {
+    "publicId": "sui-image-v1",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 1520,
+    "aspectRatio": "1080/1520"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/unproductive.avif": {
+    "publicId": "unproductive",
+    "resourceType": "image",
+    "width": 1080,
+    "height": 608,
+    "aspectRatio": "1080/608"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/vinyl-framer-setup.avif": {
+    "publicId": "vinyl-framer-setup",
+    "resourceType": "image",
+    "width": 1366,
+    "height": 768,
+    "aspectRatio": "1366/768"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player-cover.avif": {
+    "publicId": "vinyl-player-cover",
+    "resourceType": "image",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/vinyl-player.avif": {
+    "publicId": "vinyl-player",
+    "resourceType": "image",
+    "width": 1200,
+    "height": 800,
+    "aspectRatio": "1200/800"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-01.webp": {
+    "publicId": "x402-01",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-02.webp": {
+    "publicId": "x402-02",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-03.webp": {
+    "publicId": "x402-03",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-04.webp": {
+    "publicId": "x402-04",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-05.webp": {
+    "publicId": "x402-05",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-06.webp": {
+    "publicId": "x402-06",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-07.avif": {
+    "publicId": "x402-07",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-banner.avif": {
+    "publicId": "x402-banner",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 540,
+    "aspectRatio": "1440/540"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-cover.avif": {
+    "publicId": "x402-cover",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/image/upload/x402-filtered.webp": {
+    "publicId": "x402-filtered",
+    "resourceType": "image",
+    "width": 1440,
+    "height": 810,
+    "aspectRatio": "1440/810"
+  },
+  "https://res.cloudinary.com/barthkosi/video/upload/3d-ascii-demo.mp4": {
+    "publicId": "3d-ascii-demo",
+    "resourceType": "video",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-demo.mp4": {
+    "publicId": "liquid-glass-demo",
+    "resourceType": "video",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/video/upload/liquid-glass-preview-video-2025.webm": {
+    "publicId": "liquid-glass-preview-video-2025",
+    "resourceType": "video",
+    "width": 1364,
+    "height": 768,
+    "aspectRatio": "1364/768"
+  },
+  "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/3d-ascii-demo.jpg": {
+    "publicId": "3d-ascii-demo",
+    "resourceType": "video",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/video/upload/so_1,w_1200,c_limit,f_jpg,q_auto:best/liquid-glass-demo.jpg": {
+    "publicId": "liquid-glass-demo",
+    "resourceType": "video",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  },
+  "https://res.cloudinary.com/barthkosi/video/upload/vinyl-demo.webm": {
+    "publicId": "vinyl-demo",
+    "resourceType": "video",
+    "width": 886,
+    "height": 886,
+    "aspectRatio": "886/886"
+  },
+  "https://res.cloudinary.com/barthkosi/video/upload/vinyl-player-demo.mp4": {
+    "publicId": "vinyl-player-demo",
+    "resourceType": "video",
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "1920/1080"
+  }
 }

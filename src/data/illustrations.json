@@ -1,90 +1,90 @@
 [
-    {
-        "id": "beckham-2025",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/beckham-2025.avif",
-        "publicId": "beckham-2025",
-        "width": 1080,
-        "height": 1440,
-        "aspectRatio": 1.3333333333333333
-    },
-    {
-        "id": "explrar-otp-illustration",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/explrar-otp-illustration.avif",
-        "publicId": "explrar-otp-illustration",
-        "width": 1080,
-        "height": 1080,
-        "aspectRatio": 1
-    },
-    {
-        "id": "tennis-illustration-05-Nov-2025",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/tennis-illustration-05-Nov-2025.avif",
-        "publicId": "tennis-illustration-05-Nov-2025",
-        "width": 1024,
-        "height": 1539,
-        "aspectRatio": 1.5029296875
-    },
-    {
-        "id": "cassette-illustration-isometric-2025",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/cassette-illustration-isometric-2025.avif",
-        "publicId": "cassette-illustration-isometric-2025",
-        "width": 1024,
-        "height": 1024,
-        "aspectRatio": 1
-    },
-    {
-        "id": "landscape-2025",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/landscape-2025.avif",
-        "publicId": "landscape-2025",
-        "width": 1082,
-        "height": 1444,
-        "aspectRatio": 1.33456561922366
-    },
-    {
-        "id": "cassette-illustration-2025",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/cassette-illustration-2025.avif",
-        "publicId": "cassette-illustration-2025",
-        "width": 1024,
-        "height": 1024,
-        "aspectRatio": 1
-    },
-    {
-        "id": "jake-illustration",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/jake-illustration-5-Nov-2025.avif",
-        "publicId": "jake-illustration-5-Nov-2025",
-        "width": 1024,
-        "height": 1024,
-        "aspectRatio": 1
-    },
-    {
-        "id": "face-blue-dark-2025",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/face-blue-dark-2025.avif",
-        "publicId": "face-blue-dark-2025",
-        "width": 1080,
-        "height": 1080,
-        "aspectRatio": 1
-    },
-    {
-        "id": "red-building-illustration-2025",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/red-building-illustration-2025.avif",
-        "publicId": "red-building-illustration-2025",
-        "width": 1024,
-        "height": 1451,
-        "aspectRatio": 1.4169921875
-    },
-    {
-        "id": "face-with-glasses-illustration-2025",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/face-with-glasses-illustration-2025.avif",
-        "publicId": "face-with-glasses-illustration-2025",
-        "width": 1024,
-        "height": 615,
-        "aspectRatio": 0.6005859375
-    },
-    {
-        "id": "woman-Illustration-2024",
-        "image": "https://res.cloudinary.com/barthkosi/image/upload/woman-Illustration-2024.avif",
-        "publicId": "woman-Illustration-2024",
-        "width": 1080,
-        "height": 1440,
-        "aspectRatio": 1.3333333333333333
-    }
+  {
+    "id": "beckham-2025",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/beckham-2025.avif",
+    "publicId": "beckham-2025",
+    "width": 1080,
+    "height": 1440,
+    "aspectRatio": 1.3333333333333333
+  },
+  {
+    "id": "explrar-otp-illustration",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/explrar-otp-illustration.avif",
+    "publicId": "explrar-otp-illustration",
+    "width": 1080,
+    "height": 1080,
+    "aspectRatio": 1
+  },
+  {
+    "id": "tennis-illustration-05-Nov-2025",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/tennis-illustration-05-Nov-2025.avif",
+    "publicId": "tennis-illustration-05-Nov-2025",
+    "width": 1024,
+    "height": 1539,
+    "aspectRatio": 1.5029296875
+  },
+  {
+    "id": "cassette-illustration-isometric-2025",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/cassette-illustration-isometric-2025.avif",
+    "publicId": "cassette-illustration-isometric-2025",
+    "width": 1024,
+    "height": 1024,
+    "aspectRatio": 1
+  },
+  {
+    "id": "landscape-2025",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/landscape-2025.avif",
+    "publicId": "landscape-2025",
+    "width": 1082,
+    "height": 1444,
+    "aspectRatio": 1.33456561922366
+  },
+  {
+    "id": "cassette-illustration-2025",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/cassette-illustration-2025.avif",
+    "publicId": "cassette-illustration-2025",
+    "width": 1024,
+    "height": 1024,
+    "aspectRatio": 1
+  },
+  {
+    "id": "jake-illustration",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/jake-illustration-5-Nov-2025.avif",
+    "publicId": "jake-illustration-5-Nov-2025",
+    "width": 1024,
+    "height": 1024,
+    "aspectRatio": 1
+  },
+  {
+    "id": "face-blue-dark-2025",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/face-blue-dark-2025.avif",
+    "publicId": "face-blue-dark-2025",
+    "width": 1080,
+    "height": 1080,
+    "aspectRatio": 1
+  },
+  {
+    "id": "red-building-illustration-2025",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/red-building-illustration-2025.avif",
+    "publicId": "red-building-illustration-2025",
+    "width": 1024,
+    "height": 1451,
+    "aspectRatio": 1.4169921875
+  },
+  {
+    "id": "face-with-glasses-illustration-2025",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/face-with-glasses-illustration-2025.avif",
+    "publicId": "face-with-glasses-illustration-2025",
+    "width": 1024,
+    "height": 615,
+    "aspectRatio": 0.6005859375
+  },
+  {
+    "id": "woman-Illustration-2024",
+    "image": "https://res.cloudinary.com/barthkosi/image/upload/woman-Illustration-2024.avif",
+    "publicId": "woman-Illustration-2024",
+    "width": 1080,
+    "height": 1440,
+    "aspectRatio": 1.3333333333333333
+  }
 ]
