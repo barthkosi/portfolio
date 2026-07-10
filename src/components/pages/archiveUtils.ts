@@ -39,78 +39,78 @@ export const CONTEXT_IMAGE_SRC_ATTRIBUTE = "data-context-image-src";
 
 export const CURSOR_GRAB = "url('/cursors/Cursor Grab.png') 12 12, grab";
 export const CURSOR_GRABBED =
-    "url('/cursors/Cursor Grabbed.png') 12 12, grabbing";
+  "url('/cursors/Cursor Grabbed.png') 12 12, grabbing";
 
 /* -------------------------------------------------------------------------- */
 /*                                    Types                                   */
 /* -------------------------------------------------------------------------- */
 
 export type Point = {
-    x: number;
-    y: number;
+  x: number;
+  y: number;
 };
 
 export type ArchiveItem = {
-    id: string;
-    image: string;
-    publicId: string;
-    width: number;
-    height: number;
-    aspectRatio: number;
-    color: string;
+  id: string;
+  image: string;
+  publicId: string;
+  width: number;
+  height: number;
+  aspectRatio: number;
+  color: string;
 };
 
 export type Tile = {
-    item: ArchiveItem;
-    placeholder: Konva.Rect;
-    imageNode: Konva.Image | null;
-    imageElement: HTMLImageElement | null;
-    loadState: "idle" | "queued" | "loading" | "loaded" | "error";
-    generation: number;
-    baseX: number;
-    baseY: number;
-    width: number;
-    height: number;
-    colIndex: number;
-    renderedX: number | null;
-    renderedY: number | null;
-    renderedScale: number | null;
+  item: ArchiveItem;
+  placeholder: Konva.Rect;
+  imageNode: Konva.Image | null;
+  imageElement: HTMLImageElement | null;
+  loadState: "idle" | "queued" | "loading" | "loaded" | "error";
+  generation: number;
+  baseX: number;
+  baseY: number;
+  width: number;
+  height: number;
+  colIndex: number;
+  renderedX: number | null;
+  renderedY: number | null;
+  renderedScale: number | null;
 };
 
 export type LoadCandidate = {
-    tile: Tile;
-    distanceFromCenter: number;
+  tile: Tile;
+  distanceFromCenter: number;
 };
 
 export type ActiveArchiveTile = {
-    image: string;
-    previewImage: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    naturalWidth: number;
-    naturalHeight: number;
+  image: string;
+  previewImage: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  naturalWidth: number;
+  naturalHeight: number;
 };
 
 export type OpenArchiveImage = {
-    image: string;
-    previewImage: string;
-    origin: {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-    };
-    naturalWidth: number;
-    naturalHeight: number;
-};
-
-export type Rect = {
+  image: string;
+  previewImage: string;
+  origin: {
     x: number;
     y: number;
     width: number;
     height: number;
+  };
+  naturalWidth: number;
+  naturalHeight: number;
+};
+
+export type Rect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -118,143 +118,144 @@ export type Rect = {
 /* -------------------------------------------------------------------------- */
 
 export const clamp = (value: number, min: number, max: number) =>
-    Math.min(max, Math.max(min, value));
+  Math.min(max, Math.max(min, value));
 
 export const positiveModulo = (value: number, divisor: number) => {
-    const remainder = value % divisor;
-    return remainder < 0 ? remainder + divisor : remainder;
+  const remainder = value % divisor;
+  return remainder < 0 ? remainder + divisor : remainder;
 };
 
 export const getItemWidth = () =>
-    window.innerWidth < MOBILE_BREAKPOINT
-        ? MOBILE_ITEM_WIDTH
-        : DESKTOP_ITEM_WIDTH;
+  window.innerWidth < MOBILE_BREAKPOINT
+    ? MOBILE_ITEM_WIDTH
+    : DESKTOP_ITEM_WIDTH;
 
 export const getMinScale = (itemWidth: number) => {
-    if (window.innerWidth >= MOBILE_BREAKPOINT) {
-        return DESKTOP_MIN_SCALE;
-    }
+  if (window.innerWidth >= MOBILE_BREAKPOINT) {
+    return DESKTOP_MIN_SCALE;
+  }
 
-    const scaleForSevenColumns =
-        window.innerWidth / ((itemWidth + GAP) * MOBILE_MIN_VISIBLE_COLUMNS);
+  const scaleForSevenColumns =
+    window.innerWidth / ((itemWidth + GAP) * MOBILE_MIN_VISIBLE_COLUMNS);
 
-    return clamp(scaleForSevenColumns, MOBILE_MIN_SCALE_FLOOR, DESKTOP_MIN_SCALE);
+  return clamp(scaleForSevenColumns, MOBILE_MIN_SCALE_FLOOR, DESKTOP_MIN_SCALE);
 };
 
 export const getShortestColumnIndex = (heights: number[]) => {
-    let shortestIndex = 0;
+  let shortestIndex = 0;
 
-    for (let index = 1; index < heights.length; index++) {
-        if (heights[index] < heights[shortestIndex]) {
-            shortestIndex = index;
-        }
+  for (let index = 1; index < heights.length; index++) {
+    if (heights[index] < heights[shortestIndex]) {
+      shortestIndex = index;
     }
+  }
 
-    return shortestIndex;
+  return shortestIndex;
 };
 
 export const getTouchDistance = (touches: TouchList) => {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
 
-    return Math.hypot(dx, dy);
+  return Math.hypot(dx, dy);
 };
 
 export const getTouchCenter = (touches: TouchList): Point => ({
-    x: (touches[0].clientX + touches[1].clientX) / 2,
-    y: (touches[0].clientY + touches[1].clientY) / 2,
+  x: (touches[0].clientX + touches[1].clientX) / 2,
+  y: (touches[0].clientY + touches[1].clientY) / 2,
 });
 
 export const isMultiTouchEvent = (event: MouseEvent | TouchEvent) =>
-    "touches" in event && event.touches.length > 1;
+  "touches" in event && event.touches.length > 1;
 
-export const isTouchEvent = (event: MouseEvent | TouchEvent): event is TouchEvent =>
-    "touches" in event;
+export const isTouchEvent = (
+  event: MouseEvent | TouchEvent,
+): event is TouchEvent => "touches" in event;
 
 export const isolateTouchEvent = (event: TouchEvent) => {
-    if (event.cancelable) {
-        event.preventDefault();
-    }
+  if (event.cancelable) {
+    event.preventDefault();
+  }
 
-    event.stopPropagation();
+  event.stopPropagation();
 };
 
 export const stopTouchPropagation = (event: TouchEvent) => {
-    event.stopPropagation();
+  event.stopPropagation();
 };
 
 export const normalizeWheelDelta = (
-    delta: number,
-    deltaMode: number,
-    pageSize: number
+  delta: number,
+  deltaMode: number,
+  pageSize: number,
 ) => {
-    switch (deltaMode) {
-        case WheelEvent.DOM_DELTA_LINE:
-            return delta * 16;
-        case WheelEvent.DOM_DELTA_PAGE:
-            return delta * pageSize;
-        default:
-            return delta;
-    }
+  switch (deltaMode) {
+    case WheelEvent.DOM_DELTA_LINE:
+      return delta * 16;
+    case WheelEvent.DOM_DELTA_PAGE:
+      return delta * pageSize;
+    default:
+      return delta;
+  }
 };
 
 export const intersectsViewport = (
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    viewportWidth: number,
-    viewportHeight: number
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  viewportWidth: number,
+  viewportHeight: number,
 ) =>
-    x + width >= -LAZY_LOAD_OVERSCAN &&
-    x <= viewportWidth + LAZY_LOAD_OVERSCAN &&
-    y + height >= -LAZY_LOAD_OVERSCAN &&
-    y <= viewportHeight + LAZY_LOAD_OVERSCAN;
+  x + width >= -LAZY_LOAD_OVERSCAN &&
+  x <= viewportWidth + LAZY_LOAD_OVERSCAN &&
+  y + height >= -LAZY_LOAD_OVERSCAN &&
+  y <= viewportHeight + LAZY_LOAD_OVERSCAN;
 
 export const getOptimizedImageSrc = (src: string, width: number) => {
-    const uploadSegment = "/image/upload/";
-    const uploadIndex = src.indexOf(uploadSegment);
+  const uploadSegment = "/image/upload/";
+  const uploadIndex = src.indexOf(uploadSegment);
 
-    if (uploadIndex === -1) return src;
+  if (uploadIndex === -1) return src;
 
-    const insertIndex = uploadIndex + uploadSegment.length;
-    const transformation = `f_auto,q_auto,w_${width},c_limit`;
+  const insertIndex = uploadIndex + uploadSegment.length;
+  const transformation = `f_auto,q_auto,w_${width},c_limit`;
 
-    return `${src.slice(0, insertIndex)}${transformation}/${src.slice(insertIndex)}`;
+  return `${src.slice(0, insertIndex)}${transformation}/${src.slice(insertIndex)}`;
 };
 
 export const getImageRequestWidth = (itemWidth: number) => {
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_KONVA_PIXEL_RATIO);
-    const requestedWidth = Math.ceil((itemWidth * MAX_SCALE * dpr) / 100) * 100;
+  const dpr = Math.min(window.devicePixelRatio || 1, MAX_KONVA_PIXEL_RATIO);
+  const requestedWidth = Math.ceil((itemWidth * MAX_SCALE * dpr) / 100) * 100;
 
-    return clamp(
-        requestedWidth,
-        ARCHIVE_IMAGE_MIN_WIDTH,
-        ARCHIVE_IMAGE_MAX_WIDTH
-    );
+  return clamp(
+    requestedWidth,
+    ARCHIVE_IMAGE_MIN_WIDTH,
+    ARCHIVE_IMAGE_MAX_WIDTH,
+  );
 };
 
 export const getContainedRect = (
-    contentWidth: number,
-    contentHeight: number,
-    viewportWidth: number,
-    viewportHeight: number
+  contentWidth: number,
+  contentHeight: number,
+  viewportWidth: number,
+  viewportHeight: number,
 ): Rect => {
-    const marginX = viewportWidth < MOBILE_BREAKPOINT ? 0 : 70;
-    const marginY = viewportWidth < MOBILE_BREAKPOINT ? 0 : 40;
-    const availableWidth = Math.max(1, viewportWidth - marginX * 2);
-    const availableHeight = Math.max(1, viewportHeight - marginY * 2);
-    const scale = Math.min(
-        availableWidth / contentWidth,
-        availableHeight / contentHeight
-    );
-    const width = contentWidth * scale;
-    const height = contentHeight * scale;
+  const marginX = viewportWidth < MOBILE_BREAKPOINT ? 0 : 70;
+  const marginY = viewportWidth < MOBILE_BREAKPOINT ? 0 : 40;
+  const availableWidth = Math.max(1, viewportWidth - marginX * 2);
+  const availableHeight = Math.max(1, viewportHeight - marginY * 2);
+  const scale = Math.min(
+    availableWidth / contentWidth,
+    availableHeight / contentHeight,
+  );
+  const width = contentWidth * scale;
+  const height = contentHeight * scale;
 
-    return {
-        x: (viewportWidth - width) / 2,
-        y: (viewportHeight - height) / 2,
-        width,
-        height,
-    };
+  return {
+    x: (viewportWidth - width) / 2,
+    y: (viewportHeight - height) / 2,
+    width,
+    height,
+  };
 };

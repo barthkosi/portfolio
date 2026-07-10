@@ -11,73 +11,73 @@ import illustrations from "@/data/illustrations.json";
 import { springBouncy } from "@/lib/transitions";
 
 type IllustrationItem = {
-    id: string;
-    image: string;
-    publicId: string;
-    width: number;
-    height: number;
-    aspectRatio: number;
+  id: string;
+  image: string;
+  publicId: string;
+  width: number;
+  height: number;
+  aspectRatio: number;
 };
 
 function IllustrationCard({
-    data,
-    index,
-    isVisible,
+  data,
+  index,
+  isVisible,
 }: RenderComponentProps<IllustrationItem> & { isVisible: boolean }) {
-    return (
-        <motion.article
-            initial={{ opacity: 0, y: 30 }}
-            animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-            transition={{ ...springBouncy, delay: index * 0.05 }}
-        >
-            <Card
-                image={data.image}
-                aspectRatio="auto"
-                shimmerAspectRatio={`${data.width}/${data.height}`}
-                imageWidth={data.width}
-                imageHeight={data.height}
-            />
-        </motion.article>
-    );
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 30 }}
+      animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+      transition={{ ...springBouncy, delay: index * 0.05 }}
+    >
+      <Card
+        image={data.image}
+        aspectRatio="auto"
+        shimmerAspectRatio={`${data.width}/${data.height}`}
+        imageWidth={data.width}
+        imageHeight={data.height}
+      />
+    </motion.article>
+  );
 }
 
 export default function IllustrationsContent() {
-    const isClient = useIsClient();
-    const [areImagesVisible, setAreImagesVisible] = useState(false);
-    const { columnCount, gutter } = useResponsiveLayout();
+  const isClient = useIsClient();
+  const [areImagesVisible, setAreImagesVisible] = useState(false);
+  const { columnCount, gutter } = useResponsiveLayout();
 
-    const renderCard = useCallback(
-        (props: RenderComponentProps<IllustrationItem>) => (
-            <IllustrationCard {...props} isVisible={areImagesVisible} />
-        ),
-        [areImagesVisible]
-    );
+  const renderCard = useCallback(
+    (props: RenderComponentProps<IllustrationItem>) => (
+      <IllustrationCard {...props} isVisible={areImagesVisible} />
+    ),
+    [areImagesVisible],
+  );
 
-    if (!isClient) {
-        return null;
-    }
+  if (!isClient) {
+    return null;
+  }
 
-    return (
-        <section className="flex flex-col w-full gap-7 lg:gap-8 h-auto items-center justify-center">
-            <div className="max-w-[480px]">
-                <InfoBlock
-                    variant="centered"
-                    title="Illustrations"
-                    number={illustrations.length}
-                    description="A visual diary of forms. I believe only in continued iteration. This page is a snapshot of my ever growing dialogue with color, light, and composition."
-                    onComplete={() => setAreImagesVisible(true)}
-                />
-            </div>
-            <div className="w-full">
-                <Masonry
-                    key={`${columnCount}-${gutter}`}
-                    items={illustrations}
-                    columnGutter={gutter}
-                    columnCount={columnCount}
-                    overscanBy={5}
-                    render={renderCard}
-                />
-            </div>
-        </section>
-    );
+  return (
+    <section className="flex flex-col w-full gap-7 lg:gap-8 h-auto items-center justify-center">
+      <div className="max-w-[480px]">
+        <InfoBlock
+          variant="centered"
+          title="Illustrations"
+          number={illustrations.length}
+          description="A visual diary of forms. I believe only in continued iteration. This page is a snapshot of my ever growing dialogue with color, light, and composition."
+          onComplete={() => setAreImagesVisible(true)}
+        />
+      </div>
+      <div className="w-full">
+        <Masonry
+          key={`${columnCount}-${gutter}`}
+          items={illustrations}
+          columnGutter={gutter}
+          columnCount={columnCount}
+          overscanBy={5}
+          render={renderCard}
+        />
+      </div>
+    </section>
+  );
 }

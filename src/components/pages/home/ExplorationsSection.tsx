@@ -5,44 +5,46 @@ import Card from "@/components/interface/Card";
 import explorations from "@/data/home/explorations.json";
 
 type HomeExplorationItem = {
-    id: string;
-    image: string;
-    title: string;
-    description: string;
-    link: string;
-    bannerImage?: string;
-    locked?: boolean;
+  id: string;
+  image: string;
+  title: string;
+  description: string;
+  link: string;
+  bannerImage?: string;
+  locked?: boolean;
 };
 
 const homeExplorations = explorations as HomeExplorationItem[];
 
 export default function ExplorationsSection() {
-    return (
-        <section className="flex flex-col items-center px-4 md:px-8 py-8 md:py-12 gap-8">
-            <div className="flex flex-col gap-2 max-w-[640px] text-center">
-                <h2 className="h3">Explorations</h2>
-                <p className="text-[var(--content-secondary)]">Experiments, tests, and unfinished ideas.</p>
-            </div>
+  return (
+    <section className="flex flex-col items-center px-4 md:px-8 py-8 md:py-12 gap-8">
+      <div className="flex flex-col gap-2 max-w-[640px] text-center">
+        <h2 className="h3">Explorations</h2>
+        <p className="text-[var(--content-secondary)]">
+          Experiments, tests, and unfinished ideas.
+        </p>
+      </div>
 
-            <ul className="w-full flex flex-col md:flex-row gap-5">
-                {homeExplorations.map((item) => (
-                    <li key={item.id} className="w-full">
-                        <Card
-                            image={item.image}
-                            bannerImage={item.bannerImage}
-                            title={item.title}
-                            description={item.description}
-                            link={item.link}
-                            variant="list-stacked"
-                            locked={item.locked}
-                        />
-                    </li>
-                ))}
-            </ul>
+      <ul className="w-full flex flex-col md:flex-row gap-5">
+        {homeExplorations.map((item) => (
+          <li key={item.id} className="w-full">
+            <Card
+              image={item.image}
+              bannerImage={item.bannerImage}
+              title={item.title}
+              description={item.description}
+              link={item.link}
+              variant="list-stacked"
+              locked={item.locked}
+            />
+          </li>
+        ))}
+      </ul>
 
-            <Button to="/explorations" variant="secondary">
-                See More
-            </Button>
-        </section>
-    );
+      <Button to="/explorations" variant="secondary">
+        See More
+      </Button>
+    </section>
+  );
 }
