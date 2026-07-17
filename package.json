@@ -7,6 +7,7 @@
     "build": "npm run enrich:post-media && next build",
     "start": "next start",
     "lint": "eslint",
+    "format": "prettier --write .",
     "enrich:archive": "node scripts/enrich-archive.mjs",
     "enrich:data-media": "node scripts/enrich-data-media.mjs",
     "enrich:post-media": "node scripts/enrich-post-media.mjs"
@@ -37,6 +38,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "prettier": "^3.9.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   },

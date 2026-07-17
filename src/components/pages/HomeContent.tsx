@@ -1,25 +1,25 @@
 "use client";
 
 import {
-    HeroSection,
-    FeaturedWorkSection,
-    AboutSection,
-    ExplorationsSection,
-    WritingSection,
-    JoinFamilySection    
+  HeroSection,
+  FeaturedWorkSection,
+  AboutSection,
+  ExplorationsSection,
+  WritingSection,
+  JoinFamilySection,
 } from "@/components/pages/home";
 
 export default function HomeContent() {
-    return (
-        <>
-            <div className='overflow-hidden flex flex-col items-center gap-8 lg:gap-16'>
-                <HeroSection />
-                <FeaturedWorkSection />
-            </div>
-            <AboutSection />
-            <ExplorationsSection />
-            <WritingSection />
-            <JoinFamilySection />
-        </>
-    );
+  return (
+    <>
+      <div className="overflow-hidden flex flex-col items-center gap-8 lg:gap-16">
+        <HeroSection />
+        <FeaturedWorkSection />
+      </div>
+      <AboutSection />
+      <ExplorationsSection />
+      <WritingSection />
+      <JoinFamilySection />
+    </>
+  );
 }

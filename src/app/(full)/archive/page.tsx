@@ -3,18 +3,22 @@ import ArchiveContent from "@/components/pages/ArchiveContent";
 import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-    title: "Archive",
+  title: "Archive",
+  description: "A comprehensive archive of my work and experiments.",
+  alternates: {
+    canonical: `${SITE_URL}/archive`,
+  },
+  openGraph: {
+    title: "Archive by Barth Kosi",
     description: "A comprehensive archive of my work and experiments.",
-    alternates: {
-        canonical: `${SITE_URL}/archive`,
-    },
-    openGraph: {
-        title: "Archive by Barth Kosi",
-        description: "A comprehensive archive of my work and experiments.",
-        images: [{ url: "https://res.cloudinary.com/barthkosi/image/upload/v1780760353/og/archive.png" }],
-    },
+    images: [
+      {
+        url: "https://res.cloudinary.com/barthkosi/image/upload/v1780760353/og/archive.png",
+      },
+    ],
+  },
 };
 
 export default function ArchivePage() {
-    return <ArchiveContent />;
+  return <ArchiveContent />;
 }
