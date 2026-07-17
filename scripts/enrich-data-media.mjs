@@ -7,24 +7,6 @@ const DATA_PATHS = [
 ];
 const CLOUDINARY_HOST = "res.cloudinary.com";
 
-function normalizeCloudinaryUrl(value) {
-  const url = new URL(value);
-
-  if (url.hostname !== CLOUDINARY_HOST) {
-    return value;
-  }
-
-  const parts = url.pathname.split("/");
-  const uploadIndex = parts.indexOf("upload");
-
-  if (uploadIndex !== -1 && /^v\d+$/.test(parts[uploadIndex + 1])) {
-    parts.splice(uploadIndex + 1, 1);
-    url.pathname = parts.join("/");
-  }
-
-  return url.toString();
-}
-
 function parseCloudinaryPublicId(value) {
   const url = new URL(value);
 
@@ -158,7 +140,7 @@ async function fetchImageDimensions(url) {
 }
 
 async function enrichItem(item) {
-  const image = normalizeCloudinaryUrl(item.image);
+  const image = item.image;
   const publicId = item.publicId ?? parseCloudinaryPublicId(image);
   const dimensions =
     item.width && item.height
