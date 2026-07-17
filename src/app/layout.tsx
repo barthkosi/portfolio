@@ -37,6 +37,9 @@ const sourceSerif4 = Source_Serif_4({
   display: "swap",
 });
 
+const isDev = process.env.NODE_ENV === "development";
+const faviconUrl = isDev ? "/favicon-dev.svg" : "/favicon.svg";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -94,14 +97,8 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        media: "(prefers-color-scheme: light)",
-        url: "https://res.cloudinary.com/barthkosi/image/upload/favicon-light.png",
-        href: "https://res.cloudinary.com/barthkosi/image/upload/favicon-light.png",
-      },
-      {
-        media: "(prefers-color-scheme: dark)",
-        url: "https://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png",
-        href: "https://res.cloudinary.com/barthkosi/image/upload/favicon-dark.png",
+        url: faviconUrl,
+        href: faviconUrl,
       },
     ],
   },
