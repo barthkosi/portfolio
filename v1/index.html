@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>barthkosi - Design for the Soul of Your Startup</title>
+    <meta name="description" content="Portfolio of barthkosi">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/barthkosi/image/upload/c_scale,w_32,h_32/v1756581450/Favicon_tryzqp.png">
+    
+    <!-- Open Graph - This creates the previews you see in iMessage, WhatsApp, etc. -->
+    <meta property="og:title" content="barthkosi - Portfolio">
+    <meta property="og:description" content="Portfolio of barthkosi">
+    <meta property="og:image" content="https://res.cloudinary.com/barthkosi/image/upload/v1756252976/Cover.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://first.barthkosi.com">
+    
+    <!-- Twitter Card - This ensures Twitter shows the proper preview image -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="barthkosi - Portfolio">
+    <meta name="twitter:description" content="Portfolio of barthkosi">
+    <meta name="twitter:image" content="https://res.cloudinary.com/barthkosi/image/upload/v1756252976/Cover.png">
+    <meta name="twitter:image:alt" content="barthkosi portfolio cover">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "barthkosi",
+      "jobTitle": "Designer",
+      "description": "Portfolio of barthkosi",
+      "url": "https://first.barthkosi.com",
+      "sameAs": [
+        "https://cal.com/barthkosi/intro"
+      ]
+    }
+    </script>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E236PLGEQR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-E236PLGEQR');
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Inter:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <script type="module" src="script.js"></script>
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <div class="container">
+        <header class="sidebar" role="banner">
+            <nav class="sidebar-content" role="navigation" aria-label="Main navigation">
+                <div class="profile-section">
+                    <div class="avatar">
+                        <img src="https://res.cloudinary.com/barthkosi/image/upload/f_auto,q_auto/v1756256279/pfp_adpfyf.png" 
+                             alt="Profile picture of Barth" 
+                             class="avatar-img" 
+                             loading="eager" 
+                             decoding="async">
+                    </div>
+                    <div class="name">Barth</div>
+                </div>
+
+                <div class="hero-section">
+                    <div class="title-description-group">
+                        <h1 class="title">Design for the Soul of Your Startup.</h1>
+                        <p class="description">
+                            I work with founders who know the best products feel alive.
+                        </p>
+                    </div>
+                    <button class="cta-button" 
+                            onclick="window.open('https://cal.com/barthkosi/intro', '_blank')"
+                            aria-label="Book an intro call with Barth">
+                        Book an Intro Call
+                    </button>
+                </div>
+            </nav>
+
+            <footer class="footer footer-desktop" role="contentinfo">
+                <p class="footer-text">
+                    From early-stage concepts to established brands, my work has helped projects find their voice and create emotional connections that have driven brand loyalty and meaningful engagement.
+                </p>
+                <p class="copyright">© barthkosi</p>
+            </footer>
+        </header>
+
+        <main id="main-content" class="main-content" role="main">
+            <section class="portfolio-section" aria-label="Portfolio showcase">
+                <div class="portfolio-grid" data-portfolio-grid>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="footer footer-mobile" role="contentinfo">
+            <p class="footer-text">
+                From early-stage concepts to established brands, my work has helped projects find their voice and create emotional connections that have driven brand loyalty and meaningful engagement.
+            </p>
+            <p class="copyright">© barthkosi</p>
+        </footer>
+    </div>
+</body>
+</html>
