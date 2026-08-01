@@ -113,6 +113,7 @@ export default function HeroSection() {
                         alt={item.alt}
                         width={280}
                         height={158}
+                        priority={index === 0}
                         className="w-full aspect-video object-cover rounded-[var(--radius-lg)]"
                       />
                     </div>
@@ -141,6 +142,7 @@ export default function HeroSection() {
                         alt={item.alt}
                         width={280}
                         height={158}
+                        priority={index === 0}
                         className="w-full aspect-video object-cover rounded-[var(--radius-lg)]"
                       />
                     </div>
@@ -156,13 +158,14 @@ export default function HeroSection() {
                 autoFill
                 style={gradientMaskHorizontal}
               >
-                {heroMarquee.slice(0, 5).map((item) => (
+                {heroMarquee.slice(0, 5).map((item, index) => (
                   <Image
                     key={item.id}
                     src={item.image}
                     alt={item.alt}
                     width={320}
                     height={180}
+                    priority={index === 0}
                     className="h-40 md:h-52 w-auto aspect-video object-cover rounded-[var(--radius-lg)] gap-[2px] mx-[1px]"
                   />
                 ))}

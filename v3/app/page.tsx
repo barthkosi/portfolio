@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <main>
-      <div>test-depoyment</div>
+      <div>New Depoyment test</div>
     </main>
   );
 }

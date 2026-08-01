@@ -4,7 +4,7 @@ import { pressScale } from "@/lib/transitions";
 import { motion } from "motion/react";
 import Link from "next/link";
 
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 type ButtonVariant = "primary" | "secondary";
 type ButtonSize = "xs" | "sm" | "md" | "lg";
