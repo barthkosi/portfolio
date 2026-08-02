@@ -1,7 +1,7 @@
 export default function Home() {
   return (
     <main>
-      <div>New Depoyment test</div>
+      <div>V3 test triggers</div>
     </main>
   );
 }
