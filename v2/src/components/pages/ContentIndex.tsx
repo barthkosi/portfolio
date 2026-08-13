@@ -21,7 +21,10 @@ const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.2 },
+    transition: {
+      delayChildren: 0.08,
+      staggerChildren: 0.08,
+    },
   },
 };
 
@@ -84,10 +87,7 @@ export default function ContentIndex({
         description={description}
         onComplete={() => {
           setIntroFinished(true);
-
-          if (allTags.length === 0) {
-            setShowCards(true);
-          }
+          setShowCards(true);
         }}
       />
 

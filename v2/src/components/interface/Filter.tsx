@@ -1,6 +1,6 @@
 "use client";
 
-import { pressScale } from "@/lib/transitions";
+import { pressScale, springBouncy } from "@/lib/transitions";
 import { motion, Variants } from "motion/react";
 
 interface FilterProps {
@@ -12,19 +12,12 @@ interface FilterProps {
 }
 
 const containerVariants: Variants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.2,
-    },
+    y: 0,
+    transition: springBouncy,
   },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
 };
 
 export default function Filter({
@@ -50,7 +43,6 @@ export default function Filter({
       }}
     >
       <motion.button
-        variants={itemVariants}
         {...tagPressMotion}
         onClick={() => onTagSelect(null)}
         className={`px-4 py-2 rounded-full label-s transition-colors ${
@@ -64,7 +56,6 @@ export default function Filter({
       {tags.map((tag) => (
         <motion.button
           key={tag}
-          variants={itemVariants}
           {...tagPressMotion}
           onClick={() => onTagSelect(tag === activeTag ? null : tag)}
           className={`px-4 py-2 rounded-full label-s transition-colors ${

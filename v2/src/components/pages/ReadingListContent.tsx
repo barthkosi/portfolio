@@ -125,7 +125,10 @@ export default function ReadingListContent() {
         title="Reading List"
         number={books.length}
         description="Reading more is one of my biggest goals. This list shifts and grows as new titles find their way into my hands"
-        onComplete={() => setIsFilterVisible(true)}
+        onComplete={() => {
+          setIsFilterVisible(true);
+          setTimeout(() => setAreBooksVisible(true), 80);
+        }}
       />
 
       <div className="w-full items-center lg:items-start flex flex-col">
