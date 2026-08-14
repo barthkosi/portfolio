@@ -166,7 +166,7 @@ export default function Nav() {
             <AnimatePresence>
               {showVault && (
                 <motion.div
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-0 bg-[var(--background-primary)] text-[var(--content-primary)] border border-[var(--background-secondary)] rounded-xl shadow-lg p-3 flex flex-col gap-0"
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-0 bg-[var(--background-primary)] text-[var(--content-primary)] border border-[var(--background-secondary)] rounded-xl p-3 flex flex-col gap-0"
                   initial={anim.fadeDownBouncyBouncy.initial}
                   animate={anim.fadeDownBouncyBouncy.animate}
                   exit={anim.fadeDownBouncyBouncy.exit}
@@ -203,7 +203,7 @@ export default function Nav() {
             <AnimatePresence>
               {showSocial && (
                 <motion.div
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-0 bg-[var(--background-primary)] text-[var(--content-primary)] border border-[var(--background-secondary)] rounded-xl shadow-lg p-3 flex flex-col gap-0"
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-0 bg-[var(--background-primary)] text-[var(--content-primary)] border border-[var(--background-secondary)] rounded-xl p-3 flex flex-col gap-0"
                   initial={anim.fadeDownBouncy.initial}
                   animate={anim.fadeDownBouncy.animate}
                   exit={anim.fadeDownBouncy.exit}
