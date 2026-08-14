@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getAllContent, getAllTags } from "@/lib/content";
+import { getContent, getAllTags } from "@/lib/content";
 import ExplorationsContent from "@/components/pages/ExplorationsContent";
 import { SITE_URL } from "@/lib/site";
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ExplorationsPage() {
-  const content = await getAllContent();
+  const content = getContent("explorations");
   const tags = getAllTags(content);
 
   return (

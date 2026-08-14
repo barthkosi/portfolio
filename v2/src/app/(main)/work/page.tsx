@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getAllContent, getAllTags } from "@/lib/content";
+import { getWorkContent, getAllTags } from "@/lib/content";
 import WorkContent from "@/components/pages/WorkContent";
 import { SITE_URL } from "@/lib/site";
 
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage() {
-  const content = await getAllContent();
+  const content = await getWorkContent();
   const tags = getAllTags(content);
 
   return <WorkContent initialProjects={content} allTags={tags} />;

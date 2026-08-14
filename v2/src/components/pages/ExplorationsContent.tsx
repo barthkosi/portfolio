@@ -20,6 +20,7 @@ export default function ExplorationsContent({
       items={initialExplorations}
       allTags={allTags}
       initialType="explorations"
+      typeOptions={[]}
     />
   );
 }

@@ -62,6 +62,15 @@ export const getContent = (type: ContentType): ContentItem[] => {
   );
 };
 
+export const getWorkContent = (): ContentItem[] => {
+  const work = getContent("work");
+  const explorations = getContent("explorations");
+  const items = [...work, ...explorations];
+  return items.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+};
+
 export const getAllContent = (): ContentItem[] => {
   const work = getContent("work");
   const writing = getContent("writing");

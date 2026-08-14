@@ -1,12 +1,17 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import InfoBlock from "@/components/interface/InfoBlock";
 import Card from "@/components/interface/Card";
-import Filter, { type FilterTypeOption } from "@/components/interface/Filter";
+import Filter from "@/components/interface/Filter";
 import type { ContentItem } from "@/lib/content";
-import { Motion, springBouncy } from "@/lib/transitions";
+import { Motion, springBouncy, physics } from "@/lib/transitions";
+
+export type ContentTypeOption = {
+  label: string;
+  value: string;
+};
 
 function extractTags(items: ContentItem[]): string[] {
   const tags = new Set<string>();
@@ -23,6 +28,7 @@ interface ContentIndexProps {
   items: ContentItem[];
   allTags: string[];
   initialType?: string;
+  typeOptions?: ContentTypeOption[];
 }
 
 const containerVariants: Variants = {
@@ -45,11 +51,9 @@ const cardVariants: Variants = {
   },
 };
 
-const typeOptions: FilterTypeOption[] = [
-  { label: "All", value: "all" },
+const defaultTypeOptions: ContentTypeOption[] = [
   { label: "Work", value: "work" },
   { label: "Explorations", value: "explorations" },
-  { label: "Writing", value: "writing" },
 ];
 
 function getYearLabel(date: string) {
@@ -61,8 +65,10 @@ export default function ContentIndex({
   description,
   emptyMessage,
   items,
-  initialType = "all",
+  initialType = "work",
+  typeOptions,
 }: ContentIndexProps) {
+  const types = typeOptions ?? defaultTypeOptions;
   const [activeType, setActiveType] = useState<string>(initialType);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [introFinished, setIntroFinished] = useState(false);
@@ -110,29 +116,89 @@ export default function ContentIndex({
     setFilterAnimationKey((currentKey) => currentKey + 1);
   }, []);
 
+  useEffect(() => {
+    if (!activeTag) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+        handleTagSelect(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeTag, handleTagSelect]);
+
   return (
     <section className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
-      <InfoBlock
-        title={title}
-        number={filteredItems.length}
-        description={description}
-        onComplete={() => {
-          setIntroFinished(true);
-          setShowCards(true);
-        }}
-      />
+      <div className="flex flex-col gap-6 lg:gap-8 items-center lg:items-start lg:sticky lg:top-[134px] lg:self-start w-full lg:w-auto lg:max-w-[340px] shrink-0">
+        <InfoBlock
+          title={title}
+          number={filteredItems.length}
+          description={description}
+          onComplete={() => {
+            setIntroFinished(true);
+            setShowCards(true);
+          }}
+        >
+          {types.length > 0 && (
+            <nav className="flex flex-row lg:flex-col w-auto lg:w-full lg:max-w-[280px] gap-2 sm:gap-4 lg:gap-1.5 justify-center lg:justify-start">
+              {types.map((type) => {
+                const isActive = activeType === type.value;
+                const count =
+                  type.value === "all"
+                    ? items.length
+                    : items.filter((item) => item.type === type.value).length;
+
+                return (
+                  <button
+                    key={type.value}
+                    type="button"
+                    onClick={() => handleTypeSelect(type.value)}
+                    className={`relative flex items-center justify-between gap-4 w-auto lg:w-full py-2.5 px-3 text-left transition-colors outline-none focus:outline-none focus-visible:outline-none ${
+                      isActive
+                        ? "text-[var(--content-primary)] font-semibold"
+                        : "group text-[var(--content-secondary)] hover:text-[var(--content-primary)] hover:bg-[var(--background-secondary)]/50 font-normal"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="activeContentTypeIndicator"
+                        className="absolute bottom-0 left-0 right-0 h-[2px] lg:top-1.5 lg:bottom-1.5 lg:left-0 lg:w-[3px] lg:h-auto lg:right-auto rounded-full bg-[var(--content-primary)]"
+                        transition={physics.snappy}
+                      />
+                    )}
+                    <span className="label-m capitalize">{type.label}</span>
+                    <span
+                      className={`label-m tabular-nums ${
+                        isActive
+                          ? "text-[var(--content-primary)] font-medium"
+                          : "text-[var(--content-tertiary)] group-hover:text-[var(--content-secondary)]"
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
+          )}
+        </InfoBlock>
+      </div>
 
       <div className="w-full items-center lg:items-start flex flex-col">
-        <Filter
-          types={typeOptions}
-          activeType={activeType}
-          onTypeSelect={handleTypeSelect}
-          tags={availableTags}
-          activeTag={activeTag}
-          onTagSelect={handleTagSelect}
-          animate={introFinished}
-          onAnimationComplete={() => setShowCards(true)}
-        />
+        {availableTags.length > 0 && (
+          <Filter
+            tags={availableTags}
+            activeTag={activeTag}
+            onTagSelect={handleTagSelect}
+            animate={introFinished}
+            className="mb-8"
+          />
+        )}
 
         {filteredItems.length > 0 ? (
           <motion.div

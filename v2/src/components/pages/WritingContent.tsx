@@ -20,6 +20,7 @@ export default function WritingContent({
       items={initialPosts}
       allTags={allTags}
       initialType="writing"
+      typeOptions={[]}
     />
   );
 }
