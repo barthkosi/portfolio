@@ -320,7 +320,7 @@ export default function Card({
       <div className="w-full flex flex-col gap-1" style={textOpacityStyle}>
         {title && <h5 className="text-[var(--content-primary)]">{title}</h5>}
         {description && (
-          <div className="label-m text-[var(--content-secondary)]">
+          <div className="label-m text-[var(--content-secondary)] text-balance">
             {description}
           </div>
         )}
@@ -363,7 +363,7 @@ export default function Card({
             </div>
           )}
           {description && (
-            <div className="w-full text-[var(--content-tertiary)] body-s-medium">
+            <div className="w-full text-[var(--content-tertiary)] body-s-medium text-balance">
               {description}
             </div>
           )}

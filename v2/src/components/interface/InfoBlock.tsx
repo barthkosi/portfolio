@@ -126,7 +126,7 @@ export default function InfoBlock({
 
         <motion.p
           className={[
-            "text-[var(--content-secondary)]",
+            "text-[var(--content-secondary)] text-balance",
             isCentered
               ? "body-m-medium"
               : "body-m-medium max-w-[480px] lg:max-w-[335px]",
