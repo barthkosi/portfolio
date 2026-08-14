@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { Masonry, type RenderComponentProps } from "masonic";
 import InfoBlock from "@/components/interface/InfoBlock";
@@ -108,6 +108,22 @@ export default function ReadingListContent() {
     setFilterAnimationKey((currentKey) => currentKey + 1);
   }, []);
 
+  useEffect(() => {
+    if (!activeTag) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
+        handleTagSelect(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeTag, handleTagSelect]);
+
   const renderCard = useCallback(
     ({ data, index }: RenderComponentProps<BookItem>) => (
       <BookCard data={data} index={index} isVisible={areBooksVisible} />
@@ -120,10 +136,11 @@ export default function ReadingListContent() {
   }
 
   return (
-    <section className="flex flex-col lg:flex-row w-full gap-7 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
+    <section className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
       <InfoBlock
+        className="lg:sticky lg:top-[134px] lg:self-start"
         title="Reading List"
-        number={books.length}
+        number={filteredBooks.length}
         description="Reading more is one of my biggest goals. This list shifts and grows as new titles find their way into my hands"
         onComplete={() => {
           setIsFilterVisible(true);
@@ -136,8 +153,10 @@ export default function ReadingListContent() {
           tags={allTags}
           activeTag={activeTag}
           onTagSelect={handleTagSelect}
+          showAllTagsOption
           animate={isFilterVisible}
           onAnimationComplete={() => setAreBooksVisible(true)}
+          className="mb-8"
         />
 
         <Masonry

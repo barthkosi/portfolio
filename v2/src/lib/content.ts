@@ -62,6 +62,25 @@ export const getContent = (type: ContentType): ContentItem[] => {
   );
 };
 
+export const getWorkContent = (): ContentItem[] => {
+  const work = getContent("work");
+  const explorations = getContent("explorations");
+  const items = [...work, ...explorations];
+  return items.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+};
+
+export const getAllContent = (): ContentItem[] => {
+  const work = getContent("work");
+  const writing = getContent("writing");
+  const explorations = getContent("explorations");
+  const items = [...work, ...writing, ...explorations];
+  return items.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+};
+
 export const getAllTags = (items: ContentItem[]): string[] => {
   const tags = new Set<string>();
   items.forEach((item) => {
@@ -82,3 +101,4 @@ export const getAllSlugs = (type: ContentType): string[] => {
   const items = getContent(type);
   return items.map((item) => item.slug);
 };
+

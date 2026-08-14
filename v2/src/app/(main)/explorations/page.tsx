@@ -23,10 +23,10 @@ export const metadata: Metadata = {
 };
 
 export default async function ExplorationsPage() {
-  const explorations = await getContent("explorations");
-  const tags = getAllTags(explorations);
+  const content = getContent("explorations");
+  const tags = getAllTags(content);
 
   return (
-    <ExplorationsContent initialExplorations={explorations} allTags={tags} />
+    <ExplorationsContent initialExplorations={content} allTags={tags} />
   );
 }

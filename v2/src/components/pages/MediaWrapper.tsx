@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
   type ReactElement,
-  type ReactNode,
 } from "react";
 import { AnimatePresence, motion, useScroll, useTransform } from "motion/react";
 import { createPortal } from "react-dom";
@@ -187,7 +186,7 @@ export default function MediaWrapper({
                 />
 
                 <motion.div
-                  className="fixed overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.4)] outline outline-1 outline-white/10 pointer-events-auto"
+                  className="fixed overflow-hidden bg-[var(--background-primary)] shadow-[0_24px_80px_rgba(0,0,0,0.4)] outline outline-1 outline-white/10 pointer-events-auto"
                   style={{
                     left: openRect.target.x,
                     top: openRect.target.y,
@@ -221,7 +220,6 @@ export default function MediaWrapper({
                   onClick={(e) => e.stopPropagation()}
                 >
                   {expandedMediaType === "video" ? (
-                    /* eslint-disable-next-line jsx-a11y/media-has-caption */
                     <video
                       src={expandedSrc}
                       className="h-full w-full object-contain"

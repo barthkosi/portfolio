@@ -19,7 +19,8 @@ export default function WritingContent({
       emptyMessage="Writing is coming soon!"
       items={initialPosts}
       allTags={allTags}
-      type="writing"
+      initialType="writing"
+      typeOptions={[]}
     />
   );
 }

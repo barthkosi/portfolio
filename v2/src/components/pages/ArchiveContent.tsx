@@ -173,7 +173,7 @@ export default function ArchiveContent() {
 
                   {/* Zooming Image Wrapper */}
                   <motion.div
-                    className="fixed overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.4)] outline outline-1 outline-white/10 pointer-events-auto"
+                    className="fixed overflow-hidden bg-[var(--background-primary)] shadow-[0_24px_80px_rgba(0,0,0,0.4)] outline outline-1 outline-white/10 pointer-events-auto"
                     style={{
                       left: openImageTarget.x,
                       top: openImageTarget.y,

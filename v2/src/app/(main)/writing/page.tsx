@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 };
 
 export default async function WritingPage() {
-  const posts = await getContent("writing");
-  const tags = getAllTags(posts);
+  const content = getContent("writing");
+  const tags = getAllTags(content);
 
-  return <WritingContent initialPosts={posts} allTags={tags} />;
+  return <WritingContent initialPosts={content} allTags={tags} />;
 }
