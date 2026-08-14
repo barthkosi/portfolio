@@ -58,7 +58,7 @@ export default function Filter({
               : "bg-[var(--background-secondary)] text-[var(--content-secondary)] hover:bg-[var(--background-tertiary)]"
           }`}
         >
-          All Tags
+          All
         </motion.button>
       )}
       {tags.map((tag) => (
