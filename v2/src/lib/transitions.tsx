@@ -130,9 +130,12 @@ export const Motion = ({
         : { animate: "animate" })}
       exit="exit"
       variants={variant}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       transition={
-        transition || { ...(variant.animate as any)?.transition, delay }
+        transition || {
+          ...((variant.animate as { transition?: Record<string, unknown> })
+            ?.transition ?? {}),
+          delay,
+        }
       }
       {...props}
     >

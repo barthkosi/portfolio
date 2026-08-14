@@ -1,7 +1,8 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useIsClient } from "@/hooks/useIsClient";
 
 const THEME_COLORS = {
   light: "#FFFFFF", // --background-primary (light)
@@ -26,12 +27,7 @@ const THEME_COLORS = {
  */
 export default function ThemeColorMeta() {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  // Step 1: mark as mounted so we know next-themes has resolved the real theme
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   // Step 2: once mounted (and on every subsequent theme change), sync the tag
   useEffect(() => {
