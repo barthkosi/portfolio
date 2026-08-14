@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Button from "@/components/interface/Button";
 import ChevronDown from "@/components/interface/ChevronDown";
 import { anim, physics, pressScale } from "@/lib/transitions";
@@ -24,10 +24,27 @@ const NAV_MENU_SOCIAL_LABEL_TRANSITION = {
 };
 
 let hasAnimatedGlobal = false;
+const navListeners = new Set<() => void>();
+function subscribeNav(listener: () => void) {
+  navListeners.add(listener);
+  return () => {
+    navListeners.delete(listener);
+  };
+}
+function setNavAnimated() {
+  if (!hasAnimatedGlobal) {
+    hasAnimatedGlobal = true;
+    navListeners.forEach((l) => l());
+  }
+}
 
 export default function Nav() {
   const pathname = usePathname();
-  const [hasAnimated, setHasAnimated] = useState(hasAnimatedGlobal);
+  const hasAnimated = useSyncExternalStore(
+    subscribeNav,
+    () => hasAnimatedGlobal,
+    () => false,
+  );
   const [menuState, setMenuState] = useState({ isOpen: false, path: pathname });
   const [showVault, setShowVault] = useState(false);
   const [showSocial, setShowSocial] = useState(false);
@@ -36,8 +53,7 @@ export default function Nav() {
   const navBrandPressMotion = pressScale({ hover: 1.02, tap: 0.98 });
 
   useEffect(() => {
-    hasAnimatedGlobal = true;
-    setHasAnimated(true);
+    setNavAnimated();
   }, []);
 
   useEffect(() => {

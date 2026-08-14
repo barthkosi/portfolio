@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 import { SCROLL_TO_TOP_EVENT } from "@/components/ScrollToTop";
 
 interface SmoothScrollProviderProps {
@@ -13,6 +15,7 @@ export default function SmoothScrollProvider({
 }: SmoothScrollProviderProps) {
   const lenisRef = useRef<Lenis | null>(null);
   const rafIdRef = useRef<number | null>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     const lenis = new Lenis();
@@ -48,6 +51,12 @@ export default function SmoothScrollProvider({
       lenisRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (lenisRef.current) {
+      lenisRef.current.resize();
+    }
+  }, [pathname]);
 
   return <>{children}</>;
 }

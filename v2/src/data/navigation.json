@@ -9,6 +9,11 @@
       "label": "Writing",
       "href": "/writing",
       "description": "On the human condition"
+    },
+    {
+      "label": "Archive",
+      "href": "/archive",
+      "description": "Gallery of my work"
     }
   ],
   "vault": [
@@ -21,11 +26,7 @@
       "label": "Reading List",
       "href": "/reading-list",
       "description": "Books I recommend"
-    },
-    {
-      "label": "Archive",
-      "href": "/archive",
-      "description": "Gallery of my work"
     }
   ]
 }
+
