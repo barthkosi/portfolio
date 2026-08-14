@@ -15,11 +15,11 @@ export default function WorkContent({
   return (
     <ContentIndex
       title="Work"
-      description="These entries document my process of building and refining tools that serve a purpose."
-      emptyMessage="Work is coming soon!"
+      description="Projects, case studies, explorations, and writings."
+      emptyMessage="No items found!"
       items={initialProjects}
       allTags={allTags}
-      type="work"
+      initialType="all"
     />
   );
 }

@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run enrich:post-media && next build",
+    "build": "npm run db:migrate && npm run enrich:post-media && next build",
+    "db:migrate": "node scripts/migrate-md-to-db.mjs",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",

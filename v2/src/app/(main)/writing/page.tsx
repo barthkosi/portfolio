@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getContent, getAllTags } from "@/lib/content";
+import { getAllContent, getAllTags } from "@/lib/content";
 import WritingContent from "@/components/pages/WritingContent";
 import { SITE_URL } from "@/lib/site";
 
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 };
 
 export default async function WritingPage() {
-  const posts = await getContent("writing");
-  const tags = getAllTags(posts);
+  const content = await getAllContent();
+  const tags = getAllTags(content);
 
-  return <WritingContent initialPosts={posts} allTags={tags} />;
+  return <WritingContent initialPosts={content} allTags={tags} />;
 }

@@ -19,7 +19,7 @@ export default function ExplorationsContent({
       emptyMessage="Explorations are coming soon!"
       items={initialExplorations}
       allTags={allTags}
-      type="explorations"
+      initialType="explorations"
     />
   );
 }

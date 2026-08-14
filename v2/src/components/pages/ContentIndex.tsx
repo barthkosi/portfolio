@@ -4,9 +4,17 @@ import { useCallback, useMemo, useState } from "react";
 import { motion, type Variants } from "motion/react";
 import InfoBlock from "@/components/interface/InfoBlock";
 import Card from "@/components/interface/Card";
-import Filter from "@/components/interface/Filter";
-import type { ContentItem, ContentType } from "@/lib/content";
+import Filter, { type FilterTypeOption } from "@/components/interface/Filter";
+import type { ContentItem } from "@/lib/content";
 import { Motion, springBouncy } from "@/lib/transitions";
+
+function extractTags(items: ContentItem[]): string[] {
+  const tags = new Set<string>();
+  items.forEach((item) => {
+    item.tags?.forEach((tag) => tags.add(tag));
+  });
+  return Array.from(tags).sort();
+}
 
 interface ContentIndexProps {
   title: string;
@@ -14,7 +22,7 @@ interface ContentIndexProps {
   emptyMessage: string;
   items: ContentItem[];
   allTags: string[];
-  type: ContentType;
+  initialType?: string;
 }
 
 const containerVariants: Variants = {
@@ -37,6 +45,13 @@ const cardVariants: Variants = {
   },
 };
 
+const typeOptions: FilterTypeOption[] = [
+  { label: "All", value: "all" },
+  { label: "Work", value: "work" },
+  { label: "Explorations", value: "explorations" },
+  { label: "Writing", value: "writing" },
+];
+
 function getYearLabel(date: string) {
   return date ? `${date.substring(2, 4)}'` : "Unknown";
 }
@@ -46,20 +61,30 @@ export default function ContentIndex({
   description,
   emptyMessage,
   items,
-  allTags,
-  type,
+  initialType = "all",
 }: ContentIndexProps) {
+  const [activeType, setActiveType] = useState<string>(initialType);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [introFinished, setIntroFinished] = useState(false);
   const [showCards, setShowCards] = useState(false);
   const [filterAnimationKey, setFilterAnimationKey] = useState(0);
-  const filteredItems = useMemo(
-    () =>
-      activeTag
-        ? items.filter((item) => item.tags?.includes(activeTag))
-        : items,
-    [activeTag, items],
-  );
+
+  const availableTags = useMemo(() => {
+    const typeItems =
+      activeType === "all"
+        ? items
+        : items.filter((item) => item.type === activeType);
+    return extractTags(typeItems);
+  }, [activeType, items]);
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      const matchesType =
+        activeType === "all" || item.type === activeType;
+      const matchesTag = !activeTag || item.tags?.includes(activeTag);
+      return matchesType && matchesTag;
+    });
+  }, [activeType, activeTag, items]);
 
   const itemsByYear = useMemo(
     () =>
@@ -74,6 +99,12 @@ export default function ContentIndex({
     [filteredItems],
   );
 
+  const handleTypeSelect = useCallback((type: string) => {
+    setActiveType(type);
+    setActiveTag(null);
+    setFilterAnimationKey((currentKey) => currentKey + 1);
+  }, []);
+
   const handleTagSelect = useCallback((tag: string | null) => {
     setActiveTag(tag);
     setFilterAnimationKey((currentKey) => currentKey + 1);
@@ -83,7 +114,7 @@ export default function ContentIndex({
     <section className="flex flex-col lg:flex-row w-full gap-6 lg:gap-8 h-auto lg:justify-left lg:row justify-center">
       <InfoBlock
         title={title}
-        number={items.length}
+        number={filteredItems.length}
         description={description}
         onComplete={() => {
           setIntroFinished(true);
@@ -93,14 +124,17 @@ export default function ContentIndex({
 
       <div className="w-full items-center lg:items-start flex flex-col">
         <Filter
-          tags={allTags}
+          types={typeOptions}
+          activeType={activeType}
+          onTypeSelect={handleTypeSelect}
+          tags={availableTags}
           activeTag={activeTag}
           onTagSelect={handleTagSelect}
           animate={introFinished}
           onAnimationComplete={() => setShowCards(true)}
         />
 
-        {items.length > 0 ? (
+        {filteredItems.length > 0 ? (
           <motion.div
             key={filterAnimationKey}
             className="w-full flex flex-col gap-4"
@@ -130,7 +164,7 @@ export default function ContentIndex({
                         bannerImage={item.bannerImage}
                         title={item.title}
                         description={item.description}
-                        link={`/${type}/${item.slug}`}
+                        link={`/${item.type}/${item.slug}`}
                         tags={item.tags}
                         variant="list"
                         aspectRatio="aspect-video"
