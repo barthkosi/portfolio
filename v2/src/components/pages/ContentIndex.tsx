@@ -211,7 +211,7 @@ export default function ContentIndex({
             {itemsByYear.map(([year, yearItems]) => (
               <section
                 key={year}
-                className="w-full flex flex-row gap-4 relative"
+                className="w-full flex flex-row lg:gap-4 relative"
               >
                 <div className="w-[0px] shrink-0 relative z-20 pointer-events-none">
                   <h2 className="h3 text-[var(--content-primary)] [text-shadow:5px_5px_0px_var(--border-primary)] sticky top-[64px] md:top-[134px] block relative z-20">
