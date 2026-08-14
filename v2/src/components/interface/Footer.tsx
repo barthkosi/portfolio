@@ -135,14 +135,29 @@ export default function Footer() {
             <defs>
               <linearGradient
                 id="footer_name_gradient"
-                x1="717.886"
-                y1="353.064"
-                x2="717.886"
-                y2="-99.7749"
+                x1="-2880"
+                y1="0"
+                x2="0"
+                y2="0"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop stopColor="var(--background-secondary)" />
-                <stop offset="0.7" stopColor="var(--content-tertiary)" />
+                <animate
+                  attributeName="x1"
+                  values="-2880;1440"
+                  dur="6s"
+                  repeatCount="indefinite"
+                />
+                <animate
+                  attributeName="x2"
+                  values="0;4320"
+                  dur="6s"
+                  repeatCount="indefinite"
+                />
+                <stop offset="0%" stopColor="var(--content-tertiary)" />
+                <stop offset="35%" stopColor="var(--content-tertiary)" />
+                <stop offset="50%" stopColor="var(--background-primary)" />
+                <stop offset="65%" stopColor="var(--content-tertiary)" />
+                <stop offset="100%" stopColor="var(--content-tertiary)" />
               </linearGradient>
               <clipPath id="clip0_5944_524">
                 <rect width="1440" height="176" fill="white" />
