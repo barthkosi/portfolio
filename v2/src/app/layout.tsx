@@ -19,21 +19,18 @@ import { Analytics } from "@vercel/analytics/next";
 const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-instrument-sans",
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
-  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 const sourceSerif4 = Source_Serif_4({
   subsets: ["latin"],
   variable: "--font-source-serif",
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
