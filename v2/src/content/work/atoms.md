@@ -46,4 +46,4 @@ tags: ["UI/UX" , "Product Design"]
 ![](https://res.cloudinary.com/barthkosi/image/upload/atoms-desktop.avif)
 :::
 
-![](https://res.cloudinary.com/barthkosi/image/upload/atoms-404.avif)
+![](https://res.cloudinary.com/barthkosi/image/upload/atoms-404.avif) 
