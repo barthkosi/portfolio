@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "npm run enrich:post-media && next build",
+    "dev": "npm run bundle:content && next dev",
+    "build": "npm run bundle:content && npm run enrich:post-media && next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
+    "bundle:content": "node scripts/bundle-content.mjs",
     "enrich:archive": "node scripts/enrich-archive.mjs",
     "enrich:data-media": "node scripts/enrich-data-media.mjs",
     "enrich:post-media": "node scripts/enrich-post-media.mjs"

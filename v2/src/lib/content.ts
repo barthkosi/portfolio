@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import bundledContent from "@/data/content.generated.json";
 
 export type ContentType = "writing" | "work" | "explorations";
 
@@ -23,21 +24,37 @@ export interface ContentItem {
 const contentDirectory = path.join(process.cwd(), "src/content");
 const markdownExtension = ".md";
 
-export const getContent = (type: ContentType): ContentItem[] => {
+interface ContentSource {
+  filename: string;
+  source: string;
+}
+
+// Production reads the snapshot written by scripts/bundle-content.mjs, since
+// src/content isn't on disk in serverless runtimes like Cloudflare Workers.
+// Dev reads the files directly so markdown edits show up without a rebuild.
+const readSources = (type: ContentType): ContentSource[] => {
+  if (process.env.NODE_ENV !== "development") {
+    return bundledContent[type];
+  }
+
   const typeDir = path.join(contentDirectory, type);
 
   if (!fs.existsSync(typeDir)) {
     return [];
   }
 
-  const files = fs
+  return fs
     .readdirSync(typeDir)
-    .filter((file) => file.endsWith(markdownExtension));
+    .filter((file) => file.endsWith(markdownExtension))
+    .map((filename) => ({
+      filename,
+      source: fs.readFileSync(path.join(typeDir, filename), "utf8"),
+    }));
+};
 
-  const items = files.map((filename) => {
-    const filePath = path.join(typeDir, filename);
-    const fileContents = fs.readFileSync(filePath, "utf8");
-    const { data, content } = matter(fileContents);
+export const getContent = (type: ContentType): ContentItem[] => {
+  const items = readSources(type).map(({ filename, source }) => {
+    const { data, content } = matter(source);
     const slug = filename.replace(markdownExtension, "");
 
     return {
