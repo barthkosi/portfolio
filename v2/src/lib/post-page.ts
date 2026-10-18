@@ -24,7 +24,7 @@ export function getPostMetadata(type: ContentType, slug: string): Metadata {
   const post = getContent(type).find((item) => item.slug === slug);
 
   if (!post) {
-    return {};
+    return { title: "404" };
   }
 
   const image = post.coverImage || post.bannerImage;

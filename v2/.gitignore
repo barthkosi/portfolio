@@ -20,6 +20,9 @@
 # production
 /build
 
+# generated content snapshot (scripts/bundle-content.mjs)
+/src/data/content.generated.json
+
 # misc
 .DS_Store
 *.pem
