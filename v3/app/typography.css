@@ -1,0 +1,238 @@
+:root {
+  --font-family-heading: "DM Sans", sans-serif;
+  --font-family-body: "Inter Variable", "Inter", sans-serif;
+  --font-family-label: "DM Sans", sans-serif;
+
+  --font-sans: var(--font-family-body);
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+/* --------------------------------------------------------------------------
+   1. Headings (Mobile / Default)
+   -------------------------------------------------------------------------- */
+h1,
+.h1,
+h2,
+.h2,
+h3,
+.h3,
+h4,
+.h4,
+h5,
+.h5,
+h6,
+.h6,
+.display {
+  font-family: var(--font-family-heading);
+}
+
+.display {
+  font-size: 40px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+h1,
+.h1 {
+  font-size: 32px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+h2,
+.h2 {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+h3,
+.h3 {
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+h4,
+.h4 {
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+h5,
+.h5 {
+  font-size: 17px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+h6,
+.h6 {
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Heading Overrides (Tablet: 768px+)
+   -------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .display {
+    font-size: 56px;
+  }
+
+  h1,
+  .h1 {
+    font-size: 48px;
+  }
+
+  h2,
+  .h2 {
+    font-size: 28px;
+  }
+
+  h3,
+  .h3 {
+    font-size: 24px;
+  }
+
+  h4,
+  .h4 {
+    font-size: 20px;
+  }
+
+  h5,
+  .h5 {
+    font-size: 18px;
+  }
+
+  h6,
+  .h6 {
+    font-size: 16px;
+  }
+
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Heading Overrides (Desktop: 1024px+)
+   -------------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  .display {
+    font-size: 56px;
+  }
+
+  h1,
+  .h1 {
+    font-size: 48px;
+  }
+
+  h2,
+  .h2 {
+    font-size: 28px;
+  }
+
+  h3,
+  .h3 {
+    font-size: 24px;
+  }
+
+  h4,
+  .h4 {
+    font-size: 20px;
+  }
+
+  h5,
+  .h5 {
+    font-size: 18px;
+  }
+
+  h6,
+  .h6 {
+    font-size: 16px;
+  }
+
+}
+
+/* --------------------------------------------------------------------------
+   2. Body Text
+   -------------------------------------------------------------------------- */
+.body-xs,
+.body-sm,
+.body-md,
+.body-lg {
+  font-family: var(--font-family-body);
+}
+
+.body-xs {
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.body-sm {
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.body-md {
+  font-size: 17px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.body-lg {
+  font-size: 19px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   3. Labels
+   -------------------------------------------------------------------------- */
+.label-xs,
+.label-sm,
+.label-md,
+.label-lg {
+  font-family: var(--font-family-label);
+}
+
+.label-xs {
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+
+.label-sm {
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+
+.label-md {
+  font-size: 15px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+
+.label-lg {
+  font-size: 17px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
