@@ -115,8 +115,8 @@ export function AvatarIntro({
     let lastT = 0;
     let dragVel = 0;
 
-    let viewportW = window.innerWidth;
-    let viewportH = window.innerHeight;
+    let viewportW = canvas.clientWidth || window.innerWidth;
+    let viewportH = canvas.clientHeight || window.innerHeight;
     let slotCenterX = viewportW / 2;
     let slotCenterY = viewportH / 2;
 
@@ -162,8 +162,8 @@ export function AvatarIntro({
     };
 
     const handleResize = () => {
-      viewportW = window.innerWidth;
-      viewportH = window.innerHeight;
+      viewportW = canvas.clientWidth || window.innerWidth;
+      viewportH = canvas.clientHeight || window.innerHeight;
       renderer.setSize(viewportW, viewportH, false);
       camera.aspect = viewportW / viewportH;
       measureSlot();
@@ -180,6 +180,11 @@ export function AvatarIntro({
         onCollapseRef.current();
       }
     };
+
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+    resizeObserver.observe(canvas);
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", handleScroll, true);
@@ -206,10 +211,12 @@ export function AvatarIntro({
       renderer.compile(scene, camera);
 
       if (skipIntro) {
+        handleResize();
         canvas.style.visibility = "visible";
       } else {
         introShown.then(() => {
           if (disposed) return;
+          handleResize();
           canvas.style.visibility = "visible";
           const wait = Math.max(0, HOLD_MS - (performance.now() - introShownAt));
           holdTimerId = window.setTimeout(() => {
@@ -327,6 +334,7 @@ export function AvatarIntro({
       if (dockTimerId !== undefined) window.clearTimeout(dockTimerId);
 
       renderer.setAnimationLoop(null);
+      resizeObserver.disconnect();
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll, true);
       window.removeEventListener("keydown", handleKeyDown);
@@ -357,7 +365,7 @@ export function AvatarIntro({
     <>
       <div
         ref={introRef}
-        className="avatar-intro-svg pointer-events-none fixed top-1/2 left-1/2 z-30 h-[min(68vw,46dvh)] w-auto -translate-x-1/2 -translate-y-1/2 select-none"
+        className="avatar-intro-svg pointer-events-none fixed top-1/2 left-1/2 z-30 aspect-[597/613] h-[min(68vw,46dvh)] max-w-none -translate-x-1/2 -translate-y-1/2 select-none"
       >
         <img
           ref={introImgRef}
@@ -366,7 +374,7 @@ export function AvatarIntro({
           width={597}
           height={613}
           fetchPriority="high"
-          className="block h-full w-auto"
+          className="block size-full max-w-none"
         />
         <div className="avatar-intro-shimmer pointer-events-none absolute inset-0" />
       </div>
