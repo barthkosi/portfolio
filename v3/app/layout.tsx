@@ -41,7 +41,9 @@ export default function RootLayout({
     >
       <body className="antialiased">
         <DisablePinchZoom />
-        {children}
+        <div id="app-scroll" className="app-scroll">
+          {children}
+        </div>
       </body>
     </html>
   );
