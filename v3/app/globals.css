@@ -3,6 +3,10 @@
 @import "./typography.css";
 
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
   body {
     text-rendering: geometricPrecision;
     font-optical-sizing: auto;
