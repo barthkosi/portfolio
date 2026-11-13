@@ -286,10 +286,12 @@ export function Navigation({
   };
 
   useEffect(() => {
-    lastScrollY.current = window.scrollY;
+    const scrollTarget = document.getElementById("app-scroll");
+    const getScrollY = () => (scrollTarget ? scrollTarget.scrollTop : window.scrollY);
+    lastScrollY.current = getScrollY();
 
     const handleScroll = () => {
-      const currentY = window.scrollY;
+      const currentY = getScrollY();
       if (currentY > lastScrollY.current && currentY > 16) {
         setIsSmall(true);
       } else if (currentY < lastScrollY.current || currentY <= 16) {
@@ -298,8 +300,9 @@ export function Navigation({
       lastScrollY.current = currentY;
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const listenerTarget: EventTarget = scrollTarget ?? window;
+    listenerTarget.addEventListener("scroll", handleScroll, { passive: true });
+    return () => listenerTarget.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -458,7 +461,7 @@ export function Navigation({
               <div
                 ref={scrollContainerRef}
                 onScroll={(e) => setHasScrolledContent(e.currentTarget.scrollTop > 0)}
-                className="nav-scrollbar h-full w-full overflow-y-auto pb-2"
+                className="nav-scrollbar h-full w-full touch-pan-y overflow-y-auto overscroll-y-contain pb-2"
               >
                 <TabContent
                   activeTab={activeTab}
