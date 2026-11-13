@@ -3,16 +3,39 @@
 @import "./typography.css";
 
 @layer base {
-  html {
-    scrollbar-gutter: stable;
-    touch-action: pan-x pan-y;
+  *,
+  *::before,
+  *::after {
+    touch-action: pan-y;
+  }
+
+  html,
+  body {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: pan-y;
   }
 
   body {
     text-rendering: geometricPrecision;
     font-optical-sizing: auto;
-    touch-action: pan-x pan-y;
   }
+}
+
+.app-scroll {
+  height: 100%;
+  width: 100%;
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav-scrollbar {
