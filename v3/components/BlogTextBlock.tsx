@@ -68,7 +68,7 @@ export function BlogTextBlock({
         </h6>
       )}
       {variant === "Body" && type === "Paragraph" && (
-        <p className="body-sm w-full shrink-0 text-pretty text-content-secondary">
+        <p className="body-sm w-full shrink-0 text-content-secondary">
           {body}
         </p>
       )}
