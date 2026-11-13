@@ -33,7 +33,8 @@ export function AvatarIntro({
   onCollapse,
 }: AvatarIntroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const introRef = useRef<HTMLImageElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
+  const introImgRef = useRef<HTMLImageElement>(null);
 
   const isExpandedRef = useRef(isExpanded);
   const onIntroCompleteRef = useRef(onIntroComplete);
@@ -48,14 +49,15 @@ export function AvatarIntro({
   useEffect(() => {
     const canvas = canvasRef.current;
     const intro = introRef.current;
-    if (!canvas || !intro) return;
+    const introImg = introImgRef.current;
+    if (!canvas || !intro || !introImg) return;
 
     let disposed = false;
     let dockTimerId: number | undefined;
     let holdTimerId: number | undefined;
 
     let introShownAt = 0;
-    const introShown = intro
+    const introShown = introImg
       .decode()
       .catch(() => {})
       .then(() =>
@@ -343,15 +345,21 @@ export function AvatarIntro({
 
   return (
     <>
-      <img
+      <div
         ref={introRef}
-        src="/avatar-intro.svg"
-        alt=""
-        width={597}
-        height={613}
-        fetchPriority="high"
         className="avatar-intro-svg pointer-events-none fixed top-1/2 left-1/2 z-30 h-[min(68vw,46dvh)] w-auto -translate-x-1/2 -translate-y-1/2 select-none"
-      />
+      >
+        <img
+          ref={introImgRef}
+          src="/avatar-intro.svg"
+          alt=""
+          width={597}
+          height={613}
+          fetchPriority="high"
+          className="block h-full w-auto"
+        />
+        <div className="avatar-intro-shimmer pointer-events-none absolute inset-0" />
+      </div>
       <canvas
         ref={canvasRef}
         className={`fixed inset-0 z-20 block size-full touch-none ${

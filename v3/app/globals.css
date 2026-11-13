@@ -20,12 +20,43 @@
   }
 }
 
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
 .avatar-intro-svg {
   animation: avatar-intro-appear 400ms ease-out backwards;
 }
 
+.avatar-intro-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.16) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  mix-blend-mode: overlay;
+  -webkit-mask-image: url("/avatar-intro.svg");
+  mask-image: url("/avatar-intro.svg");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .avatar-intro-svg {
+  .avatar-intro-svg,
+  .avatar-intro-shimmer {
     animation: none;
   }
 }
