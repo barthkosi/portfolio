@@ -1,7 +1,7 @@
 :root {
-  --font-family-heading: "DM Sans", sans-serif;
-  --font-family-body: "Inter Variable", "Inter", sans-serif;
-  --font-family-label: "DM Sans", sans-serif;
+  --font-family-heading: var(--font-heading), sans-serif;
+  --font-family-body: var(--font-body), sans-serif;
+  --font-family-label: var(--font-heading), sans-serif;
 
   --font-sans: var(--font-family-body);
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
