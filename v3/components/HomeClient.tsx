@@ -30,7 +30,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
 
   return (
     <div className="relative flex min-h-dvh w-full flex-col items-center justify-center gap-0 overflow-clip bg-background-primary p-4">
-      <div className="relative flex w-full shrink-0 flex-col items-center gap-8 px-1 md:max-w-[360px]">
+      <div className="relative z-10 flex w-full shrink-0 flex-col items-center gap-8 px-1 md:max-w-[360px]">
         <div className="relative flex w-full shrink-0 flex-col items-center gap-4">
           <button
             ref={slotRef}
