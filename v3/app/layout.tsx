@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Inter } from "next/font/google";
+import { DEFAULT_THEME_COLOR } from "@/lib/theme";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -17,6 +18,10 @@ export const metadata: Metadata = {
   description: "Barth is a design engineer building beautiful and intuitive digital products.",
 };
 
+export const viewport: Viewport = {
+  themeColor: DEFAULT_THEME_COLOR,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,6 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      className="bg-background-primary"
       style={
         {
           "--font-family-heading": dmSans.style.fontFamily,
