@@ -29,7 +29,7 @@ export default function BlogPage() {
           </div>
         </div>
 
-        <div className="relative flex w-full max-w-[720px] shrink-0 flex-col items-start">
+        <div className="relative flex w-full max-w-[640px] shrink-0 flex-col items-start">
           <BlogTextBlock
             variant="Quote"
             type="Paragraph"
