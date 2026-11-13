@@ -13,3 +13,21 @@
   }
 }
 
+@keyframes avatar-intro-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.avatar-intro-svg {
+  animation: avatar-intro-appear 400ms ease-out backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-intro-svg {
+    animation: none;
+  }
+}
+
+
