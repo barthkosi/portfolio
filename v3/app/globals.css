@@ -2,3 +2,10 @@
 @import "./color.css";
 @import "./typography.css";
 
+@layer base {
+  body {
+    text-rendering: geometricPrecision;
+    font-optical-sizing: auto;
+  }
+}
+
