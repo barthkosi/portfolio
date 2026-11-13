@@ -345,6 +345,12 @@ export function Navigation({
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (
+          document.activeElement instanceof HTMLElement &&
+          navRef.current?.contains(document.activeElement)
+        ) {
+          document.activeElement.blur();
+        }
         setIsOpen(false);
         pushPath("/");
       }
@@ -409,7 +415,7 @@ export function Navigation({
         type="button"
         onClick={handleToggleOpen}
         aria-label={isOpen ? "Close navigation" : "Open navigation"}
-        className="relative flex h-fit w-fit shrink-0 cursor-pointer flex-row items-center gap-0 p-2"
+        className="relative flex h-fit w-fit shrink-0 cursor-pointer flex-row items-center gap-0 p-2 outline-none"
       >
         <div className="relative size-5 shrink-0">
           <img src="/images/nav-minus.svg" alt="" className="block size-full" />
