@@ -22,6 +22,7 @@ const TAP_MAX_DURATION_MS = 300;
 interface AvatarIntroProps {
   slotRef: React.RefObject<HTMLButtonElement | null>;
   isExpanded: boolean;
+  skipIntro?: boolean;
   onIntroComplete: () => void;
   onCollapse: () => void;
 }
@@ -29,6 +30,7 @@ interface AvatarIntroProps {
 export function AvatarIntro({
   slotRef,
   isExpanded,
+  skipIntro = false,
   onIntroComplete,
   onCollapse,
 }: AvatarIntroProps) {
@@ -91,11 +93,15 @@ export function AvatarIntro({
     scene.add(spinner);
 
     let modelHeight = 0;
-    let revealed = false;
+    let revealed = skipIntro;
     let velocity = 0;
-    let spinUp = 0;
+    let spinUp = skipIntro ? 1 : 0;
     let fadeStart = 0;
-    let introDone = false;
+    let introDone = skipIntro;
+
+    if (skipIntro) {
+      intro.style.display = "none";
+    }
 
     // morph: 0 = full-size centered (46vmin), 1 = docked in 64px slot
     let morph = isExpandedRef.current ? 0 : 1;
@@ -199,16 +205,20 @@ export function AvatarIntro({
       updateCamera();
       renderer.compile(scene, camera);
 
-      introShown.then(() => {
-        if (disposed) return;
+      if (skipIntro) {
         canvas.style.visibility = "visible";
-        const wait = Math.max(0, HOLD_MS - (performance.now() - introShownAt));
-        holdTimerId = window.setTimeout(() => {
-          if (!disposed) {
-            fadeStart = performance.now();
-          }
-        }, wait);
-      });
+      } else {
+        introShown.then(() => {
+          if (disposed) return;
+          canvas.style.visibility = "visible";
+          const wait = Math.max(0, HOLD_MS - (performance.now() - introShownAt));
+          holdTimerId = window.setTimeout(() => {
+            if (!disposed) {
+              fadeStart = performance.now();
+            }
+          }, wait);
+        });
+      }
     });
 
     const onPointerDown = (e: PointerEvent) => {
