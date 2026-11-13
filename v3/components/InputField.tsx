@@ -31,7 +31,7 @@ export function InputField({
           name={name}
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
-          className="body-xs h-[80px] w-full shrink-0 resize-none touch-manipulation overflow-clip rounded-[4px] bg-background-tertiary p-2 text-content-secondary outline-none"
+          className="body-xs h-[80px] w-full shrink-0 resize-none touch-pan-y overflow-clip rounded-[4px] bg-background-tertiary p-2 text-content-secondary outline-none"
         />
       ) : (
         <input
@@ -39,7 +39,7 @@ export function InputField({
           name={name}
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
-          className="body-xs h-[34px] w-full shrink-0 touch-manipulation overflow-clip rounded-[4px] bg-background-tertiary p-2 text-content-secondary outline-none"
+          className="body-xs h-[34px] w-full shrink-0 touch-pan-y overflow-clip rounded-[4px] bg-background-tertiary p-2 text-content-secondary outline-none"
         />
       )}
     </div>
