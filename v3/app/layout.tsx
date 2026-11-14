@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Inter } from "next/font/google";
+import { Instrument_Sans, Inter } from "next/font/google";
 import { DisablePinchZoom } from "@/components/DisablePinchZoom";
 import { DEFAULT_THEME_COLOR } from "@/lib/theme";
 import "./globals.css";
 
-const headingFont = DM_Sans({
+const headingFont = Instrument_Sans({
   subsets: ["latin"],
   weight: ["400", "500"],
   variable: "--font-heading",
