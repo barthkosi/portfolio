@@ -3,7 +3,7 @@ import { Navigation } from "@/components/Navigation";
 
 export default function BlogPage() {
   return (
-    <div className="relative flex min-h-dvh w-full flex-col items-center bg-background-primary px-4 pt-[120px] pb-4 md:px-8 md:pb-8">
+    <div className="relative flex min-h-full w-full flex-col items-center bg-background-primary px-4 pt-[120px] pb-4 md:px-8 md:pb-8">
       <Navigation />
       <div className="relative z-[1] flex w-full shrink-0 flex-col items-center gap-16">
         <div className="relative flex w-full max-w-[960px] shrink-0 flex-col items-center gap-12">
