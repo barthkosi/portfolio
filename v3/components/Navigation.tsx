@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { InputField } from "@/components/InputField";
-import { NAV_TABS, type NavTab, pathToTab, tabToPath } from "@/lib/navigation";
+import { NAV_TABS, type NavTab, tabToPath } from "@/lib/navigation";
 
 export type { NavTab };
 
@@ -278,12 +278,15 @@ export function Navigation({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
-  const pushPath = (path: string) => {
-    if (!syncUrl || typeof window === "undefined") return;
-    if (window.location.pathname !== path) {
-      window.history.pushState(null, "", path);
-    }
-  };
+  const replacePath = useCallback(
+    (path: string) => {
+      if (!syncUrl || typeof window === "undefined") return;
+      if (window.location.pathname !== path) {
+        window.history.replaceState(null, "", path);
+      }
+    },
+    [syncUrl],
+  );
 
   useEffect(() => {
     const scrollTarget = document.getElementById("app-scroll");
@@ -314,36 +317,15 @@ export function Navigation({
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-    pushPath(tabToPath(openRequest.tab));
-  }, [openRequest]);
-
-  useEffect(() => {
-    if (!syncUrl) return;
-    const handlePopState = () => {
-      const matched = pathToTab(window.location.pathname);
-      if (matched) {
-        setIsOpen(true);
-        setActiveTab(matched);
-        setMobileView("tab");
-        setHasScrolledContent(false);
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTop = 0;
-        }
-      } else {
-        setIsOpen(false);
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [syncUrl]);
+    replacePath(tabToPath(openRequest.tab));
+  }, [openRequest, replacePath]);
 
   useEffect(() => {
     if (!isOpen) return;
     const handlePointerDown = (event: PointerEvent) => {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
         setIsOpen(false);
-        pushPath("/");
+        replacePath("/");
       }
     };
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -355,7 +337,7 @@ export function Navigation({
           document.activeElement.blur();
         }
         setIsOpen(false);
-        pushPath("/");
+        replacePath("/");
       }
     };
 
@@ -365,7 +347,7 @@ export function Navigation({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, syncUrl]);
+  }, [isOpen, replacePath]);
 
   const handleToggleOpen = () => {
     const next = !isOpen;
@@ -373,9 +355,9 @@ export function Navigation({
     if (next) {
       setMobileView("menu");
       setHasScrolledContent(false);
-      pushPath(tabToPath(activeTab));
+      replacePath(tabToPath(activeTab));
     } else {
-      pushPath("/");
+      replacePath("/");
     }
   };
 
@@ -386,7 +368,7 @@ export function Navigation({
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = 0;
     }
-    pushPath(tabToPath(tab));
+    replacePath(tabToPath(tab));
   };
 
   const handleFieldChange = (field: keyof typeof formState, value: string) => {
