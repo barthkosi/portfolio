@@ -50,7 +50,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
               Barth is a design engineer building  beautiful and intuitive digital products.
             </p>
             <p className="body-sm w-full shrink-0 text-center text-pretty text-content-primary">
-              He has 4+ years of experience and has worked with businesses and studios building interesting products.
+              He has 4+ years of experience and has worked with businesses and studios building intuitive products.
             </p>
           </div>
         </div>
