@@ -275,8 +275,13 @@ export function Navigation({
   });
 
   const lastScrollY = useRef(0);
+  const isOpenRef = useRef(isOpen);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
   const replacePath = useCallback(
     (path: string) => {
@@ -294,6 +299,7 @@ export function Navigation({
     lastScrollY.current = getScrollY();
 
     const handleScroll = () => {
+      if (isOpenRef.current) return;
       const currentY = getScrollY();
       if (currentY > lastScrollY.current && currentY > 16) {
         setIsSmall(true);
@@ -307,6 +313,48 @@ export function Navigation({
     listenerTarget.addEventListener("scroll", handleScroll, { passive: true });
     return () => listenerTarget.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const scrollTarget = document.getElementById("app-scroll");
+    if (!scrollTarget) {
+      const prevOverflow = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = "hidden";
+      return () => {
+        document.documentElement.style.overflow = prevOverflow;
+      };
+    }
+
+    const prevOverflowY = scrollTarget.style.overflowY;
+    const prevPaddingRight = scrollTarget.style.paddingRight;
+    const savedScrollTop = scrollTarget.scrollTop;
+    const gutterBefore = scrollTarget.offsetWidth - scrollTarget.clientWidth;
+
+    scrollTarget.style.overflowY = "hidden";
+
+    const gutterAfter = scrollTarget.offsetWidth - scrollTarget.clientWidth;
+    const gutterDiff = gutterBefore - gutterAfter;
+    if (gutterDiff > 0) {
+      const computedPaddingRight =
+        Number.parseFloat(getComputedStyle(scrollTarget).paddingRight) || 0;
+      scrollTarget.style.paddingRight = `${computedPaddingRight + gutterDiff}px`;
+    }
+
+    if (scrollTarget.scrollTop !== savedScrollTop) {
+      scrollTarget.scrollTop = savedScrollTop;
+    }
+
+    return () => {
+      const currentScrollTop = scrollTarget.scrollTop;
+      scrollTarget.style.overflowY = prevOverflowY;
+      scrollTarget.style.paddingRight = prevPaddingRight;
+      if (scrollTarget.scrollTop !== currentScrollTop) {
+        scrollTarget.scrollTop = currentScrollTop;
+      }
+      lastScrollY.current = scrollTarget.scrollTop;
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!openRequest) return;
