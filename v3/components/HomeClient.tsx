@@ -3,13 +3,17 @@
 import { useCallback, useRef, useState } from "react";
 import { AvatarIntro } from "@/components/AvatarIntro";
 import { Barth } from "@/components/Barth";
-import { Navigation, type NavTab } from "@/components/Navigation";
+import {
+  Navigation,
+  type NavigationHandle,
+  type NavTab,
+} from "@/components/Navigation";
 
 export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
   const [hasEntered, setHasEntered] = useState(Boolean(initialTab));
   const [isExpanded, setIsExpanded] = useState(!initialTab);
-  const [openRequest, setOpenRequest] = useState<{ tab: NavTab; nonce: number } | null>(null);
   const slotRef = useRef<HTMLButtonElement>(null);
+  const navigationRef = useRef<NavigationHandle>(null);
 
   const handleIntroComplete = useCallback(() => {
     setHasEntered(true);
@@ -25,7 +29,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
   }, []);
 
   const handleOpenTab = useCallback((tab: NavTab) => {
-    setOpenRequest((prev) => ({ tab, nonce: (prev?.nonce ?? 0) + 1 }));
+    navigationRef.current?.openTab(tab);
   }, []);
 
   return (
@@ -81,9 +85,9 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
         }`}
       >
         <Navigation
+          ref={navigationRef}
           initialTab={initialTab}
           initialOpen={Boolean(initialTab)}
-          openRequest={openRequest}
           syncUrl
         />
         <Barth />

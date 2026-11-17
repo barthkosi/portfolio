@@ -1,11 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type Ref,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { Card } from "@/components/Card";
 import { InputField } from "@/components/InputField";
 import { NAV_TABS, type NavTab, tabToPath } from "@/lib/navigation";
 
 export type { NavTab };
+
+export type NavigationHandle = {
+  openTab: (tab: NavTab) => void;
+};
 
 const TABS = NAV_TABS;
 const SOCIALS = ["X (Twitter)", "Github", "Cosmos", "Instagram"];
@@ -203,14 +214,14 @@ function TabContent({
 }
 
 export function Navigation({
+  ref,
   initialTab = "Work",
   initialOpen = false,
-  openRequest = null,
   syncUrl = false,
 }: {
+  ref?: Ref<NavigationHandle>;
   initialTab?: NavTab;
   initialOpen?: boolean;
-  openRequest?: { tab: NavTab; nonce: number } | null;
   syncUrl?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(initialOpen);
@@ -309,17 +320,22 @@ export function Navigation({
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!openRequest) return;
-    setIsOpen(true);
-    setActiveTab(openRequest.tab);
-    setMobileView("tab");
-    setHasScrolledContent(false);
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
-    replacePath(tabToPath(openRequest.tab));
-  }, [openRequest, replacePath]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      openTab: (tab: NavTab) => {
+        setIsOpen(true);
+        setActiveTab(tab);
+        setMobileView("tab");
+        setHasScrolledContent(false);
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = 0;
+        }
+        replacePath(tabToPath(tab));
+      },
+    }),
+    [replacePath],
+  );
 
   useEffect(() => {
     if (!isOpen) return;
