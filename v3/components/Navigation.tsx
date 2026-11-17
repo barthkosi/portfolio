@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Card } from "@/components/Card";
 import { InputField } from "@/components/InputField";
 import { NAV_TABS, type NavTab, tabToPath } from "@/lib/navigation";
 
@@ -8,54 +9,6 @@ export type { NavTab };
 
 const TABS = NAV_TABS;
 const SOCIALS = ["X (Twitter)", "Github", "Cosmos", "Instagram"];
-
-function NavCard({
-  aspectClass,
-  orientation = "Vertical",
-  showMeta = false,
-  title = "Title",
-  year = "2026",
-}: {
-  aspectClass?: string;
-  orientation?: "Vertical" | "Horizontal";
-  showMeta?: boolean;
-  title?: string;
-  year?: string;
-}) {
-  if (orientation === "Horizontal") {
-    return (
-      <div className="relative flex w-full shrink-0 items-center gap-0 rounded-[4px]">
-        <div className="relative aspect-[71.11111450195312/40] max-h-[54px] max-w-[96px] min-w-px flex-[1_0_0] rounded-[4px] bg-background-tertiary" />
-        <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-1.5 px-2 py-1">
-          <p className="label-md h-fit w-fit shrink-0 whitespace-nowrap text-content-primary">
-            {title}
-          </p>
-          <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
-            {year}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={`relative flex w-full shrink-0 flex-col items-start gap-0 rounded-[4px] bg-background-tertiary ${aspectClass || ""}`}
-    >
-      <div className="relative min-h-px w-full flex-[1_0_0] rounded-t-[4px] bg-background-tertiary" />
-      {showMeta && (
-        <div className="relative flex w-full shrink-0 items-center justify-between gap-0 px-2 py-1">
-          <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-primary">
-            {title}
-          </p>
-          <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
-            {year}
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
 
 function PagesList({
   activeTab,
@@ -133,13 +86,13 @@ function TabContent({
     return (
       <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[160/90]" showMeta />
-          <NavCard aspectClass="aspect-[472/472]" />
-          <NavCard aspectClass="aspect-[160/90]" />
+          <Card aspectClass="aspect-[160/90]" showMeta />
+          <Card aspectClass="aspect-[472/472]" showMeta />
+          <Card aspectClass="aspect-[160/90]" showMeta />
         </div>
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[472/590]" />
-          <NavCard aspectClass="aspect-[160/90]" />
+          <Card aspectClass="aspect-[472/590]" showMeta />
+          <Card aspectClass="aspect-[160/90]" showMeta />
         </div>
       </div>
     );
@@ -148,8 +101,8 @@ function TabContent({
   if (activeTab === "Writing") {
     return (
       <div className="relative flex w-full flex-col items-start gap-2">
-        <NavCard orientation="Horizontal" />
-        <NavCard orientation="Horizontal" />
+        <Card orientation="Horizontal" />
+        <Card orientation="Horizontal" />
       </div>
     );
   }
@@ -158,20 +111,20 @@ function TabContent({
     return (
       <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[472/472]" />
-          <NavCard aspectClass="aspect-[160/90]" />
-          <NavCard aspectClass="aspect-[472/472]" />
+          <Card aspectClass="aspect-[472/472]" />
+          <Card aspectClass="aspect-[160/90]" />
+          <Card aspectClass="aspect-[472/472]" />
         </div>
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[472/590]" />
-          <NavCard aspectClass="aspect-[472/590]" />
-          <NavCard aspectClass="aspect-[160/90]" />
+          <Card aspectClass="aspect-[472/590]" />
+          <Card aspectClass="aspect-[472/590]" />
+          <Card aspectClass="aspect-[160/90]" />
         </div>
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[160/90]" />
-          <NavCard aspectClass="aspect-[472/590]" />
-          <NavCard aspectClass="aspect-[160/90]" />
-          <NavCard aspectClass="aspect-[160/90]" />
+          <Card aspectClass="aspect-[160/90]" />
+          <Card aspectClass="aspect-[472/590]" />
+          <Card aspectClass="aspect-[160/90]" />
+          <Card aspectClass="aspect-[160/90]" />
         </div>
       </div>
     );

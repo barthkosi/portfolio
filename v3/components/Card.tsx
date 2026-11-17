@@ -1,0 +1,106 @@
+type CardProps = {
+  aspectClass?: string;
+  orientation?: "Vertical" | "Horizontal";
+  showMeta?: boolean;
+  title?: string;
+  year?: string;
+  image?: string;
+  alt?: string;
+  className?: string;
+};
+
+function CardMeta({
+  title,
+  year,
+  className,
+}: {
+  title: string;
+  year: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex w-full items-center justify-between gap-2 px-2 ${className || ""}`}
+    >
+      <p className="label-xs h-fit w-fit min-w-0 truncate text-content-primary">
+        {title}
+      </p>
+      <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
+        {year}
+      </p>
+    </div>
+  );
+}
+
+export function Card({
+  aspectClass,
+  orientation = "Vertical",
+  showMeta = false,
+  title = "Title",
+  year = "2026",
+  image,
+  alt,
+  className,
+}: CardProps) {
+  if (orientation === "Horizontal") {
+    return (
+      <div
+        className={`relative flex w-full shrink-0 items-center gap-0 rounded-[4px] ${className || ""}`}
+      >
+        <div className="relative aspect-[71.11111450195312/40] max-h-[54px] max-w-[96px] min-w-px flex-[1_0_0] overflow-hidden rounded-[4px] bg-background-tertiary">
+          {image && (
+            <img
+              src={image}
+              alt={alt ?? title}
+              className="pointer-events-none block size-full object-cover"
+            />
+          )}
+        </div>
+        <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-1.5 px-2 py-1">
+          <p className="label-md h-fit w-fit shrink-0 whitespace-nowrap text-content-primary">
+            {title}
+          </p>
+          <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
+            {year}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`group relative flex w-full shrink-0 flex-col items-start gap-0 overflow-hidden rounded-[4px] bg-background-tertiary ${aspectClass || ""} ${className || ""}`}
+    >
+      <div className="relative min-h-px w-full flex-[1_0_0] overflow-hidden rounded-t-[4px] bg-background-tertiary">
+        {image && (
+          <div
+            className={`pointer-events-none absolute top-0 left-0 w-full ${
+              aspectClass || "h-full"
+            }`}
+          >
+            <img
+              src={image}
+              alt={alt ?? title}
+              className="block size-full object-cover"
+            />
+          </div>
+        )}
+        {showMeta && (
+          <CardMeta
+            title={title}
+            year={year}
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-overlay-100/70 via-overlay-100/35 to-overlay-0 pt-4 pb-1 md:pointer-fine:hidden"
+          />
+        )}
+      </div>
+      {showMeta && (
+        <div className="hidden w-full shrink-0 md:pointer-fine:grid md:pointer-fine:grid-rows-[0fr] md:pointer-fine:opacity-0 md:pointer-fine:transition-[grid-template-rows,opacity] md:pointer-fine:duration-300 md:pointer-fine:ease-[cubic-bezier(0.43,0.07,0.59,0.94)] md:pointer-fine:group-hover:grid-rows-[1fr] md:pointer-fine:group-hover:opacity-100 motion-reduce:md:pointer-fine:transition-none">
+          <div className="min-h-0 overflow-hidden">
+            <CardMeta title={title} year={year} className="relative py-1" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
