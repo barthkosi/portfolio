@@ -10,6 +10,7 @@ import {
 } from "react";
 import { Card } from "@/components/Card";
 import { InputField } from "@/components/InputField";
+import { type MediaItem } from "@/lib/media";
 import { NAV_TABS, type NavTab, tabToPath } from "@/lib/navigation";
 
 export type { NavTab };
@@ -20,6 +21,231 @@ export type NavigationHandle = {
 
 const TABS = NAV_TABS;
 const SOCIALS = ["X (Twitter)", "Github", "Cosmos", "Instagram"];
+const MASONRY_GAP = 8;
+const SKELETON_ASPECTS = [
+  "aspect-[3/4]",
+  "aspect-square",
+  "aspect-[4/5]",
+  "aspect-[16/10]",
+  "aspect-[3/4]",
+  "aspect-square",
+];
+
+const cachedMedia = new Map<string, MediaItem[]>();
+const inFlightMedia = new Map<string, Promise<MediaItem[]>>();
+
+async function fetchMediaFolder(folder: string): Promise<MediaItem[]> {
+  const cached = cachedMedia.get(folder);
+  if (cached) return cached;
+
+  let pending = inFlightMedia.get(folder);
+  if (!pending) {
+    pending = fetch(`/api/media?folder=${encodeURIComponent(folder)}`, {
+      cache: "no-store",
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load media (${res.status})`);
+        }
+        const data = (await res.json()) as { items?: MediaItem[] };
+        const items = data.items ?? [];
+        cachedMedia.set(folder, items);
+        return items;
+      })
+      .finally(() => {
+        inFlightMedia.delete(folder);
+      });
+    inFlightMedia.set(folder, pending);
+  }
+  return pending;
+}
+
+function MediaMasonry({ folder }: { folder: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [items, setItems] = useState<MediaItem[] | null>(
+    () => cachedMedia.get(folder) ?? null,
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [measuredSizes, setMeasuredSizes] = useState<
+    Record<string, { width: number; height: number }>
+  >({});
+  const [layout, setLayout] = useState<{ width: number; columns: number } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let active = true;
+    const cached = cachedMedia.get(folder);
+    if (cached) {
+      return;
+    }
+
+    fetchMediaFolder(folder)
+      .then((nextItems) => {
+        if (active) {
+          setError(null);
+          setItems(nextItems);
+        }
+      })
+      .catch((err: unknown) => {
+        if (active) {
+          setError(err instanceof Error ? err.message : "Failed to load media");
+          setItems([]);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [folder]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateLayout = () => {
+      const width = container.clientWidth;
+      if (width <= 0) return;
+      const columns = window.innerWidth >= 768 ? 3 : 2;
+      setLayout((prev) =>
+        prev && prev.width === width && prev.columns === columns
+          ? prev
+          : { width, columns },
+      );
+    };
+
+    const observer = new ResizeObserver(updateLayout);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  const handleImageLoad = useCallback(
+    (id: string, dimensions: { width: number; height: number }) => {
+      setMeasuredSizes((prev) => {
+        const existing = prev[id];
+        if (
+          existing &&
+          existing.width === dimensions.width &&
+          existing.height === dimensions.height
+        ) {
+          return prev;
+        }
+        return { ...prev, [id]: dimensions };
+      });
+    },
+    [],
+  );
+
+  if (!items) {
+    return (
+      <div ref={containerRef} className="relative w-full">
+        <div className="w-full columns-2 gap-2 md:columns-3">
+          {SKELETON_ASPECTS.map((aspectClass, index) => (
+            <div key={index} className="break-inside-avoid pb-2">
+              <Card variant="Media" aspectClass={aspectClass} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div ref={containerRef} className="relative w-full py-4">
+        <p className="label-xs text-content-tertiary">{error}</p>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div ref={containerRef} className="relative w-full py-4">
+        <p className="label-xs text-content-tertiary">No media found.</p>
+      </div>
+    );
+  }
+
+  if (!layout) {
+    return (
+      <div ref={containerRef} className="relative w-full">
+        <div className="w-full columns-2 gap-2 md:columns-3">
+          {items.map((item) => {
+            const size =
+              measuredSizes[item.id] ??
+              (item.width && item.height
+                ? { width: item.width, height: item.height }
+                : { width: 1, height: 1 });
+            return (
+              <div key={item.id} className="break-inside-avoid pb-2">
+                <Card
+                  variant="Media"
+                  image={item.src}
+                  alt={item.alt}
+                  style={{ aspectRatio: `${size.width} / ${size.height}` }}
+                  onImageLoad={(dims) => handleImageLoad(item.id, dims)}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  const colWidth =
+    (layout.width - MASONRY_GAP * (layout.columns - 1)) / layout.columns;
+  const colHeights = new Array<number>(layout.columns).fill(0);
+  const positioned = items.map((item) => {
+    let targetCol = 0;
+    for (let i = 1; i < layout.columns; i += 1) {
+      if (colHeights[i] < colHeights[targetCol]) {
+        targetCol = i;
+      }
+    }
+    const size =
+      measuredSizes[item.id] ??
+      (item.width && item.height
+        ? { width: item.width, height: item.height }
+        : { width: 1, height: 1 });
+    const itemHeight = colWidth * (size.height / size.width);
+    const x = targetCol * (colWidth + MASONRY_GAP);
+    const y = colHeights[targetCol];
+    colHeights[targetCol] = y + itemHeight + MASONRY_GAP;
+    return { item, x, y, itemHeight };
+  });
+  const totalHeight = Math.max(0, Math.max(...colHeights) - MASONRY_GAP);
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      <div className="relative w-full" style={{ height: totalHeight }}>
+        {positioned.map(({ item, x, y, itemHeight }) => (
+          <div
+            key={item.id}
+            className="absolute top-0 left-0"
+            style={{
+              width: colWidth,
+              height: itemHeight,
+              transform: `translate3d(${x}px, ${y}px, 0)`,
+            }}
+          >
+            <Card
+              variant="Media"
+              image={item.src}
+              alt={item.alt}
+              className="h-full"
+              onImageLoad={
+                item.width && item.height
+                  ? undefined
+                  : (dims) => handleImageLoad(item.id, dims)
+              }
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function PagesList({
   activeTab,
@@ -97,13 +323,13 @@ function TabContent({
     return (
       <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <Card aspectClass="aspect-[160/90]" showMeta />
-          <Card aspectClass="aspect-[472/472]" showMeta />
-          <Card aspectClass="aspect-[160/90]" showMeta />
+          <Card variant="Default" aspectClass="aspect-[160/90]" />
+          <Card variant="Default" aspectClass="aspect-[472/472]" />
+          <Card variant="Default" aspectClass="aspect-[160/90]" />
         </div>
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <Card aspectClass="aspect-[472/590]" showMeta />
-          <Card aspectClass="aspect-[160/90]" showMeta />
+          <Card variant="Default" aspectClass="aspect-[472/590]" />
+          <Card variant="Default" aspectClass="aspect-[160/90]" />
         </div>
       </div>
     );
@@ -112,33 +338,14 @@ function TabContent({
   if (activeTab === "Writing") {
     return (
       <div className="relative flex w-full flex-col items-start gap-2">
-        <Card orientation="Horizontal" />
-        <Card orientation="Horizontal" />
+        <Card variant="Horizontal" />
+        <Card variant="Horizontal" />
       </div>
     );
   }
 
   if (activeTab === "Illustrations") {
-    return (
-      <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
-        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <Card aspectClass="aspect-[472/472]" />
-          <Card aspectClass="aspect-[160/90]" />
-          <Card aspectClass="aspect-[472/472]" />
-        </div>
-        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <Card aspectClass="aspect-[472/590]" />
-          <Card aspectClass="aspect-[472/590]" />
-          <Card aspectClass="aspect-[160/90]" />
-        </div>
-        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <Card aspectClass="aspect-[160/90]" />
-          <Card aspectClass="aspect-[472/590]" />
-          <Card aspectClass="aspect-[160/90]" />
-          <Card aspectClass="aspect-[160/90]" />
-        </div>
-      </div>
-    );
+    return <MediaMasonry key="illustrations" folder="illustrations" />;
   }
 
   return (
