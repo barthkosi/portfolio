@@ -386,7 +386,7 @@ export function Navigation({
   };
 
   const widthClass = isOpen
-    ? "left-4 right-4 h-[calc(100dvh-32px)] bg-background-secondary md:left-1/2 md:right-auto md:h-[80dvh] md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]"
+    ? "left-4 right-4 h-[calc(100dvh-32px-env(safe-area-inset-bottom,0px))] bg-background-secondary md:left-1/2 md:right-auto md:h-[80dvh] md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]"
     : isSmall
       ? "left-4 right-4 h-[52px] bg-background-tertiary backdrop-blur-[2px] md:left-1/2 md:right-auto md:w-[360px] md:-translate-x-1/2"
       : "left-4 right-4 h-[52px] bg-background-tertiary backdrop-blur-[2px] md:left-1/2 md:right-auto md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]";
