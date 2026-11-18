@@ -8,13 +8,6 @@
   "main": "vinext/server/fetch-handler",
   "workers_dev": true,
   "preview_urls": true,
-  "routes": [
-    {
-      "pattern": "v3.barthkosi.com",
-      "custom_domain": true,
-      "previews_enabled": true
-    }
-  ],
   "observability": {
     "enabled": true,
     "logs": {
@@ -37,5 +30,20 @@
       "!/*/_next/static/*"
     ]
   },
-  "previews": {}
+  "r2_buckets": [
+    {
+      "binding": "PORTFOLIO_BUCKET",
+      "bucket_name": "portfolio",
+      "remote": true
+    }
+  ],
+  "previews": {
+    "r2_buckets": [
+      {
+        "binding": "PORTFOLIO_BUCKET",
+        "bucket_name": "portfolio",
+        "remote": true
+      }
+    ]
+  }
 }

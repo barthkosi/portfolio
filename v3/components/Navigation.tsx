@@ -1,58 +1,248 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type Ref,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import { Card } from "@/components/Card";
 import { InputField } from "@/components/InputField";
+import { type MediaItem } from "@/lib/media";
 import { NAV_TABS, type NavTab, tabToPath } from "@/lib/navigation";
 
 export type { NavTab };
 
+export type NavigationHandle = {
+  openTab: (tab: NavTab) => void;
+};
+
 const TABS = NAV_TABS;
 const SOCIALS = ["X (Twitter)", "Github", "Cosmos", "Instagram"];
+const MASONRY_GAP = 8;
+const SKELETON_ASPECTS = [
+  "aspect-[3/4]",
+  "aspect-square",
+  "aspect-[4/5]",
+  "aspect-[16/10]",
+  "aspect-[3/4]",
+  "aspect-square",
+];
 
-function NavCard({
-  aspectClass,
-  orientation = "Vertical",
-  showMeta = false,
-  title = "Title",
-  year = "2026",
-}: {
-  aspectClass?: string;
-  orientation?: "Vertical" | "Horizontal";
-  showMeta?: boolean;
-  title?: string;
-  year?: string;
-}) {
-  if (orientation === "Horizontal") {
+const cachedMedia = new Map<string, MediaItem[]>();
+const inFlightMedia = new Map<string, Promise<MediaItem[]>>();
+
+async function fetchMediaFolder(folder: string): Promise<MediaItem[]> {
+  const cached = cachedMedia.get(folder);
+  if (cached) return cached;
+
+  let pending = inFlightMedia.get(folder);
+  if (!pending) {
+    pending = fetch(`/api/media?folder=${encodeURIComponent(folder)}`, {
+      cache: "no-store",
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load media (${res.status})`);
+        }
+        const data = (await res.json()) as { items?: MediaItem[] };
+        const items = data.items ?? [];
+        cachedMedia.set(folder, items);
+        return items;
+      })
+      .finally(() => {
+        inFlightMedia.delete(folder);
+      });
+    inFlightMedia.set(folder, pending);
+  }
+  return pending;
+}
+
+function MediaMasonry({ folder }: { folder: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [items, setItems] = useState<MediaItem[] | null>(
+    () => cachedMedia.get(folder) ?? null,
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [measuredSizes, setMeasuredSizes] = useState<
+    Record<string, { width: number; height: number }>
+  >({});
+  const [layout, setLayout] = useState<{ width: number; columns: number } | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let active = true;
+    const cached = cachedMedia.get(folder);
+    if (cached) {
+      return;
+    }
+
+    fetchMediaFolder(folder)
+      .then((nextItems) => {
+        if (active) {
+          setError(null);
+          setItems(nextItems);
+        }
+      })
+      .catch((err: unknown) => {
+        if (active) {
+          setError(err instanceof Error ? err.message : "Failed to load media");
+          setItems([]);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [folder]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateLayout = () => {
+      const width = container.clientWidth;
+      if (width <= 0) return;
+      const columns = window.innerWidth >= 768 ? 3 : 2;
+      setLayout((prev) =>
+        prev && prev.width === width && prev.columns === columns
+          ? prev
+          : { width, columns },
+      );
+    };
+
+    const observer = new ResizeObserver(updateLayout);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  const handleImageLoad = useCallback(
+    (id: string, dimensions: { width: number; height: number }) => {
+      setMeasuredSizes((prev) => {
+        const existing = prev[id];
+        if (
+          existing &&
+          existing.width === dimensions.width &&
+          existing.height === dimensions.height
+        ) {
+          return prev;
+        }
+        return { ...prev, [id]: dimensions };
+      });
+    },
+    [],
+  );
+
+  if (!items) {
     return (
-      <div className="relative flex w-full shrink-0 items-center gap-0 rounded-[4px]">
-        <div className="relative aspect-[71.11111450195312/40] max-h-[54px] max-w-[96px] min-w-px flex-[1_0_0] rounded-[4px] bg-background-tertiary" />
-        <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-1.5 px-2 py-1">
-          <p className="label-md h-fit w-fit shrink-0 whitespace-nowrap text-content-primary">
-            {title}
-          </p>
-          <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
-            {year}
-          </p>
+      <div ref={containerRef} className="relative w-full">
+        <div className="w-full columns-2 gap-2 md:columns-3">
+          {SKELETON_ASPECTS.map((aspectClass, index) => (
+            <div key={index} className="break-inside-avoid pb-2">
+              <Card variant="Media" aspectClass={aspectClass} />
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
-  return (
-    <div
-      className={`relative flex w-full shrink-0 flex-col items-start gap-0 rounded-[4px] bg-background-tertiary ${aspectClass || ""}`}
-    >
-      <div className="relative min-h-px w-full flex-[1_0_0] rounded-t-[4px] bg-background-tertiary" />
-      {showMeta && (
-        <div className="relative flex w-full shrink-0 items-center justify-between gap-0 px-2 py-1">
-          <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-primary">
-            {title}
-          </p>
-          <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
-            {year}
-          </p>
+  if (error) {
+    return (
+      <div ref={containerRef} className="relative w-full py-4">
+        <p className="label-xs text-content-tertiary">{error}</p>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div ref={containerRef} className="relative w-full py-4">
+        <p className="label-xs text-content-tertiary">No media found.</p>
+      </div>
+    );
+  }
+
+  if (!layout) {
+    return (
+      <div ref={containerRef} className="relative w-full">
+        <div className="w-full columns-2 gap-2 md:columns-3">
+          {items.map((item) => {
+            const size =
+              measuredSizes[item.id] ??
+              (item.width && item.height
+                ? { width: item.width, height: item.height }
+                : { width: 1, height: 1 });
+            return (
+              <div key={item.id} className="break-inside-avoid pb-2">
+                <Card
+                  variant="Media"
+                  image={item.src}
+                  alt={item.alt}
+                  style={{ aspectRatio: `${size.width} / ${size.height}` }}
+                  onImageLoad={(dims) => handleImageLoad(item.id, dims)}
+                />
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
+    );
+  }
+
+  const colWidth =
+    (layout.width - MASONRY_GAP * (layout.columns - 1)) / layout.columns;
+  const colHeights = new Array<number>(layout.columns).fill(0);
+  const positioned = items.map((item) => {
+    let targetCol = 0;
+    for (let i = 1; i < layout.columns; i += 1) {
+      if (colHeights[i] < colHeights[targetCol]) {
+        targetCol = i;
+      }
+    }
+    const size =
+      measuredSizes[item.id] ??
+      (item.width && item.height
+        ? { width: item.width, height: item.height }
+        : { width: 1, height: 1 });
+    const itemHeight = colWidth * (size.height / size.width);
+    const x = targetCol * (colWidth + MASONRY_GAP);
+    const y = colHeights[targetCol];
+    colHeights[targetCol] = y + itemHeight + MASONRY_GAP;
+    return { item, x, y, itemHeight };
+  });
+  const totalHeight = Math.max(0, Math.max(...colHeights) - MASONRY_GAP);
+
+  return (
+    <div ref={containerRef} className="relative w-full">
+      <div className="relative w-full" style={{ height: totalHeight }}>
+        {positioned.map(({ item, x, y, itemHeight }) => (
+          <div
+            key={item.id}
+            className="absolute top-0 left-0"
+            style={{
+              width: colWidth,
+              height: itemHeight,
+              transform: `translate3d(${x}px, ${y}px, 0)`,
+            }}
+          >
+            <Card
+              variant="Media"
+              image={item.src}
+              alt={item.alt}
+              className="h-full"
+              onImageLoad={
+                item.width && item.height
+                  ? undefined
+                  : (dims) => handleImageLoad(item.id, dims)
+              }
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -133,13 +323,13 @@ function TabContent({
     return (
       <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[160/90]" showMeta />
-          <NavCard aspectClass="aspect-[472/472]" />
-          <NavCard aspectClass="aspect-[160/90]" />
+          <Card variant="Default" aspectClass="aspect-[160/90]" />
+          <Card variant="Default" aspectClass="aspect-[472/472]" />
+          <Card variant="Default" aspectClass="aspect-[160/90]" />
         </div>
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[472/590]" />
-          <NavCard aspectClass="aspect-[160/90]" />
+          <Card variant="Default" aspectClass="aspect-[472/590]" />
+          <Card variant="Default" aspectClass="aspect-[160/90]" />
         </div>
       </div>
     );
@@ -148,33 +338,14 @@ function TabContent({
   if (activeTab === "Writing") {
     return (
       <div className="relative flex w-full flex-col items-start gap-2">
-        <NavCard orientation="Horizontal" />
-        <NavCard orientation="Horizontal" />
+        <Card variant="Horizontal" />
+        <Card variant="Horizontal" />
       </div>
     );
   }
 
   if (activeTab === "Illustrations") {
-    return (
-      <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
-        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[472/472]" />
-          <NavCard aspectClass="aspect-[160/90]" />
-          <NavCard aspectClass="aspect-[472/472]" />
-        </div>
-        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[472/590]" />
-          <NavCard aspectClass="aspect-[472/590]" />
-          <NavCard aspectClass="aspect-[160/90]" />
-        </div>
-        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <NavCard aspectClass="aspect-[160/90]" />
-          <NavCard aspectClass="aspect-[472/590]" />
-          <NavCard aspectClass="aspect-[160/90]" />
-          <NavCard aspectClass="aspect-[160/90]" />
-        </div>
-      </div>
-    );
+    return <MediaMasonry key="illustrations" folder="illustrations" />;
   }
 
   return (
@@ -250,14 +421,14 @@ function TabContent({
 }
 
 export function Navigation({
+  ref,
   initialTab = "Work",
   initialOpen = false,
-  openRequest = null,
   syncUrl = false,
 }: {
+  ref?: Ref<NavigationHandle>;
   initialTab?: NavTab;
   initialOpen?: boolean;
-  openRequest?: { tab: NavTab; nonce: number } | null;
   syncUrl?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(initialOpen);
@@ -275,8 +446,13 @@ export function Navigation({
   });
 
   const lastScrollY = useRef(0);
+  const isOpenRef = useRef(isOpen);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
 
   const replacePath = useCallback(
     (path: string) => {
@@ -294,6 +470,7 @@ export function Navigation({
     lastScrollY.current = getScrollY();
 
     const handleScroll = () => {
+      if (isOpenRef.current) return;
       const currentY = getScrollY();
       if (currentY > lastScrollY.current && currentY > 16) {
         setIsSmall(true);
@@ -309,16 +486,63 @@ export function Navigation({
   }, []);
 
   useEffect(() => {
-    if (!openRequest) return;
-    setIsOpen(true);
-    setActiveTab(openRequest.tab);
-    setMobileView("tab");
-    setHasScrolledContent(false);
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
+    if (!isOpen) return;
+
+    const scrollTarget = document.getElementById("app-scroll");
+    if (!scrollTarget) {
+      const prevOverflow = document.documentElement.style.overflow;
+      document.documentElement.style.overflow = "hidden";
+      return () => {
+        document.documentElement.style.overflow = prevOverflow;
+      };
     }
-    replacePath(tabToPath(openRequest.tab));
-  }, [openRequest, replacePath]);
+
+    const prevOverflowY = scrollTarget.style.overflowY;
+    const prevPaddingRight = scrollTarget.style.paddingRight;
+    const savedScrollTop = scrollTarget.scrollTop;
+    const gutterBefore = scrollTarget.offsetWidth - scrollTarget.clientWidth;
+
+    scrollTarget.style.overflowY = "hidden";
+
+    const gutterAfter = scrollTarget.offsetWidth - scrollTarget.clientWidth;
+    const gutterDiff = gutterBefore - gutterAfter;
+    if (gutterDiff > 0) {
+      const computedPaddingRight =
+        Number.parseFloat(getComputedStyle(scrollTarget).paddingRight) || 0;
+      scrollTarget.style.paddingRight = `${computedPaddingRight + gutterDiff}px`;
+    }
+
+    if (scrollTarget.scrollTop !== savedScrollTop) {
+      scrollTarget.scrollTop = savedScrollTop;
+    }
+
+    return () => {
+      const currentScrollTop = scrollTarget.scrollTop;
+      scrollTarget.style.overflowY = prevOverflowY;
+      scrollTarget.style.paddingRight = prevPaddingRight;
+      if (scrollTarget.scrollTop !== currentScrollTop) {
+        scrollTarget.scrollTop = currentScrollTop;
+      }
+      lastScrollY.current = scrollTarget.scrollTop;
+    };
+  }, [isOpen]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      openTab: (tab: NavTab) => {
+        setIsOpen(true);
+        setActiveTab(tab);
+        setMobileView("tab");
+        setHasScrolledContent(false);
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = 0;
+        }
+        replacePath(tabToPath(tab));
+      },
+    }),
+    [replacePath],
+  );
 
   useEffect(() => {
     if (!isOpen) return;
