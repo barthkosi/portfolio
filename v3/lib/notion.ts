@@ -15,6 +15,7 @@ import {
   type RichTextSpan,
   slugifyTitle,
 } from "@/lib/content-types";
+import { parseImageDimensions } from "@/lib/media";
 
 const NOTION_API_BASE = "https://api.notion.com/v1";
 const NOTION_VERSION = "2022-06-28";
@@ -380,6 +381,28 @@ async function fetchBlockChildren(
   return blocks;
 }
 
+const IMAGE_HEADER_BYTES = 65536;
+
+async function probeImageDimensions(
+  url: string,
+): Promise<{ width: number; height: number } | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { Range: `bytes=0-${IMAGE_HEADER_BYTES - 1}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const buffer = await res.arrayBuffer();
+    const slice =
+      buffer.byteLength > IMAGE_HEADER_BYTES
+        ? buffer.slice(0, IMAGE_HEADER_BYTES)
+        : buffer;
+    return parseImageDimensions(new Uint8Array(slice));
+  } catch {
+    return null;
+  }
+}
+
 async function resolveMediaBlock(
   block: NotionBlockObject,
   pageId: string,
@@ -388,10 +411,13 @@ async function resolveMediaBlock(
     const src = await resolveFileUrl(block.image, pageId, block.id);
     if (!src) return null;
     const caption = richTextToPlain(block.image.caption).trim();
+    const kind = VIDEO_EXT_RE.test(src) ? "video" : "image";
+    const dimensions = kind === "image" ? await probeImageDimensions(src) : null;
     return {
       src,
-      kind: VIDEO_EXT_RE.test(src) ? "video" : "image",
+      kind,
       ...(caption ? { caption, alt: caption } : {}),
+      ...(dimensions ? { width: dimensions.width, height: dimensions.height } : {}),
     };
   }
 
@@ -412,10 +438,13 @@ async function resolveMediaBlock(
     if (match) {
       const caption = match[1].trim();
       const src = match[2].trim();
+      const kind = VIDEO_EXT_RE.test(src) ? "video" : "image";
+      const dimensions = kind === "image" ? await probeImageDimensions(src) : null;
       return {
         src,
-        kind: VIDEO_EXT_RE.test(src) ? "video" : "image",
+        kind,
         ...(caption ? { caption, alt: caption } : {}),
+        ...(dimensions ? { width: dimensions.width, height: dimensions.height } : {}),
       };
     }
   }

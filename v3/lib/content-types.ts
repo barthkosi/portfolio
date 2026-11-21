@@ -29,6 +29,8 @@ export type MediaBlockItem = {
   alt?: string;
   caption?: string;
   kind: "image" | "video";
+  width?: number;
+  height?: number;
 };
 
 export type ContentBlock =

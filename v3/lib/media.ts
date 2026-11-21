@@ -148,5 +148,35 @@ export function parseImageDimensions(
     }
   }
 
+  // AVIF / HEIF (ISO BMFF ispe box)
+  if (bytes.length >= 24 && readAscii(bytes, 4, 4) === "ftyp") {
+    const brand = readAscii(bytes, 8, 4);
+    if (
+      brand === "avif" ||
+      brand === "avis" ||
+      brand === "mif1" ||
+      brand === "heic" ||
+      brand === "heix"
+    ) {
+      for (let i = 16; i + 16 <= bytes.length; i += 1) {
+        if (
+          bytes[i] === 0x69 &&
+          bytes[i + 1] === 0x73 &&
+          bytes[i + 2] === 0x70 &&
+          bytes[i + 3] === 0x65
+        ) {
+          const boxSize = view.getUint32(i - 4, false);
+          if (boxSize >= 20 && boxSize <= 64) {
+            const width = view.getUint32(i + 8, false);
+            const height = view.getUint32(i + 12, false);
+            if (width > 0 && width <= 65536 && height > 0 && height <= 65536) {
+              return { width, height };
+            }
+          }
+        }
+      }
+    }
+  }
+
   return null;
 }
