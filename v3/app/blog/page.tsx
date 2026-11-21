@@ -1,5 +1,26 @@
-import { BlogTextBlock } from "@/components/BlogTextBlock";
+import { BlogCodeBlock } from "@/components/BlogCodeBlock";
+import { BlogListBlock } from "@/components/BlogListBlock";
+import { BlogMediaBlock } from "@/components/BlogMediaBlock";
+import {
+  BlogBold,
+  BlogInlineCode,
+  BlogItalic,
+  BlogLink,
+  BlogStrikethrough,
+} from "@/components/BlogRichText";
+import {
+  BlogTextBlock,
+  mapNotionHeadingLevel,
+} from "@/components/BlogTextBlock";
 import { Navigation } from "@/components/Navigation";
+
+const SAMPLE_HTML_CODE = `<div>
+  <div>
+    <h1>
+      Barth
+    <h1/>
+  <div/> 
+<div/>`;
 
 export default function BlogPage() {
   return (
@@ -54,7 +75,7 @@ export default function BlogPage() {
 
           <BlogTextBlock
             variant="Heading"
-            type="h2"
+            type={mapNotionHeadingLevel(1)}
             heading="Replacement is a myth, only metamorphosis exists"
           />
 
@@ -66,7 +87,7 @@ export default function BlogPage() {
 
           <BlogTextBlock
             variant="Heading"
-            type="h3"
+            type={mapNotionHeadingLevel(2)}
             heading="Why not collective intelligence?"
           />
 
@@ -78,7 +99,7 @@ export default function BlogPage() {
 
           <BlogTextBlock
             variant="Heading"
-            type="h3"
+            type={mapNotionHeadingLevel(2)}
             heading="The sky is no longer the limit"
           />
 
@@ -102,7 +123,7 @@ export default function BlogPage() {
 
           <BlogTextBlock
             variant="Heading"
-            type="h3"
+            type={mapNotionHeadingLevel(2)}
             heading="Progress is an upward spiral, not a straight line"
           />
 
@@ -114,7 +135,7 @@ export default function BlogPage() {
 
           <BlogTextBlock
             variant="Heading"
-            type="h2"
+            type={mapNotionHeadingLevel(1)}
             heading="The quiet power of partnership"
           />
 
@@ -126,7 +147,7 @@ export default function BlogPage() {
 
           <BlogTextBlock
             variant="Heading"
-            type="h3"
+            type={mapNotionHeadingLevel(2)}
             heading="Where do we go from here?"
           />
 
@@ -144,7 +165,7 @@ export default function BlogPage() {
 
           <BlogTextBlock
             variant="Heading"
-            type="h2"
+            type={mapNotionHeadingLevel(1)}
             heading="Closing note"
           />
 
@@ -158,6 +179,120 @@ export default function BlogPage() {
             variant="Body"
             type="Paragraph"
             body="We all stand the chance to be Michelangelo, but can we set the angel free?"
+          />
+
+          <BlogTextBlock
+            variant="Heading"
+            type={mapNotionHeadingLevel(1)}
+            heading="Block styles preview"
+          />
+
+          <BlogMediaBlock
+            items={[
+              {
+                src: "/images/blog-cover.png",
+                alt: "Single media preview",
+                caption: "Lorem ipsum dolor sit amet consectetur.",
+              },
+            ]}
+          />
+
+          <BlogMediaBlock
+            items={[
+              {
+                src: "/images/blog-cover.png",
+                alt: "Double media preview left",
+                caption: "Lorem ipsum dolor sit amet consectetur.",
+              },
+              {
+                src: "/images/blog-cover.png",
+                alt: "Double media preview right",
+                caption: "Lorem ipsum dolor sit amet consectetur.",
+              },
+            ]}
+          />
+
+          <BlogTextBlock
+            variant="Body"
+            type="Paragraph"
+            body={
+              <>
+                <BlogBold>Bold text</BlogBold>,{" "}
+                <BlogItalic>example of italic text</BlogItalic>{" "}
+                <BlogLink href="#preview">link</BlogLink>{" "}
+                <BlogLink
+                  href="#preview"
+                  className="text-content-brand underline decoration-solid [text-underline-position:from-font]"
+                >
+                  link when hovered
+                </BlogLink>{" "}
+                <BlogStrikethrough>strikethrough</BlogStrikethrough>
+              </>
+            }
+          />
+
+          <BlogTextBlock
+            variant="Body"
+            type="Paragraph"
+            body={
+              <>
+                We then pass the <BlogInlineCode>x</BlogInlineCode> to make the
+                row draggable on the x-axis only. value to the{" "}
+                <BlogInlineCode>style</BlogInlineCode> prop of the{" "}
+                <BlogInlineCode>motion.div</BlogInlineCode> and use{" "}
+                <BlogInlineCode>{`drag="x"`}</BlogInlineCode>
+              </>
+            }
+          />
+
+          <BlogListBlock
+            variant="bullet"
+            items={[
+              "Lorem ipsum dolor sit amet consectetur.",
+              "Lorem ipsum dolor sit amet consectetur.",
+              "Lorem ipsum dolor sit amet consectetur.",
+            ]}
+          />
+
+          <BlogListBlock
+            variant="numbered"
+            items={[
+              "Lorem ipsum dolor sit amet consectetur.",
+              "Lorem ipsum dolor sit amet consectetur.",
+              "Lorem ipsum dolor sit amet consectetur.",
+            ]}
+          />
+
+          <BlogCodeBlock language="HTML" code={SAMPLE_HTML_CODE} />
+
+          <BlogTextBlock
+            variant="Callout"
+            type="Paragraph"
+            body="Callouts reuse the Quote block styling without an author line."
+          />
+
+          <BlogTextBlock
+            variant="Heading"
+            type={mapNotionHeadingLevel(3)}
+            heading="Toggle heading (Notion H3 mapped to H4)"
+          />
+
+          <BlogTextBlock
+            variant="Body"
+            type="Paragraph"
+            body="Toggle headings render as regular headings with their content displayed directly below."
+          />
+
+          <BlogTextBlock
+            variant="Heading"
+            type={mapNotionHeadingLevel(4)}
+            heading="Notion H4 mapped to H5"
+          />
+
+          <BlogTextBlock
+            variant="Heading"
+            type={mapNotionHeadingLevel(5)}
+            heading="Notion H5 and H6 mapped to H6"
           />
         </div>
       </div>
