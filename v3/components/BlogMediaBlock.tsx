@@ -7,6 +7,8 @@ export type BlogMediaItem = {
 
 type BlogMediaBlockProps = {
   items: BlogMediaItem[];
+  hasMediaBefore?: boolean;
+  hasMediaAfter?: boolean;
   className?: string;
 };
 
@@ -16,14 +18,21 @@ function isVideoItem(item: BlogMediaItem): boolean {
   return item.kind === "video" || VIDEO_EXT_RE.test(item.src);
 }
 
-export function BlogMediaBlock({ items, className }: BlogMediaBlockProps) {
+export function BlogMediaBlock({
+  items,
+  hasMediaBefore = false,
+  hasMediaAfter = false,
+  className,
+}: BlogMediaBlockProps) {
   if (items.length === 0) return null;
+
+  const verticalPadding = `${hasMediaBefore ? "pt-0" : "pt-6"} ${hasMediaAfter ? "pb-2" : "pb-4"}`;
 
   return (
     <div
       className={
         className ??
-        "relative flex w-full shrink-0 flex-row items-start justify-center gap-2 pt-6 pb-4 lg:-mx-8 lg:w-[calc(100%+64px)]"
+        `relative flex w-full shrink-0 flex-row items-start justify-center gap-2 ${verticalPadding} lg:-mx-8 lg:w-[calc(100%+64px)]`
       }
     >
       {items.map((item, index) => (

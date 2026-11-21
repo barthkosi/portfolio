@@ -14,43 +14,9 @@ import {
 import { buildMediaUrl } from "@/lib/media";
 
 const INDEX_KEY = "content/index.json";
-const CACHE_ORIGIN = "https://content-cache.barthkosi.internal";
-
-type WorkersCacheStorage = {
-  default: {
-    match: (request: Request | string) => Promise<Response | undefined>;
-    put: (request: Request | string, response: Response) => Promise<void>;
-    delete: (request: Request | string) => Promise<boolean>;
-  };
-};
 
 function postKey(category: ContentCategory, slug: string): string {
   return `content/${category}/${slug}.json`;
-}
-
-function getEdgeCache(): WorkersCacheStorage["default"] | null {
-  try {
-    const maybeCaches = (globalThis as unknown as { caches?: WorkersCacheStorage })
-      .caches;
-    if (maybeCaches && maybeCaches.default) {
-      return maybeCaches.default;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-function cacheUrlForKey(key: string): string {
-  return `${CACHE_ORIGIN}/${key}`;
-}
-
-async function purgeEdgeCache(keys: string[]): Promise<void> {
-  const edgeCache = getEdgeCache();
-  if (!edgeCache) return;
-  await Promise.all(
-    keys.map((key) => edgeCache.delete(cacheUrlForKey(key)).catch(() => false)),
-  );
 }
 
 async function getR2ApiConfig(): Promise<{
@@ -86,14 +52,6 @@ async function readJsonFromBucket(
 }
 
 async function readJsonObject<T>(key: string): Promise<T | null> {
-  const edgeCache = getEdgeCache();
-  if (edgeCache) {
-    const cached = await edgeCache.match(cacheUrlForKey(key));
-    if (cached) {
-      return (await cached.json()) as T;
-    }
-  }
-
   let rawText: string | null = null;
   const bucket = await getPortfolioBucket();
 
@@ -126,17 +84,6 @@ async function readJsonObject<T>(key: string): Promise<T | null> {
   }
 
   if (rawText === null) return null;
-
-  if (edgeCache) {
-    const cacheResponse = new Response(rawText, {
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "public, max-age=31536000",
-      },
-    });
-    await edgeCache.put(cacheUrlForKey(key), cacheResponse).catch(() => {});
-  }
-
   return JSON.parse(rawText) as T;
 }
 
@@ -154,7 +101,6 @@ async function writeObject(
         ...(cacheControl ? { cacheControl } : {}),
       },
     });
-    await purgeEdgeCache([key]);
     return;
   }
 
@@ -197,7 +143,6 @@ async function deleteObject(key: string): Promise<void> {
   const bucket = await getPortfolioBucket();
   if (bucket) {
     await bucket.delete(key);
-    await purgeEdgeCache([key]);
     return;
   }
 
@@ -309,7 +254,6 @@ export async function savePostToStore(post: PostDocument): Promise<{
     "application/json; charset=utf-8",
   );
 
-  await purgeEdgeCache([targetKey, INDEX_KEY, ...removedOldKeys]);
   return { key: targetKey, removedOldKeys };
 }
 
@@ -341,7 +285,6 @@ export async function removePostByIdFromStore(
       JSON.stringify(index),
       "application/json; charset=utf-8",
     );
-    await purgeEdgeCache([INDEX_KEY, ...removedKeys]);
   }
 
   return { removedKeys };
@@ -383,7 +326,6 @@ export async function replaceCategoryInStore(
     JSON.stringify(index),
     "application/json; charset=utf-8",
   );
-  await purgeEdgeCache([INDEX_KEY, ...savedKeys, ...removedKeys]);
 
   return { savedKeys, removedKeys };
 }

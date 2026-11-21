@@ -67,7 +67,11 @@ function renderRichText(spans: RichTextSpan[]): ReactNode {
   });
 }
 
-function renderBlock(block: ContentBlock, index: number): ReactNode {
+function renderBlock(
+  block: ContentBlock,
+  index: number,
+  blocks: ContentBlock[],
+): ReactNode {
   if (block.type === "heading") {
     return (
       <BlogTextBlock
@@ -114,7 +118,16 @@ function renderBlock(block: ContentBlock, index: number): ReactNode {
   }
 
   if (block.type === "media") {
-    return <BlogMediaBlock key={index} items={block.items} />;
+    const hasMediaBefore = blocks[index - 1]?.type === "media";
+    const hasMediaAfter = blocks[index + 1]?.type === "media";
+    return (
+      <BlogMediaBlock
+        key={index}
+        items={block.items}
+        hasMediaBefore={hasMediaBefore}
+        hasMediaAfter={hasMediaAfter}
+      />
+    );
   }
 
   if (block.type === "bulleted_list") {
@@ -203,7 +216,9 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
         </div>
 
         <div className="relative flex w-full max-w-[640px] shrink-0 flex-col items-start">
-          {post.blocks.map((block, index) => renderBlock(block, index))}
+          {post.blocks.map((block, index) =>
+            renderBlock(block, index, post.blocks),
+          )}
         </div>
       </div>
     </div>

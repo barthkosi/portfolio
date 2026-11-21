@@ -188,6 +188,7 @@ export default function BlogPage() {
           />
 
           <BlogMediaBlock
+            hasMediaAfter
             items={[
               {
                 src: "/images/blog-cover.png",
@@ -198,6 +199,7 @@ export default function BlogPage() {
           />
 
           <BlogMediaBlock
+            hasMediaBefore
             items={[
               {
                 src: "/images/blog-cover.png",
