@@ -11,6 +11,7 @@ type BlogMediaBlockProps = {
   items: BlogMediaItem[];
   hasMediaBefore?: boolean;
   hasMediaAfter?: boolean;
+  isShowcase?: boolean;
   className?: string;
 };
 
@@ -24,17 +25,20 @@ export function BlogMediaBlock({
   items,
   hasMediaBefore = false,
   hasMediaAfter = false,
+  isShowcase = false,
   className,
 }: BlogMediaBlockProps) {
   if (items.length === 0) return null;
 
-  const verticalPadding = `${hasMediaBefore ? "pt-0" : "pt-6"} ${hasMediaAfter ? "pb-2" : "pb-4"}`;
+  const topPadding = hasMediaBefore ? "pt-0" : "pt-6";
+  const bottomPadding = hasMediaAfter ? "pb-2 lg:pb-4" : "pb-4";
+  const desktopBleed = isShowcase ? "" : "lg:-mx-8 lg:w-[calc(100%+64px)]";
 
   return (
     <div
       className={
         className ??
-        `relative flex w-full shrink-0 flex-row items-start justify-center gap-2 ${verticalPadding} lg:-mx-8 lg:w-[calc(100%+64px)]`
+        `relative flex w-full shrink-0 flex-col items-start justify-center gap-2 md:flex-row lg:gap-4 ${topPadding} ${bottomPadding} ${desktopBleed}`
       }
     >
       {items.map((item, index) => {
@@ -50,7 +54,7 @@ export function BlogMediaBlock({
         return (
           <div
             key={`${item.src}-${index}`}
-            className="relative flex min-w-px flex-[1_0_0] flex-col items-start justify-start gap-2"
+            className="relative flex w-full flex-col items-start justify-start gap-2 md:min-w-px md:flex-[1_0_0]"
           >
             <div
               style={aspectStyle}

@@ -71,6 +71,7 @@ function renderBlock(
   block: ContentBlock,
   index: number,
   blocks: ContentBlock[],
+  isShowcase: boolean,
 ): ReactNode {
   if (block.type === "heading") {
     return (
@@ -126,6 +127,7 @@ function renderBlock(
         items={block.items}
         hasMediaBefore={hasMediaBefore}
         hasMediaAfter={hasMediaAfter}
+        isShowcase={isShowcase}
       />
     );
   }
@@ -169,6 +171,7 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
   const coverIsVideo =
     Boolean(post.meta.coverImage) &&
     VIDEO_EXT_RE.test(post.meta.coverImage ?? "");
+  const isShowcase = post.meta.layout === "showcase";
 
   return (
     <div className="relative flex min-h-full w-full flex-col items-center bg-background-primary px-4 pt-[120px] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] md:px-8 md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
@@ -215,9 +218,13 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
           )}
         </div>
 
-        <div className="relative flex w-full max-w-[640px] shrink-0 flex-col items-start">
+        <div
+          className={`relative flex w-full shrink-0 flex-col items-start ${
+            isShowcase ? "max-w-[1600px]" : "max-w-[640px]"
+          }`}
+        >
           {post.blocks.map((block, index) =>
-            renderBlock(block, index, post.blocks),
+            renderBlock(block, index, post.blocks, isShowcase),
           )}
         </div>
       </div>

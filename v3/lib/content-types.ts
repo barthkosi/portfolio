@@ -70,10 +70,13 @@ export type ContentBlock =
       code: string;
     };
 
+export type PostLayout = "default" | "showcase";
+
 export type PostMeta = {
   id: string;
   slug: string;
   category: ContentCategory;
+  layout?: PostLayout;
   title: string;
   description: string;
   date: string | null;

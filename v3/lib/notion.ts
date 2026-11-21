@@ -11,6 +11,7 @@ import {
   type ContentCategory,
   type MediaBlockItem,
   type PostDocument,
+  type PostLayout,
   type PostMeta,
   type RichTextSpan,
   slugifyTitle,
@@ -665,14 +666,33 @@ async function buildPostDocument(
     }
   }
 
+  const layoutProp = getProperty(page, "Layout");
+  const layoutName = (
+    layoutProp?.select?.name ??
+    layoutProp?.status?.name ??
+    ""
+  )
+    .trim()
+    .toLowerCase();
+  const layout: PostLayout = layoutName === "showcase" ? "showcase" : "default";
+
+  const slugProp = getProperty(page, "Slug");
+  const customSlugRaw = richTextToPlain(slugProp?.rich_text)
+    .trim()
+    .replace(/^\/+|\/+$/g, "");
+  const slug = customSlugRaw
+    ? slugifyTitle(customSlugRaw, page.id)
+    : slugifyTitle(title, page.id);
+
   const coverImage = await resolveFileUrl(page.cover, page.id, "cover");
   const rawBlocks = await fetchBlockChildren(page.id);
   const blocks = await transformBlocks(rawBlocks, page.id);
 
   const meta: PostMeta = {
     id: page.id,
-    slug: slugifyTitle(title, page.id),
+    slug,
     category,
+    layout,
     title,
     description,
     date,
