@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CSSProperties } from "react";
 
 export type CardVariant = "Default" | "Media" | "Horizontal";
@@ -9,6 +10,8 @@ type CardProps = {
   year?: string;
   image?: string;
   alt?: string;
+  href?: string;
+  onClick?: () => void;
   className?: string;
   style?: CSSProperties;
   onImageLoad?: (dimensions: { width: number; height: number }) => void;
@@ -44,12 +47,27 @@ export function Card({
   year = "2026",
   image,
   alt,
+  href,
+  onClick,
   className,
   style,
   onImageLoad,
 }: CardProps) {
-  if (variant === "Horizontal") {
+  const wrapIfLink = (content: React.ReactNode) => {
+    if (!href) return content;
     return (
+      <Link
+        href={href}
+        onClick={onClick}
+        className="block w-full shrink-0"
+      >
+        {content}
+      </Link>
+    );
+  };
+
+  if (variant === "Horizontal") {
+    return wrapIfLink(
       <div
         style={style}
         className={`relative flex w-full shrink-0 items-center gap-0 rounded-[4px] ${className || ""}`}
@@ -72,12 +90,12 @@ export function Card({
             {year}
           </p>
         </div>
-      </div>
+      </div>,
     );
   }
 
   if (variant === "Media") {
-    return (
+    return wrapIfLink(
       <div
         style={style}
         className={`relative w-full shrink-0 overflow-hidden rounded-[4px] bg-background-tertiary ${aspectClass || ""} ${className || ""}`}
@@ -103,11 +121,11 @@ export function Card({
             className="pointer-events-none block size-full object-cover"
           />
         )}
-      </div>
+      </div>,
     );
   }
 
-  return (
+  return wrapIfLink(
     <div
       style={style}
       className={`group relative flex w-full shrink-0 flex-col items-start gap-0 overflow-hidden rounded-[4px] bg-background-tertiary ${aspectClass || ""} ${className || ""}`}
@@ -137,6 +155,6 @@ export function Card({
           <CardMeta title={title} year={year} className="relative py-1" />
         </div>
       </div>
-    </div>
+    </div>,
   );
 }

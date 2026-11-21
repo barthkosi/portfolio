@@ -10,6 +10,12 @@ import {
 } from "react";
 import { Card } from "@/components/Card";
 import { InputField } from "@/components/InputField";
+import {
+  type ContentCategory,
+  type ContentIndex,
+  formatPostYear,
+  type PostMeta,
+} from "@/lib/content-types";
 import { type MediaItem } from "@/lib/media";
 import { NAV_TABS, type NavTab, tabToPath } from "@/lib/navigation";
 
@@ -33,6 +39,170 @@ const SKELETON_ASPECTS = [
 
 const cachedMedia = new Map<string, MediaItem[]>();
 const inFlightMedia = new Map<string, Promise<MediaItem[]>>();
+let cachedContentIndex: ContentIndex | null = null;
+let inFlightContentIndex: Promise<ContentIndex> | null = null;
+
+async function fetchContentIndex(): Promise<ContentIndex> {
+  if (cachedContentIndex) return cachedContentIndex;
+  if (!inFlightContentIndex) {
+    inFlightContentIndex = fetch("/api/content", { cache: "no-store" })
+      .then(async (res) => {
+        if (!res.ok) {
+          throw new Error(`Failed to load content (${res.status})`);
+        }
+        const data = (await res.json()) as ContentIndex;
+        cachedContentIndex = data;
+        return data;
+      })
+      .finally(() => {
+        inFlightContentIndex = null;
+      });
+  }
+  return inFlightContentIndex;
+}
+
+const CARD_ASPECTS = [
+  "aspect-[160/90]",
+  "aspect-[472/590]",
+  "aspect-[472/472]",
+  "aspect-[160/90]",
+];
+
+function ContentCategoryView({
+  category,
+  onNavigate,
+}: {
+  category: ContentCategory;
+  onNavigate: () => void;
+}) {
+  const [items, setItems] = useState<PostMeta[] | null>(
+    () => cachedContentIndex?.[category] ?? null,
+  );
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    if (cachedContentIndex) {
+      return;
+    }
+
+    fetchContentIndex()
+      .then((index) => {
+        if (active) {
+          setError(null);
+          setItems(index[category] ?? []);
+        }
+      })
+      .catch((err: unknown) => {
+        if (active) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load content",
+          );
+          setItems([]);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [category]);
+
+  if (!items) {
+    if (category === "writing") {
+      return (
+        <div className="relative flex w-full flex-col items-start gap-2">
+          <Card variant="Horizontal" title="" year="" />
+          <Card variant="Horizontal" title="" year="" />
+        </div>
+      );
+    }
+    return (
+      <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
+        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
+          <Card variant="Default" aspectClass="aspect-[160/90]" title="" year="" />
+          <Card variant="Default" aspectClass="aspect-[472/472]" title="" year="" />
+        </div>
+        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
+          <Card variant="Default" aspectClass="aspect-[472/590]" title="" year="" />
+          <Card variant="Default" aspectClass="aspect-[160/90]" title="" year="" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="relative w-full py-4">
+        <p className="label-xs text-content-tertiary">{error}</p>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="relative w-full py-4">
+        <p className="label-xs text-content-tertiary">No published items yet.</p>
+      </div>
+    );
+  }
+
+  if (category === "writing") {
+    return (
+      <div className="relative flex w-full flex-col items-start gap-2">
+        {items.map((item) => (
+          <Card
+            key={item.id}
+            variant="Horizontal"
+            title={item.title}
+            year={formatPostYear(item.date)}
+            image={item.coverImage ?? undefined}
+            alt={item.title}
+            href={`/${category}/${item.slug}`}
+            onClick={onNavigate}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  const leftItems = items.filter((_, i) => i % 2 === 0);
+  const rightItems = items.filter((_, i) => i % 2 === 1);
+
+  return (
+    <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
+      <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
+        {leftItems.map((item, idx) => (
+          <Card
+            key={item.id}
+            variant="Default"
+            aspectClass={CARD_ASPECTS[(idx * 2) % CARD_ASPECTS.length]}
+            title={item.title}
+            year={formatPostYear(item.date)}
+            image={item.coverImage ?? undefined}
+            alt={item.title}
+            href={`/${category}/${item.slug}`}
+            onClick={onNavigate}
+          />
+        ))}
+      </div>
+      <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
+        {rightItems.map((item, idx) => (
+          <Card
+            key={item.id}
+            variant="Default"
+            aspectClass={CARD_ASPECTS[(idx * 2 + 1) % CARD_ASPECTS.length]}
+            title={item.title}
+            year={formatPostYear(item.date)}
+            image={item.coverImage ?? undefined}
+            alt={item.title}
+            href={`/${category}/${item.slug}`}
+            onClick={onNavigate}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 async function fetchMediaFolder(folder: string): Promise<MediaItem[]> {
   const cached = cachedMedia.get(folder);
@@ -302,12 +472,14 @@ function SocialLinks() {
 
 function TabContent({
   activeTab,
+  onNavigate,
   formState,
   onFieldChange,
   onCopyEmail,
   copied,
 }: {
   activeTab: NavTab;
+  onNavigate: () => void;
   formState: {
     firstName: string;
     lastName: string;
@@ -319,28 +491,27 @@ function TabContent({
   onCopyEmail: () => void;
   copied: boolean;
 }) {
-  if (activeTab === "Work" || activeTab === "Explorations") {
+  if (activeTab === "Work") {
+    return <ContentCategoryView key="work" category="work" onNavigate={onNavigate} />;
+  }
+
+  if (activeTab === "Explorations") {
     return (
-      <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
-        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <Card variant="Default" aspectClass="aspect-[160/90]" />
-          <Card variant="Default" aspectClass="aspect-[472/472]" />
-          <Card variant="Default" aspectClass="aspect-[160/90]" />
-        </div>
-        <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <Card variant="Default" aspectClass="aspect-[472/590]" />
-          <Card variant="Default" aspectClass="aspect-[160/90]" />
-        </div>
-      </div>
+      <ContentCategoryView
+        key="explorations"
+        category="explorations"
+        onNavigate={onNavigate}
+      />
     );
   }
 
   if (activeTab === "Writing") {
     return (
-      <div className="relative flex w-full flex-col items-start gap-2">
-        <Card variant="Horizontal" />
-        <Card variant="Horizontal" />
-      </div>
+      <ContentCategoryView
+        key="writing"
+        category="writing"
+        onNavigate={onNavigate}
+      />
     );
   }
 
@@ -671,6 +842,7 @@ export function Navigation({
               >
                 <TabContent
                   activeTab={activeTab}
+                  onNavigate={() => setIsOpen(false)}
                   formState={formState}
                   onFieldChange={handleFieldChange}
                   onCopyEmail={handleCopyEmail}
