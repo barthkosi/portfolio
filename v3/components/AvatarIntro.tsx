@@ -3,7 +3,101 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+function createSoftboxTexture(shape: "radial" | "strip" = "radial"): THREE.CanvasTexture {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  if (ctx) {
+    ctx.clearRect(0, 0, size, size);
+
+    if (shape === "strip") {
+      const gradX = ctx.createLinearGradient(0, 0, size, 0);
+      gradX.addColorStop(0.0, "rgba(255,255,255,0)");
+      gradX.addColorStop(0.22, "rgba(255,255,255,0.75)");
+      gradX.addColorStop(0.5, "rgba(255,255,255,1)");
+      gradX.addColorStop(0.78, "rgba(255,255,255,0.75)");
+      gradX.addColorStop(1.0, "rgba(255,255,255,0)");
+      ctx.fillStyle = gradX;
+      ctx.fillRect(0, 0, size, size);
+
+      ctx.globalCompositeOperation = "destination-in";
+      const gradY = ctx.createLinearGradient(0, 0, 0, size);
+      gradY.addColorStop(0.0, "rgba(255,255,255,0)");
+      gradY.addColorStop(0.18, "rgba(255,255,255,1)");
+      gradY.addColorStop(0.82, "rgba(255,255,255,1)");
+      gradY.addColorStop(1.0, "rgba(255,255,255,0)");
+      ctx.fillStyle = gradY;
+      ctx.fillRect(0, 0, size, size);
+    } else {
+      const cx = size / 2;
+      const grad = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx);
+      grad.addColorStop(0.0, "rgba(255,255,255,1)");
+      grad.addColorStop(0.35, "rgba(255,255,255,0.85)");
+      grad.addColorStop(0.7, "rgba(255,255,255,0.28)");
+      grad.addColorStop(1.0, "rgba(255,255,255,0)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.NoColorSpace;
+  return texture;
+}
+
+function createStudioEnvironment() {
+  const envScene = new THREE.Scene();
+  envScene.background = new THREE.Color(0x111318);
+
+  const radialTex = createSoftboxTexture("radial");
+  const stripTex = createSoftboxTexture("strip");
+
+  const addPanel = (
+    color: number,
+    intensity: number,
+    width: number,
+    height: number,
+    pos: [number, number, number],
+    {
+      shape = "radial",
+      roll = 0,
+      target = [0, 0, 0],
+    }: { shape?: "radial" | "strip"; roll?: number; target?: [number, number, number] } = {},
+  ) => {
+    const mat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(color).multiplyScalar(intensity),
+      map: shape === "strip" ? stripTex : radialTex,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), mat);
+    mesh.position.set(...pos);
+    mesh.lookAt(...target);
+    if (roll) mesh.rotateZ(roll);
+    envScene.add(mesh);
+  };
+
+  // Primary diagonal front-upper-left softbox (warm-neutral key gradient across +Z)
+  addPanel(0xfff7ed, 4.6, 17, 13, [-5.5, 5.5, 10], { shape: "radial", roll: -0.35 });
+  // Broad overhead studio bank for top bevels
+  addPanel(0xfafcff, 3.8, 18, 9, [0, 10, 4], { shape: "strip" });
+  // Crisp cool right-side vertical strip for edge definition
+  addPanel(0xc8dcff, 5.2, 4.5, 16, [11, 1.5, 3], { shape: "strip" });
+  // Left-back cool strip for side walls when rotated
+  addPanel(0xdbe8ff, 3.4, 5, 14, [-10, 2, -6], { shape: "strip" });
+  // Back overhead rim for 360-degree spin
+  addPanel(0xe8f1ff, 3.6, 16, 6, [0, 7, -10], { shape: "strip" });
+  // Subtle cool lower bounce so underside bevels stay legible
+  addPanel(0x8ea4c2, 1.1, 16, 6, [3, -8.5, 6], { shape: "radial" });
+
+  return { envScene, textures: [radialTex, stripTex] };
+}
 
 // avatar-intro.svg: viewBox height 61.28; the model (outline + bevel) spans 58.88 + 2 * 0.736 of it.
 const MODEL_SHARE = (58.88 + 2 * 0.736) / 61.28;
@@ -77,16 +171,34 @@ export function AvatarIntro({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMappingExposure = 1.5;
+    renderer.toneMappingExposure = 1.12;
 
     const scene = new THREE.Scene();
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
+    const { envScene: studioScene, textures: studioTextures } =
+      createStudioEnvironment();
+    const envRT = pmrem.fromScene(studioScene, 0.028);
     scene.environment = envRT.texture;
+    studioScene.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) {
+        obj.geometry.dispose();
+        if (Array.isArray(obj.material)) {
+          obj.material.forEach((m) => m.dispose());
+        } else {
+          obj.material.dispose();
+        }
+      }
+    });
+    studioTextures.forEach((tex) => tex.dispose());
+    pmrem.dispose();
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
-    keyLight.position.set(-3, 4, 5);
+    const keyLight = new THREE.DirectionalLight(0xfff7ee, 1.65);
+    keyLight.position.set(-4.5, 5.5, 6);
     scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0xc8dcff, 1.45);
+    rimLight.position.set(5.5, 2.5, -4.5);
+    scene.add(rimLight);
 
     const camera = new THREE.PerspectiveCamera(35, 1, 0.01, 100);
     const spinner = new THREE.Group();
@@ -356,7 +468,6 @@ export function AvatarIntro({
       });
 
       envRT.dispose();
-      pmrem.dispose();
       renderer.dispose();
     };
   }, [slotRef]);
