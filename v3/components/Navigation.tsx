@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import {
+  type MouseEvent,
   type Ref,
   useCallback,
   useEffect,
@@ -824,6 +826,23 @@ export function Navigation({
     }
   };
 
+  const handleLogoClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (
+      syncUrl &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.shiftKey &&
+      !event.altKey &&
+      event.button === 0
+    ) {
+      event.preventDefault();
+      setIsOpen(false);
+      replacePath("/");
+      return;
+    }
+    setIsOpen(false);
+  };
+
   const widthClass = isOpen
     ? "left-4 right-4 h-[calc(100dvh-32px-env(safe-area-inset-bottom,0px))] bg-background-secondary md:left-1/2 md:right-auto md:h-[80dvh] md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]"
     : isSmall
@@ -898,13 +917,22 @@ export function Navigation({
         </div>
       )}
 
-      <div className="pointer-events-none absolute top-[5px] left-[-32px] flex size-[71.36px] items-center justify-center">
+      <Link
+        href="/"
+        aria-label="Go to home"
+        onClick={handleLogoClick}
+        className="absolute top-[5px] left-[-32px] z-10 flex size-[71.36px] cursor-pointer items-center justify-center outline-none"
+      >
         <div className="-rotate-12 flex-none">
           <div className="relative size-[60.165px]">
-            <img src="/images/nav-logo.svg" alt="" className="block size-full" />
+            <img
+              src="/images/nav-logo.svg"
+              alt=""
+              className="pointer-events-none block size-full"
+            />
           </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
