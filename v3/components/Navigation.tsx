@@ -39,6 +39,7 @@ const SKELETON_ASPECTS = [
 
 const cachedMedia = new Map<string, MediaItem[]>();
 const inFlightMedia = new Map<string, Promise<MediaItem[]>>();
+const cachedCoverSizes = new Map<string, { width: number; height: number }>();
 let cachedContentIndex: ContentIndex | null = null;
 let inFlightContentIndex: Promise<ContentIndex> | null = null;
 
@@ -61,13 +62,6 @@ async function fetchContentIndex(): Promise<ContentIndex> {
   return inFlightContentIndex;
 }
 
-const CARD_ASPECTS = [
-  "aspect-[160/90]",
-  "aspect-[472/590]",
-  "aspect-[472/472]",
-  "aspect-[160/90]",
-];
-
 function ContentCategoryView({
   category,
   onNavigate,
@@ -79,6 +73,9 @@ function ContentCategoryView({
     () => cachedContentIndex?.[category] ?? null,
   );
   const [error, setError] = useState<string | null>(null);
+  const [measuredSizes, setMeasuredSizes] = useState<
+    Record<string, { width: number; height: number }>
+  >(() => Object.fromEntries(cachedCoverSizes));
 
   useEffect(() => {
     let active = true;
@@ -107,6 +104,32 @@ function ContentCategoryView({
     };
   }, [category]);
 
+  const handleImageLoad = useCallback(
+    (id: string, dimensions: { width: number; height: number }) => {
+      const existingCached = cachedCoverSizes.get(id);
+      if (
+        existingCached &&
+        existingCached.width === dimensions.width &&
+        existingCached.height === dimensions.height
+      ) {
+        return;
+      }
+      cachedCoverSizes.set(id, dimensions);
+      setMeasuredSizes((prev) => {
+        const existing = prev[id];
+        if (
+          existing &&
+          existing.width === dimensions.width &&
+          existing.height === dimensions.height
+        ) {
+          return prev;
+        }
+        return { ...prev, [id]: dimensions };
+      });
+    },
+    [],
+  );
+
   if (!items) {
     if (category === "writing") {
       return (
@@ -120,10 +143,10 @@ function ContentCategoryView({
       <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
           <Card variant="Default" aspectClass="aspect-[160/90]" title="" year="" />
-          <Card variant="Default" aspectClass="aspect-[472/472]" title="" year="" />
+          <Card variant="Default" aspectClass="aspect-[160/90]" title="" year="" />
         </div>
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-          <Card variant="Default" aspectClass="aspect-[472/590]" title="" year="" />
+          <Card variant="Default" aspectClass="aspect-[160/90]" title="" year="" />
           <Card variant="Default" aspectClass="aspect-[160/90]" title="" year="" />
         </div>
       </div>
@@ -165,38 +188,59 @@ function ContentCategoryView({
     );
   }
 
+  const getAspectStyle = (item: PostMeta) => {
+    const size =
+      measuredSizes[item.id] ??
+      (item.coverWidth && item.coverHeight
+        ? { width: item.coverWidth, height: item.coverHeight }
+        : null);
+    return {
+      aspectRatio: size ? `${size.width} / ${size.height}` : "16 / 9",
+    };
+  };
+
   const leftItems = items.filter((_, i) => i % 2 === 0);
   const rightItems = items.filter((_, i) => i % 2 === 1);
 
   return (
     <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
       <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-        {leftItems.map((item, idx) => (
+        {leftItems.map((item) => (
           <Card
             key={item.id}
             variant="Default"
-            aspectClass={CARD_ASPECTS[(idx * 2) % CARD_ASPECTS.length]}
+            style={getAspectStyle(item)}
             title={item.title}
             year={formatPostYear(item.date)}
             image={item.coverImage ?? undefined}
             alt={item.title}
             href={`/${category}/${item.slug}`}
             onClick={onNavigate}
+            onImageLoad={
+              item.coverWidth && item.coverHeight
+                ? undefined
+                : (dims) => handleImageLoad(item.id, dims)
+            }
           />
         ))}
       </div>
       <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-        {rightItems.map((item, idx) => (
+        {rightItems.map((item) => (
           <Card
             key={item.id}
             variant="Default"
-            aspectClass={CARD_ASPECTS[(idx * 2 + 1) % CARD_ASPECTS.length]}
+            style={getAspectStyle(item)}
             title={item.title}
             year={formatPostYear(item.date)}
             image={item.coverImage ?? undefined}
             alt={item.title}
             href={`/${category}/${item.slug}`}
             onClick={onNavigate}
+            onImageLoad={
+              item.coverWidth && item.coverHeight
+                ? undefined
+                : (dims) => handleImageLoad(item.id, dims)
+            }
           />
         ))}
       </div>
