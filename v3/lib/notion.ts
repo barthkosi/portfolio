@@ -685,6 +685,10 @@ async function buildPostDocument(
     : slugifyTitle(title, page.id);
 
   const coverImage = await resolveFileUrl(page.cover, page.id, "cover");
+  const coverDimensions =
+    coverImage && !VIDEO_EXT_RE.test(coverImage)
+      ? await probeImageDimensions(coverImage)
+      : null;
   const rawBlocks = await fetchBlockChildren(page.id);
   const blocks = await transformBlocks(rawBlocks, page.id);
 
@@ -698,6 +702,12 @@ async function buildPostDocument(
     date,
     genre,
     coverImage,
+    ...(coverDimensions
+      ? {
+          coverWidth: coverDimensions.width,
+          coverHeight: coverDimensions.height,
+        }
+      : {}),
     updatedAt: page.last_edited_time ?? new Date().toISOString(),
   };
 

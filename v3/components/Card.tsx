@@ -125,6 +125,10 @@ export function Card({
     );
   }
 
+  const innerAspectStyle = style?.aspectRatio
+    ? { aspectRatio: style.aspectRatio }
+    : undefined;
+
   return wrapIfLink(
     <div
       style={style}
@@ -133,13 +137,28 @@ export function Card({
       <div className="relative min-h-px w-full flex-[1_0_0] overflow-hidden rounded-t-[4px] bg-background-tertiary">
         {image && (
           <div
+            style={innerAspectStyle}
             className={`pointer-events-none absolute top-0 left-0 w-full ${
-              aspectClass || "h-full"
+              innerAspectStyle ? "" : aspectClass || "h-full"
             }`}
           >
             <img
               src={image}
               alt={alt ?? title}
+              decoding="async"
+              onLoad={
+                onImageLoad
+                  ? (event) => {
+                      const { naturalWidth, naturalHeight } = event.currentTarget;
+                      if (naturalWidth > 0 && naturalHeight > 0) {
+                        onImageLoad({
+                          width: naturalWidth,
+                          height: naturalHeight,
+                        });
+                      }
+                    }
+                  : undefined
+              }
               className="block size-full object-cover"
             />
           </div>

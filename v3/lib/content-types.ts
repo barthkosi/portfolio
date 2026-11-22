@@ -82,6 +82,8 @@ export type PostMeta = {
   date: string | null;
   genre: string[];
   coverImage: string | null;
+  coverWidth?: number;
+  coverHeight?: number;
   updatedAt: string;
 };
 
