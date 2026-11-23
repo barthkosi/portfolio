@@ -28,7 +28,12 @@ export type NavigationHandle = {
 };
 
 const TABS = NAV_TABS;
-const SOCIALS = ["X (Twitter)", "Github", "Cosmos", "Instagram"];
+const SOCIALS = [
+  { label: "X (Twitter)", href: "https://x.com/barthkosi" },
+  { label: "Github", href: "https://github.com/barthkosi" },
+  { label: "Cosmos", href: "https://cosmos.so/barthkosi" },
+  { label: "Instagram", href: "https://instagram.com/barthkosi" },
+];
 const MASONRY_GAP = 8;
 const SKELETON_ASPECTS = [
   "aspect-[3/4]",
@@ -480,12 +485,14 @@ function PagesList({
             type="button"
             onClick={() => onSelect(tab)}
             className={`relative flex w-full shrink-0 cursor-pointer items-center justify-between gap-0 rounded-[4px] p-2 text-left ${
-              isActive ? "bg-background-tertiary" : ""
+              isActive ? "md:bg-background-tertiary" : ""
             }`}
           >
             <span
-              className={`label-sm h-fit w-fit shrink-0 whitespace-nowrap ${
-                isActive ? "text-content-primary" : "text-content-secondary"
+              className={`label-md md:label-sm h-fit w-fit shrink-0 whitespace-nowrap ${
+                isActive
+                  ? "text-content-primary"
+                  : "text-content-primary md:text-content-secondary"
               }`}
             >
               {tab}
@@ -503,12 +510,17 @@ function SocialLinks() {
       <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary uppercase opacity-60">
         Socials
       </p>
-      <div className="relative flex shrink-0 flex-col items-start gap-1">
+      <div className="relative flex shrink-0 flex-col items-start gap-2 md:gap-1">
         {SOCIALS.map((item) => (
-          <div key={item} className="relative flex shrink-0 items-start gap-0">
-            <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-secondary">
-              {item}
-            </p>
+          <div key={item.label} className="relative flex shrink-0 items-start gap-0">
+            <a
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="label-sm md:label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-secondary"
+            >
+              {item.label}
+            </a>
           </div>
         ))}
       </div>
@@ -858,10 +870,15 @@ export function Navigation({
         type="button"
         onClick={handleToggleOpen}
         aria-label={isOpen ? "Close navigation" : "Open navigation"}
-        className="relative flex h-fit w-fit shrink-0 cursor-pointer flex-row items-center gap-0 p-2 outline-none"
+        className="relative flex h-fit w-fit shrink-0 cursor-pointer flex-row items-center gap-2 p-2 outline-none"
       >
-        <div className="relative size-5 shrink-0">
-          <img src="/images/nav-minus.svg" alt="" className="block size-full" />
+        <div className="relative size-5 shrink-0 overflow-clip">
+          <span className="absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse" />
+          <span
+            className={`absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse transition-transform duration-[250ms] ease-[cubic-bezier(0.43,0.07,0.59,0.94)] ${
+              isOpen ? "rotate-0" : "-rotate-90"
+            }`}
+          />
         </div>
       </button>
 

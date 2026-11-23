@@ -30,10 +30,10 @@ function CardMeta({
     <div
       className={`flex w-full items-center justify-between gap-2 px-2 ${className || ""}`}
     >
-      <p className="label-xs h-fit w-fit min-w-0 truncate text-content-primary">
+      <p className="label-sm h-fit w-fit min-w-0 truncate text-content-primary">
         {title}
       </p>
-      <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
+      <p className="label-sm h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
         {year}
       </p>
     </div>

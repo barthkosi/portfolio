@@ -202,35 +202,32 @@ h6,
 /* --------------------------------------------------------------------------
    3. Labels
    -------------------------------------------------------------------------- */
-.label-xs,
-.label-sm,
-.label-md,
-.label-lg {
+@utility label-xs {
   font-family: var(--font-family-label);
-}
-
-.label-xs {
   font-size: 11px;
   line-height: 1;
   letter-spacing: -0.01em;
   font-weight: 400;
 }
 
-.label-sm {
+@utility label-sm {
+  font-family: var(--font-family-label);
   font-size: 13px;
   line-height: 1;
   letter-spacing: -0.01em;
   font-weight: 400;
 }
 
-.label-md {
+@utility label-md {
+  font-family: var(--font-family-label);
   font-size: 15px;
   line-height: 1;
   letter-spacing: -0.01em;
   font-weight: 400;
 }
 
-.label-lg {
+@utility label-lg {
+  font-family: var(--font-family-label);
   font-size: 17px;
   line-height: 1;
   letter-spacing: -0.01em;
