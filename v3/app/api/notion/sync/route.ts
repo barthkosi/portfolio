@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     if (body.pageId) {
       const result = await syncNotionPageById(body.pageId, {
         dryRun: Boolean(body.dryRun),
+        force: true,
       });
       return NextResponse.json({ ok: true, mode: "page", result });
     }

@@ -716,13 +716,14 @@ async function buildPostDocument(
 
 export async function syncNotionPageById(
   pageId: string,
-  options: { dryRun?: boolean } = {},
+  options: { dryRun?: boolean; force?: boolean } = {},
 ): Promise<{
   action: "published" | "removed" | "skipped";
   category?: ContentCategory;
   slug?: string;
   key?: string;
   removedKeys?: string[];
+  skippedStale?: boolean;
   document?: PostDocument;
 }> {
   const page = await notionRequest<NotionPageObject>(`/pages/${pageId}`);
@@ -749,13 +750,16 @@ export async function syncNotionPageById(
       document: post,
     };
   }
-  const { key, removedOldKeys } = await savePostToStore(post);
+  const { key, removedOldKeys, skippedStale } = await savePostToStore(post, {
+    force: options.force,
+  });
   return {
-    action: "published",
+    action: skippedStale ? "skipped" : "published",
     category,
     slug: post.meta.slug,
     key,
     removedKeys: removedOldKeys,
+    ...(skippedStale ? { skippedStale: true } : {}),
   };
 }
 

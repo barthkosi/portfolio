@@ -212,22 +212,52 @@ export async function putMediaObject(
   return buildMediaUrl(key);
 }
 
-export async function savePostToStore(post: PostDocument): Promise<{
+function normalizeId(id: string): string {
+  return id.replace(/-/g, "").toLowerCase();
+}
+
+export async function savePostToStore(
+  post: PostDocument,
+  options: { force?: boolean } = {},
+): Promise<{
   key: string;
   removedOldKeys: string[];
+  skippedStale?: boolean;
 }> {
   const index = await getContentIndex();
-  const removedOldKeys: string[] = [];
+  const normalizedPostId = normalizeId(post.meta.id);
+  const incomingUpdatedMs = Date.parse(post.meta.updatedAt);
+
+  if (!options.force && Number.isFinite(incomingUpdatedMs)) {
+    for (const cat of CONTENT_CATEGORIES) {
+      const existing = index[cat].find(
+        (item) => normalizeId(item.id) === normalizedPostId,
+      );
+      if (existing) {
+        const existingUpdatedMs = Date.parse(existing.updatedAt);
+        if (
+          Number.isFinite(existingUpdatedMs) &&
+          incomingUpdatedMs < existingUpdatedMs
+        ) {
+          return {
+            key: postKey(cat, existing.slug),
+            removedOldKeys: [],
+            skippedStale: true,
+          };
+        }
+      }
+    }
+  }
+
+  const keysToDelete: string[] = [];
 
   for (const cat of CONTENT_CATEGORIES) {
     const prevList = index[cat];
     const nextList: PostMeta[] = [];
     for (const item of prevList) {
-      if (item.id === post.meta.id) {
+      if (normalizeId(item.id) === normalizedPostId) {
         if (cat !== post.meta.category || item.slug !== post.meta.slug) {
-          const oldKey = postKey(cat, item.slug);
-          await deleteObject(oldKey);
-          removedOldKeys.push(oldKey);
+          keysToDelete.push(postKey(cat, item.slug));
         }
       } else {
         nextList.push(item);
@@ -253,6 +283,14 @@ export async function savePostToStore(post: PostDocument): Promise<{
     JSON.stringify(index),
     "application/json; charset=utf-8",
   );
+
+  const removedOldKeys: string[] = [];
+  for (const oldKey of keysToDelete) {
+    if (oldKey !== targetKey) {
+      await deleteObject(oldKey);
+      removedOldKeys.push(oldKey);
+    }
+  }
 
   return { key: targetKey, removedOldKeys };
 }
