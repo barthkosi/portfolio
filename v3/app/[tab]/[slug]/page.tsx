@@ -23,7 +23,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${post.meta.title} | Barth`,
+    title: post.meta.title,
     description: post.meta.description || undefined,
     openGraph: {
       title: post.meta.title,
