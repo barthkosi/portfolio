@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { HomeClient } from "@/components/HomeClient";
 import { pathToTab } from "@/lib/navigation";
 
@@ -21,7 +21,7 @@ export default async function TabPage({
   const matchedTab = pathToTab(`/${tab}`);
 
   if (!matchedTab) {
-    notFound();
+    redirect("/");
   }
 
   return <HomeClient initialTab={matchedTab} />;

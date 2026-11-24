@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { BlogPostRenderer } from "@/components/BlogPostRenderer";
 import { getPostBySlug } from "@/lib/content-store";
 import { isContentCategory } from "@/lib/content-types";
@@ -42,12 +42,12 @@ export default async function ContentPostPage({
   const category = tab.toLowerCase();
 
   if (!isContentCategory(category)) {
-    notFound();
+    redirect("/");
   }
 
   const post = await getPostBySlug(category, slug);
   if (!post) {
-    notFound();
+    redirect("/");
   }
 
   return <BlogPostRenderer post={post} />;
