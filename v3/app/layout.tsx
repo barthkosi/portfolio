@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Sans, Inter } from "next/font/google";
 import { DisablePinchZoom } from "@/components/DisablePinchZoom";
 import { DEFAULT_THEME_COLOR } from "@/lib/theme";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, SOCIAL_LINKS } from "@/lib/site";
 import "./globals.css";
 
 const headingFont = Instrument_Sans({
@@ -46,6 +46,16 @@ export const viewport: Viewport = {
   themeColor: DEFAULT_THEME_COLOR,
 };
 
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: SITE_NAME,
+  url: SITE_URL,
+  jobTitle: "Design Engineer",
+  description: SITE_DESCRIPTION,
+  sameAs: SOCIAL_LINKS.map((link) => link.href),
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,6 +67,12 @@ export default function RootLayout({
       className={`bg-background-primary ${headingFont.variable} ${bodyFont.variable}`}
     >
       <body className="antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(personJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
         <DisablePinchZoom />
         <div id="app-scroll" className="app-scroll">
           {children}
