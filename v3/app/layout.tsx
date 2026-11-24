@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Sans, Inter } from "next/font/google";
 import { DisablePinchZoom } from "@/components/DisablePinchZoom";
 import { DEFAULT_THEME_COLOR } from "@/lib/theme";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const headingFont = Instrument_Sans({
@@ -17,8 +18,9 @@ const bodyFont = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Barth",
-  description: "Barth is a design engineer building beautiful and intuitive digital products.",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_NAME,
+  description: SITE_DESCRIPTION,
   icons: {
     icon: [
       {
