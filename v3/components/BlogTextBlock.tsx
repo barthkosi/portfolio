@@ -53,8 +53,15 @@ export function BlogTextBlock({
     (variant === "Quote" || variant === "Callout") && type === "Paragraph";
   const showAuthor = variant === "Quote" && Boolean(author);
 
+  const ContainerTag =
+    variant === "Quote"
+      ? "figure"
+      : variant === "Callout"
+        ? "aside"
+        : "div";
+
   return (
-    <div
+    <ContainerTag
       className={
         className ?? `relative flex w-full shrink-0 flex-col gap-0 ${layoutClass}`
       }
@@ -96,20 +103,28 @@ export function BlogTextBlock({
       )}
       {isQuoteLike && (
         <>
-          <div className="flex w-full shrink-0 flex-col items-start gap-0">
-            <p className="h3 w-full shrink-0 text-pretty text-content-primary">
-              {body}
-            </p>
-          </div>
-          {showAuthor && (
-            <div className="flex w-full shrink-0 flex-col items-start gap-0 pt-3">
-              <p className="label-md h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
-                {author}
+          {variant === "Quote" ? (
+            <blockquote className="flex w-full shrink-0 flex-col items-start gap-0">
+              <p className="h3 w-full shrink-0 text-pretty text-content-primary">
+                {body}
+              </p>
+            </blockquote>
+          ) : (
+            <div className="flex w-full shrink-0 flex-col items-start gap-0">
+              <p className="h3 w-full shrink-0 text-pretty text-content-primary">
+                {body}
               </p>
             </div>
           )}
+          {showAuthor && (
+            <figcaption className="flex w-full shrink-0 flex-col items-start gap-0 pt-3">
+              <cite className="label-md h-fit w-fit shrink-0 whitespace-nowrap not-italic text-content-tertiary">
+                {author}
+              </cite>
+            </figcaption>
+          )}
         </>
       )}
-    </div>
+    </ContainerTag>
   );
 }

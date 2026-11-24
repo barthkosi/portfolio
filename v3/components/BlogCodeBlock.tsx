@@ -72,7 +72,10 @@ export function BlogCodeBlock({
 
         <div className="absolute top-1 right-1 flex h-fit w-fit flex-row items-center justify-start gap-0 overflow-clip rounded-[8px] bg-background-base-tertiary p-[2px]">
           <div className="relative flex h-fit w-fit shrink-0 flex-row items-center justify-start gap-1.5 rounded-[4px] px-1.5 py-1">
-            <span className="h-fit w-fit shrink-0 font-sans text-[12px] leading-[16px] tracking-[0] whitespace-nowrap text-content-tertiary">
+            <span
+              aria-live="polite"
+              className="h-fit w-fit shrink-0 font-sans text-[12px] leading-[16px] tracking-[0] whitespace-nowrap text-content-tertiary"
+            >
               {copied ? "Copied" : language}
             </span>
           </div>
@@ -83,7 +86,10 @@ export function BlogCodeBlock({
             title="Copy code"
             className="relative size-6 shrink-0 cursor-pointer rounded-[4px] transition-colors hover:bg-background-base-tertiary"
           >
-            <span className="pointer-events-none absolute top-[4px] left-[5.38px] h-[16px] w-[13.25px] overflow-clip">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-[4px] left-[5.38px] h-[16px] w-[13.25px] overflow-clip"
+            >
               <img
                 src="/images/code-copy.svg"
                 alt=""
@@ -103,7 +109,10 @@ export function BlogCodeBlock({
               wrapped ? "" : "bg-background-base-tertiary"
             }`}
           >
-            <span className="pointer-events-none absolute top-[4px] left-[5.98px] h-[16px] w-[12.0469px] overflow-clip">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-[4px] left-[5.98px] h-[16px] w-[12.0469px] overflow-clip"
+            >
               <img
                 src="/images/code-wrap.svg"
                 alt=""
@@ -119,7 +128,10 @@ export function BlogCodeBlock({
             title="More options"
             className="relative size-6 shrink-0 cursor-pointer rounded-[4px] transition-colors hover:bg-background-base-tertiary"
           >
-            <span className="pointer-events-none absolute top-[4px] left-[5.92px] h-[16px] w-[12.1562px] overflow-clip">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute top-[4px] left-[5.92px] h-[16px] w-[12.1562px] overflow-clip"
+            >
               <img
                 src="/images/code-more.svg"
                 alt=""

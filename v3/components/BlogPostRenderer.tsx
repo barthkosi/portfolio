@@ -176,13 +176,16 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
   return (
     <div className="relative flex min-h-full w-full flex-col items-center bg-background-primary px-4 pt-[120px] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] md:px-8 md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
       <Navigation />
-      <div className="relative z-[1] flex w-full shrink-0 flex-col items-center gap-16">
+      <main className="relative z-[1] flex w-full shrink-0 flex-col items-center gap-16">
         <div className="relative flex w-full max-w-[960px] shrink-0 flex-col items-center gap-12">
           <div className="relative flex w-full max-w-[720px] shrink-0 flex-col items-center gap-5">
             {formattedDate && (
-              <p className="label-sm w-full shrink-0 text-center text-content-tertiary">
+              <time
+                dateTime={post.meta.date ?? undefined}
+                className="label-sm block w-full shrink-0 text-center text-content-tertiary"
+              >
                 {formattedDate}
-              </p>
+              </time>
             )}
             <BlogTextBlock
               variant="Heading"
@@ -196,7 +199,7 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
             )}
           </div>
           {hasCover && post.meta.coverImage && (
-            <div className="relative aspect-[240/135] w-full shrink-0 overflow-clip rounded-[16px]">
+            <figure className="relative aspect-[240/135] w-full shrink-0 overflow-clip rounded-[16px]">
               {coverIsVideo ? (
                 <video
                   src={post.meta.coverImage}
@@ -214,11 +217,11 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
                   className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[16px] object-cover"
                 />
               )}
-            </div>
+            </figure>
           )}
         </div>
 
-        <div
+        <article
           className={`relative flex w-full shrink-0 flex-col items-start ${
             isShowcase ? "max-w-[1600px]" : "max-w-[640px]"
           }`}
@@ -226,8 +229,8 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
           {post.blocks.map((block, index) =>
             renderBlock(block, index, post.blocks, isShowcase),
           )}
-        </div>
-      </div>
+        </article>
+      </main>
     </div>
   );
 }

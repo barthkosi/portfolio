@@ -52,7 +52,7 @@ export function BlogMediaBlock({
           : undefined;
 
         return (
-          <div
+          <figure
             key={`${item.src}-${index}`}
             className="relative flex w-full flex-col items-start justify-start gap-2 md:min-w-px md:flex-[1_0_0]"
           >
@@ -90,13 +90,13 @@ export function BlogMediaBlock({
               )}
             </div>
             {item.caption && (
-              <div className="relative flex w-full max-w-[720px] shrink-0 flex-col items-center justify-start gap-5">
+              <figcaption className="relative flex w-full max-w-[720px] shrink-0 flex-col items-center justify-start gap-5">
                 <p className="label-xs w-full shrink-0 text-center text-content-tertiary">
                   {item.caption}
                 </p>
-              </div>
+              </figcaption>
             )}
-          </div>
+          </figure>
         );
       })}
     </div>
