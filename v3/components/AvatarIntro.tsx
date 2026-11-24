@@ -365,6 +365,7 @@ export function AvatarIntro({
     <>
       <div
         ref={introRef}
+        aria-hidden="true"
         className="avatar-intro-svg pointer-events-none fixed top-1/2 left-1/2 z-30 aspect-[597/613] h-[min(68vw,46dvh)] max-w-none -translate-x-1/2 -translate-y-1/2 select-none"
       >
         <img
@@ -380,6 +381,9 @@ export function AvatarIntro({
       </div>
       <canvas
         ref={canvasRef}
+        role="img"
+        aria-label="3D star avatar"
+        aria-hidden={!isExpanded}
         className={`fixed inset-0 z-20 block size-full touch-none ${
           isExpanded
             ? "pointer-events-auto cursor-grab active:cursor-grabbing"

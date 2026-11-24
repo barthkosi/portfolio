@@ -34,7 +34,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
 
   return (
     <div className="relative flex min-h-full w-full flex-col items-center justify-center gap-0 overflow-clip bg-background-primary p-4">
-      <div className="relative z-10 flex w-full shrink-0 flex-col items-center gap-8 px-1 md:max-w-[360px]">
+      <main className="relative z-10 flex w-full shrink-0 flex-col items-center gap-8 px-1 md:max-w-[360px]">
         <div className="relative flex w-full shrink-0 flex-col items-center gap-4">
           <button
             ref={slotRef}
@@ -50,15 +50,16 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
               isExpanded ? "pointer-events-none opacity-0" : "opacity-100"
             }`}
           >
-            <p className="body-sm w-full shrink-0 text-center text-pretty text-content-primary">
+            <h1 className="body-sm w-full shrink-0 text-center text-pretty text-content-primary">
               Barth is a design engineer building  beautiful and intuitive digital products.
-            </p>
+            </h1>
             <p className="body-sm w-full shrink-0 text-center text-pretty text-content-primary">
               He has 4+ years of experience and has worked with businesses and studios building intuitive products.
             </p>
           </div>
         </div>
-        <div
+        <nav
+          aria-label="Quick links"
           className={`relative flex h-fit w-fit shrink-0 flex-row items-start justify-center gap-8 transition-opacity duration-500 ${
             isExpanded ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
@@ -77,8 +78,8 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
           >
             Writing
           </button>
-        </div>
-      </div>
+        </nav>
+      </main>
       <div
         className={`transition-opacity duration-500 ${
           hasEntered ? "opacity-100" : "pointer-events-none opacity-0"
