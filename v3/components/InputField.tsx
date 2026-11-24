@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 type InputFieldProps = {
   className?: string;
   size?: "Small" | "Large";
@@ -19,15 +21,21 @@ export function InputField({
   value,
   onChange,
 }: InputFieldProps) {
+  const id = useId();
+
   return (
     <div className={className || "relative flex w-full flex-col items-start gap-2"}>
       <div className="relative flex h-fit w-fit shrink-0 items-center justify-center gap-0 px-2">
-        <label className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary">
+        <label
+          htmlFor={id}
+          className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary"
+        >
           {title}
         </label>
       </div>
       {size === "Large" ? (
         <textarea
+          id={id}
           name={name}
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
@@ -35,6 +43,7 @@ export function InputField({
         />
       ) : (
         <input
+          id={id}
           type={type}
           name={name}
           value={value}
