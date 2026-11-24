@@ -17,7 +17,7 @@ export function BlogLink({
     <a
       className={
         className ??
-        "text-content-brand decoration-solid [text-underline-position:from-font] hover:underline"
+        "underline decoration-solid [text-underline-position:from-font] transition-colors hover:text-content-brand"
       }
       {...props}
     >
