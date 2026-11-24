@@ -19,6 +19,7 @@
     overflow: hidden;
     overscroll-behavior: none;
     touch-action: pan-y;
+    cursor: url("/cursor.svg") 1 1, auto;
   }
 
   body {
