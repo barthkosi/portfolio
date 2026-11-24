@@ -117,4 +117,11 @@
   }
 }
 
+@supports (-webkit-touch-callout: none) {
+  p.text-pretty,
+  li.text-pretty {
+    text-wrap: wrap;
+  }
+}
+
 
