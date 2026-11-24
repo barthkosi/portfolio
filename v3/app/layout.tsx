@@ -19,6 +19,20 @@ const bodyFont = Inter({
 export const metadata: Metadata = {
   title: "Barth",
   description: "Barth is a design engineer building beautiful and intuitive digital products.",
+  icons: {
+    icon: [
+      {
+        url: "/favicon-light.svg",
+        type: "image/svg+xml",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/favicon-dark.svg",
+        type: "image/svg+xml",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
