@@ -39,6 +39,7 @@ export function AvatarIntro({
   const introImgRef = useRef<HTMLImageElement>(null);
 
   const isExpandedRef = useRef(isExpanded);
+  const skipIntroRef = useRef(skipIntro);
   const onIntroCompleteRef = useRef(onIntroComplete);
   const onCollapseRef = useRef(onCollapse);
 
@@ -92,14 +93,15 @@ export function AvatarIntro({
     const spinner = new THREE.Group();
     scene.add(spinner);
 
+    const shouldSkipIntro = skipIntroRef.current;
     let modelHeight = 0;
-    let revealed = skipIntro;
+    let revealed = shouldSkipIntro;
     let velocity = 0;
-    let spinUp = skipIntro ? 1 : 0;
+    let spinUp = shouldSkipIntro ? 1 : 0;
     let fadeStart = 0;
-    let introDone = skipIntro;
+    let introDone = shouldSkipIntro;
 
-    if (skipIntro) {
+    if (shouldSkipIntro) {
       intro.style.display = "none";
     }
 
@@ -210,7 +212,7 @@ export function AvatarIntro({
       updateCamera();
       renderer.compile(scene, camera);
 
-      if (skipIntro) {
+      if (shouldSkipIntro) {
         handleResize();
         canvas.style.visibility = "visible";
       } else {
