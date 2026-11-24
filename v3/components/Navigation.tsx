@@ -476,13 +476,17 @@ function PagesList({
   onSelect: (tab: NavTab) => void;
 }) {
   return (
-    <div className="relative flex w-full shrink-0 flex-col items-start gap-0">
+    <nav
+      aria-label="Primary"
+      className="relative flex w-full shrink-0 flex-col items-start gap-0"
+    >
       {TABS.map((tab) => {
         const isActive = activeTab === tab;
         return (
           <button
             key={tab}
             type="button"
+            aria-current={isActive ? "page" : undefined}
             onClick={() => onSelect(tab)}
             className={`relative flex w-full shrink-0 cursor-pointer items-center justify-between gap-0 rounded-[4px] p-2 text-left ${
               isActive ? "md:bg-background-tertiary" : ""
@@ -500,19 +504,22 @@ function PagesList({
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 }
 
 function SocialLinks() {
   return (
-    <div className="relative flex shrink-0 flex-col items-start gap-2 p-2">
+    <nav
+      aria-label="Socials"
+      className="relative flex shrink-0 flex-col items-start gap-2 p-2"
+    >
       <p className="label-xs h-fit w-fit shrink-0 whitespace-nowrap text-content-tertiary uppercase opacity-60">
         Socials
       </p>
-      <div className="relative flex shrink-0 flex-col items-start gap-2 md:gap-1">
+      <ul className="relative flex shrink-0 list-none flex-col items-start gap-2 md:gap-1">
         {SOCIALS.map((item) => (
-          <div key={item.label} className="relative flex shrink-0 items-start gap-0">
+          <li key={item.label} className="relative flex shrink-0 items-start gap-0">
             <a
               href={item.href}
               target="_blank"
@@ -521,10 +528,10 @@ function SocialLinks() {
             >
               {item.label}
             </a>
-          </div>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </nav>
   );
 }
 
@@ -641,7 +648,7 @@ function TabContent({
         <span className="body-sm h-fit w-fit shrink-0 whitespace-nowrap text-content-secondary">
           {copied ? "Copied" : "hey@barthkosi.com"}
         </span>
-        <span className="relative size-5 shrink-0">
+        <span aria-hidden="true" className="relative block size-5 shrink-0">
           <img src="/images/copy.svg" alt="" className="block size-full" />
         </span>
       </button>
@@ -677,7 +684,7 @@ export function Navigation({
   const lastScrollY = useRef(0);
   const isOpenRef = useRef(isOpen);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     isOpenRef.current = isOpen;
@@ -862,7 +869,7 @@ export function Navigation({
       : "left-4 right-4 h-[52px] bg-background-tertiary backdrop-blur-[2px] md:left-1/2 md:right-auto md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]";
 
   return (
-    <div
+    <header
       ref={navRef}
       className={`fixed top-4 z-50 flex flex-col items-end gap-[44px] overflow-clip rounded-[12px] p-2 transition-[width,height,background-color] duration-[250ms] ease-[cubic-bezier(0.43,0.07,0.59,0.94)] ${widthClass}`}
     >
@@ -870,16 +877,20 @@ export function Navigation({
         type="button"
         onClick={handleToggleOpen}
         aria-label={isOpen ? "Close navigation" : "Open navigation"}
+        aria-expanded={isOpen}
         className="relative flex h-fit w-fit shrink-0 cursor-pointer flex-row items-center gap-2 p-2 outline-none"
       >
-        <div className="relative size-5 shrink-0 overflow-clip">
+        <span
+          aria-hidden="true"
+          className="relative block size-5 shrink-0 overflow-clip"
+        >
           <span className="absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse" />
           <span
             className={`absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse transition-transform duration-[250ms] ease-[cubic-bezier(0.43,0.07,0.59,0.94)] ${
               isOpen ? "rotate-0" : "-rotate-90"
             }`}
           />
-        </div>
+        </span>
       </button>
 
       {isOpen && (
@@ -893,7 +904,8 @@ export function Navigation({
             <SocialLinks />
           </div>
 
-          <div
+          <section
+            aria-label={activeTab}
             className={`${
               mobileView === "tab" ? "flex" : "hidden"
             } min-h-0 w-full flex-1 flex-col items-start gap-5 md:col-span-6 md:flex md:h-full md:min-h-0`}
@@ -907,9 +919,9 @@ export function Navigation({
               aria-label="Back to menu"
               className="flex shrink-0 cursor-pointer flex-col items-start gap-0 overflow-clip rounded-[12px] bg-background-tertiary p-2 backdrop-blur-[3px] md:hidden"
             >
-              <div className="relative size-5 shrink-0">
+              <span aria-hidden="true" className="relative block size-5 shrink-0">
                 <img src="/images/chevron-left.svg" alt="" className="block size-full" />
-              </div>
+              </span>
             </button>
             <div className="relative -mb-2 min-h-0 w-full flex-1">
               {hasScrolledContent && (
@@ -930,26 +942,26 @@ export function Navigation({
                 />
               </div>
             </div>
-          </div>
+          </section>
         </div>
       )}
 
       <Link
         href="/"
-        aria-label="Go to home"
+        aria-label="Barth Home"
         onClick={handleLogoClick}
         className="absolute top-[5px] left-[-32px] z-10 flex size-[71.36px] cursor-pointer items-center justify-center outline-none"
       >
-        <div className="-rotate-12 flex-none">
-          <div className="relative size-[60.165px]">
+        <span aria-hidden="true" className="block -rotate-12 flex-none">
+          <span className="relative block size-[60.165px]">
             <img
               src="/images/nav-logo.svg"
               alt=""
               className="pointer-events-none block size-full"
             />
-          </div>
-        </div>
+          </span>
+        </span>
       </Link>
-    </div>
+    </header>
   );
 }
