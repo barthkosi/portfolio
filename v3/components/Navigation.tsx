@@ -20,6 +20,7 @@ import {
 } from "@/lib/content-types";
 import { type MediaItem } from "@/lib/media";
 import { NAV_TABS, type NavTab, tabToPath } from "@/lib/navigation";
+import { SOCIAL_LINKS } from "@/lib/site";
 
 export type { NavTab };
 
@@ -28,12 +29,7 @@ export type NavigationHandle = {
 };
 
 const TABS = NAV_TABS;
-const SOCIALS = [
-  { label: "X (Twitter)", href: "https://x.com/barthkosi" },
-  { label: "Github", href: "https://github.com/barthkosi" },
-  { label: "Cosmos", href: "https://cosmos.so/barthkosi" },
-  { label: "Instagram", href: "https://instagram.com/barthkosi" },
-];
+const SOCIALS = SOCIAL_LINKS;
 const MASONRY_GAP = 8;
 const SKELETON_ASPECTS = [
   "aspect-[3/4]",
