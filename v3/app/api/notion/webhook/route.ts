@@ -1,5 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getRuntimeSecret } from "@/lib/cloudflare-env";
+import {
+  getNotionSyncDebouncer,
+  getRuntimeSecret,
+} from "@/lib/cloudflare-env";
 import { removePostByIdFromStore } from "@/lib/content-store";
 import { syncNotionPageById } from "@/lib/notion";
 
@@ -100,7 +103,28 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    if (eventType === "page.deleted") {
+    const isDelete = eventType === "page.deleted";
+    const isSync = SYNC_PAGE_EVENTS.has(eventType);
+
+    if (!isDelete && !isSync) {
+      return NextResponse.json({ ok: true, ignored: true, eventType });
+    }
+
+    const debouncer = await getNotionSyncDebouncer();
+    if (debouncer) {
+      const queued = await debouncer.schedulePageEvent({
+        pageId: entityId,
+        eventType,
+        action: isDelete ? "delete" : "sync",
+      });
+      return NextResponse.json({
+        ok: true,
+        eventType,
+        ...queued,
+      });
+    }
+
+    if (isDelete) {
       const removed = await removePostByIdFromStore(entityId);
       return NextResponse.json({
         ok: true,
@@ -110,16 +134,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    if (SYNC_PAGE_EVENTS.has(eventType)) {
-      const outcome = await syncNotionPageById(entityId);
-      return NextResponse.json({
-        ok: true,
-        eventType,
-        ...outcome,
-      });
-    }
-
-    return NextResponse.json({ ok: true, ignored: true, eventType });
+    const outcome = await syncNotionPageById(entityId);
+    return NextResponse.json({
+      ok: true,
+      eventType,
+      ...outcome,
+    });
   } catch (err) {
     console.error("[notion-webhook] sync error:", err);
     return NextResponse.json(

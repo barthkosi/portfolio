@@ -26,8 +26,29 @@ export type R2BucketLike = {
   }>;
 };
 
+export type NotionSyncDebouncerStub = {
+  schedulePageEvent: (input: {
+    pageId: string;
+    eventType: string;
+    action: "sync" | "delete";
+  }) => Promise<{
+    queued: true;
+    pageId: string;
+    action: "sync" | "delete";
+    scheduledAt: string;
+    debounceMs: number;
+  }>;
+};
+
+type DurableObjectNamespaceLike<TStub> = {
+  getByName?: (name: string) => TStub;
+  idFromName: (name: string) => unknown;
+  get: (id: unknown) => TStub;
+};
+
 type CloudflareEnvMap = Record<string, unknown> & {
   PORTFOLIO_BUCKET?: R2BucketLike;
+  NOTION_SYNC_DEBOUNCER?: DurableObjectNamespaceLike<NotionSyncDebouncerStub>;
 };
 
 async function loadCloudflareEnv(): Promise<CloudflareEnvMap | null> {
@@ -45,6 +66,16 @@ async function loadCloudflareEnv(): Promise<CloudflareEnvMap | null> {
 export async function getPortfolioBucket(): Promise<R2BucketLike | null> {
   const cfEnv = await loadCloudflareEnv();
   return cfEnv?.PORTFOLIO_BUCKET ?? null;
+}
+
+export async function getNotionSyncDebouncer(): Promise<NotionSyncDebouncerStub | null> {
+  const cfEnv = await loadCloudflareEnv();
+  const ns = cfEnv?.NOTION_SYNC_DEBOUNCER;
+  if (!ns) return null;
+  if (typeof ns.getByName === "function") {
+    return ns.getByName("global");
+  }
+  return ns.get(ns.idFromName("global"));
 }
 
 export async function getRuntimeSecret(key: string): Promise<string | undefined> {
