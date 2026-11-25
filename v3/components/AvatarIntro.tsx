@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -38,16 +38,10 @@ export function AvatarIntro({
   const introRef = useRef<HTMLDivElement>(null);
   const introImgRef = useRef<HTMLImageElement>(null);
 
-  const isExpandedRef = useRef(isExpanded);
-  const skipIntroRef = useRef(skipIntro);
-  const onIntroCompleteRef = useRef(onIntroComplete);
-  const onCollapseRef = useRef(onCollapse);
-
-  useEffect(() => {
-    isExpandedRef.current = isExpanded;
-    onIntroCompleteRef.current = onIntroComplete;
-    onCollapseRef.current = onCollapse;
-  }, [isExpanded, onIntroComplete, onCollapse]);
+  const getIsExpanded = useEffectEvent(() => isExpanded);
+  const getSkipIntro = useEffectEvent(() => skipIntro);
+  const handleIntroComplete = useEffectEvent(onIntroComplete);
+  const handleCollapse = useEffectEvent(onCollapse);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -82,7 +76,9 @@ export function AvatarIntro({
 
     const scene = new THREE.Scene();
     const pmrem = new THREE.PMREMGenerator(renderer);
-    const envRT = pmrem.fromScene(new RoomEnvironment(), 0.04);
+    const roomEnv = new RoomEnvironment();
+    const envRT = pmrem.fromScene(roomEnv, 0.04);
+    roomEnv.dispose();
     scene.environment = envRT.texture;
 
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
@@ -93,7 +89,7 @@ export function AvatarIntro({
     const spinner = new THREE.Group();
     scene.add(spinner);
 
-    const shouldSkipIntro = skipIntroRef.current;
+    const shouldSkipIntro = getSkipIntro();
     let modelHeight = 0;
     let revealed = shouldSkipIntro;
     let velocity = 0;
@@ -106,7 +102,7 @@ export function AvatarIntro({
     }
 
     // morph: 0 = full-size centered (46vmin), 1 = docked in 64px slot
-    let morph = isExpandedRef.current ? 0 : 1;
+    let morph = getIsExpanded() ? 0 : 1;
 
     let dragging = false;
     let pointerDownX = 0;
@@ -178,8 +174,8 @@ export function AvatarIntro({
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isExpandedRef.current && introDone) {
-        onCollapseRef.current();
+      if (e.key === "Escape" && getIsExpanded() && introDone) {
+        handleCollapse();
       }
     };
 
@@ -231,7 +227,7 @@ export function AvatarIntro({
     });
 
     const onPointerDown = (e: PointerEvent) => {
-      if (!revealed || !isExpandedRef.current) return;
+      if (!revealed || !getIsExpanded()) return;
       dragging = true;
       pointerDownX = e.clientX;
       pointerDownY = e.clientY;
@@ -275,8 +271,8 @@ export function AvatarIntro({
       velocity =
         now - lastT > 80 ? IDLE_RAD_PER_SEC * Math.sign(dragVel || 1) : dragVel;
 
-      if (wasTap && introDone && isExpandedRef.current) {
-        onCollapseRef.current();
+      if (wasTap && introDone && getIsExpanded()) {
+        handleCollapse();
       }
     };
 
@@ -299,7 +295,7 @@ export function AvatarIntro({
           dockTimerId = window.setTimeout(() => {
             if (!disposed) {
               introDone = true;
-              onIntroCompleteRef.current();
+              handleIntroComplete();
             }
           }, DOCK_DELAY_MS);
         }
@@ -317,7 +313,7 @@ export function AvatarIntro({
         spinner.rotation.y += velocity * dt;
       }
 
-      const targetMorph = isExpandedRef.current ? 0 : 1;
+      const targetMorph = getIsExpanded() ? 0 : 1;
       if (Math.abs(targetMorph - morph) > 0.0005) {
         morph += (targetMorph - morph) * (1 - Math.exp(-MORPH_RATE * dt));
         if (Math.abs(targetMorph - morph) <= 0.0005) {
@@ -345,6 +341,10 @@ export function AvatarIntro({
       canvas.removeEventListener("pointermove", onPointerMove);
       canvas.removeEventListener("pointerup", releasePointer);
       canvas.removeEventListener("pointercancel", releasePointer);
+
+      canvas.style.visibility = "hidden";
+      intro.style.display = "";
+      intro.style.opacity = "";
 
       spinner.traverse((obj) => {
         if (obj instanceof THREE.Mesh) {
