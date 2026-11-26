@@ -46,7 +46,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
             }`}
           />
           <div
-            className={`relative flex w-full shrink-0 flex-col items-start gap-5 transition-opacity duration-500 ${
+            className={`relative flex w-full shrink-0 flex-col items-start gap-5 transition-home-fade ${
               isExpanded ? "pointer-events-none opacity-0" : "opacity-100"
             }`}
           >
@@ -60,7 +60,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
         </div>
         <nav
           aria-label="Quick links"
-          className={`relative flex h-fit w-fit shrink-0 flex-row items-start justify-center gap-8 transition-opacity duration-500 ${
+          className={`relative flex h-fit w-fit shrink-0 flex-row items-start justify-center gap-8 transition-home-fade ${
             isExpanded ? "pointer-events-none opacity-0" : "opacity-100"
           }`}
         >
@@ -81,7 +81,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
         </nav>
       </main>
       <div
-        className={`transition-opacity duration-500 ${
+        className={`transition-home-fade ${
           hasEntered ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >

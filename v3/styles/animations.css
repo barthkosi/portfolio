@@ -1,0 +1,135 @@
+/* ==========================================================================
+   Sitewide Animations & Transitions
+
+   Inventory of CSS transitions and keyframe animations used across v3:
+   1. Color hover transition      --duration-fast (150ms), --ease-fast
+      (BlogCodeBlock, BlogRichText, HomeClient quick links via transition-colors)
+   2. Navigation shell resize     --duration-base (250ms), --ease-fast
+      (Navigation header width, height, background-color via transition-nav-shell)
+   3. Navigation toggle icon      --duration-base (250ms), --ease-fast
+      (Navigation plus/minus rotation via transition-nav-icon)
+   4. Navigation panel fade in    --duration-base (250ms), --delay-short (80ms), --ease-fast
+      (Navigation expanded content via .nav-fade-in)
+   5. Card hover metadata reveal  --duration-base (250ms), --ease-fast
+      (Card grid-template-rows and opacity via transition-card-reveal)
+   6. Avatar intro SVG appear     --duration-medium (400ms), --ease-fast
+      (AvatarIntro SVG entrance via .avatar-intro-svg)
+   7. Home content opacity fade   --duration-slow (500ms), --ease-fast
+      (HomeClient copy, quick links, and chrome via transition-home-fade)
+   8. Avatar intro shimmer loop   --duration-loop (1500ms), --ease-fast
+      (AvatarIntro SVG shimmer via .avatar-intro-shimmer)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Durations & Delays
+   -------------------------------------------------------------------------- */
+:root {
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-medium: 400ms;
+  --duration-slow: 500ms;
+  --duration-loop: 1500ms;
+
+  --delay-short: 80ms;
+}
+
+/* --------------------------------------------------------------------------
+   2. Easing Curve & Tailwind v4 Theme Tokens
+   -------------------------------------------------------------------------- */
+@theme {
+  --ease-fast: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --default-transition-duration: var(--duration-fast);
+  --default-transition-timing-function: var(--ease-fast);
+}
+
+/* --------------------------------------------------------------------------
+   3. Transition Utilities
+   -------------------------------------------------------------------------- */
+@utility transition-nav-shell {
+  transition-property: width, height, background-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-fast);
+}
+
+@utility transition-nav-icon {
+  transition-property: transform;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-fast);
+}
+
+@utility transition-card-reveal {
+  transition-property: grid-template-rows, opacity;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-fast);
+}
+
+@utility transition-home-fade {
+  transition-property: opacity;
+  transition-duration: var(--duration-slow);
+  transition-timing-function: var(--ease-fast);
+}
+
+/* --------------------------------------------------------------------------
+   4. Keyframe Animations
+   -------------------------------------------------------------------------- */
+@keyframes navFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.nav-fade-in {
+  animation: navFadeIn var(--duration-base) var(--ease-fast) var(--delay-short) both;
+}
+
+@keyframes avatar-intro-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.avatar-intro-svg {
+  animation: avatar-intro-appear var(--duration-medium) var(--ease-fast) backwards;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.avatar-intro-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.16) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer var(--duration-loop) infinite var(--ease-fast);
+  mix-blend-mode: overlay;
+  -webkit-mask-image: url("/avatar-intro.svg");
+  mask-image: url("/avatar-intro.svg");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-intro-svg,
+  .avatar-intro-shimmer {
+    animation: none;
+  }
+}
