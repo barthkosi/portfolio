@@ -10,6 +10,7 @@ import {
   useImperativeHandle,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { Card } from "@/components/interface/Card";
 import { InputField } from "@/components/interface/InputField";
@@ -32,6 +33,21 @@ export type NavigationHandle = {
 const TABS = NAV_TABS;
 const SOCIALS = SOCIAL_LINKS;
 const MASONRY_GAP = 8;
+const DESKTOP_MEDIA_QUERY = "(min-width: 48rem)";
+
+function subscribeDesktopMedia(callback: () => void) {
+  const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+}
+
+function getDesktopSnapshot() {
+  return window.matchMedia(DESKTOP_MEDIA_QUERY).matches;
+}
+
+function getDesktopServerSnapshot() {
+  return false;
+}
 const SKELETON_ASPECTS = [
   "aspect-[3/4]",
   "aspect-square",
@@ -83,6 +99,11 @@ function ContentCategoryView({
   const [measuredSizes, setMeasuredSizes] = useState<
     Record<string, { width: number; height: number }>
   >(() => Object.fromEntries(cachedCoverSizes));
+  const isDesktop = useSyncExternalStore(
+    subscribeDesktopMedia,
+    getDesktopSnapshot,
+    getDesktopServerSnapshot,
+  );
 
   useEffect(() => {
     if (cachedContentIndex) {
@@ -210,50 +231,43 @@ function ContentCategoryView({
     };
   };
 
+  const renderCard = (item: PostMeta) => (
+    <Card
+      key={item.id}
+      variant="Default"
+      style={getAspectStyle(item)}
+      title={item.title}
+      year={formatPostYear(item.date)}
+      image={item.coverImage ?? undefined}
+      alt={item.title}
+      href={`/${category}/${item.slug}`}
+      onClick={onNavigate}
+      onImageLoad={
+        item.coverWidth && item.coverHeight
+          ? undefined
+          : (dims) => handleImageLoad(item.id, dims)
+      }
+    />
+  );
+
+  if (!isDesktop) {
+    return (
+      <div className="relative flex w-full flex-col items-start gap-2">
+        {items.map(renderCard)}
+      </div>
+    );
+  }
+
   const leftItems = items.filter((_, i) => i % 2 === 0);
   const rightItems = items.filter((_, i) => i % 2 === 1);
 
   return (
-    <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
-      <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-        {leftItems.map((item) => (
-          <Card
-            key={item.id}
-            variant="Default"
-            style={getAspectStyle(item)}
-            title={item.title}
-            year={formatPostYear(item.date)}
-            image={item.coverImage ?? undefined}
-            alt={item.title}
-            href={`/${category}/${item.slug}`}
-            onClick={onNavigate}
-            onImageLoad={
-              item.coverWidth && item.coverHeight
-                ? undefined
-                : (dims) => handleImageLoad(item.id, dims)
-            }
-          />
-        ))}
+    <div className="relative flex w-full flex-row items-start gap-2">
+      <div className="relative flex w-full min-w-px flex-[1_0_0] flex-col items-start justify-center gap-2">
+        {leftItems.map(renderCard)}
       </div>
-      <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
-        {rightItems.map((item) => (
-          <Card
-            key={item.id}
-            variant="Default"
-            style={getAspectStyle(item)}
-            title={item.title}
-            year={formatPostYear(item.date)}
-            image={item.coverImage ?? undefined}
-            alt={item.title}
-            href={`/${category}/${item.slug}`}
-            onClick={onNavigate}
-            onImageLoad={
-              item.coverWidth && item.coverHeight
-                ? undefined
-                : (dims) => handleImageLoad(item.id, dims)
-            }
-          />
-        ))}
+      <div className="relative flex w-full min-w-px flex-[1_0_0] flex-col items-start justify-center gap-2">
+        {rightItems.map(renderCard)}
       </div>
     </div>
   );
