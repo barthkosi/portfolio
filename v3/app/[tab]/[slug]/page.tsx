@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { BlogPostRenderer } from "@/components/BlogPostRenderer";
+import { BlogPostRenderer } from "@/components/interface/BlogPostRenderer";
 import { getPostBySlug } from "@/lib/content-store";
 import { isContentCategory } from "@/lib/content-types";
 

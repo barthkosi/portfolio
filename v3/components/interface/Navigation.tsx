@@ -11,8 +11,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { Card } from "@/components/Card";
-import { InputField } from "@/components/InputField";
+import { Card } from "@/components/interface/Card";
+import { InputField } from "@/components/interface/InputField";
 import {
   type ContentCategory,
   type ContentIndex,
@@ -887,7 +887,7 @@ export function Navigation({
   return (
     <header
       ref={navRef}
-      className={`fixed top-4 z-50 flex flex-col items-end gap-[44px] overflow-clip rounded-[12px] p-2 transition-[width,height,background-color] duration-[250ms] ease-[cubic-bezier(0.43,0.07,0.59,0.94)] ${widthClass}`}
+      className={`fixed top-4 z-50 flex flex-col items-end gap-[44px] overflow-clip rounded-[12px] p-2 transition-nav-shell ${widthClass}`}
     >
       <button
         type="button"
@@ -902,7 +902,7 @@ export function Navigation({
         >
           <span className="absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse" />
           <span
-            className={`absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse transition-transform duration-[250ms] ease-[cubic-bezier(0.43,0.07,0.59,0.94)] ${
+            className={`absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse transition-nav-icon ${
               isOpen ? "rotate-0" : "-rotate-90"
             }`}
           />

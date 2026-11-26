@@ -1,4 +1,4 @@
-import type { NotionHeadingLevel } from "@/components/BlogTextBlock";
+import type { NotionHeadingLevel } from "@/components/interface/BlogTextBlock";
 
 export type ContentCategory = "work" | "writing" | "explorations";
 

@@ -197,7 +197,7 @@ export function Card({
           className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-overlay-100/70 via-overlay-100/35 to-overlay-0 pt-4 pb-1 md:pointer-fine:hidden"
         />
       </span>
-      <span className="hidden w-full shrink-0 md:pointer-fine:grid md:pointer-fine:grid-rows-[0fr] md:pointer-fine:opacity-0 md:pointer-fine:transition-[grid-template-rows,opacity] md:pointer-fine:duration-300 md:pointer-fine:ease-[cubic-bezier(0.43,0.07,0.59,0.94)] md:pointer-fine:group-hover:grid-rows-[1fr] md:pointer-fine:group-hover:opacity-100 motion-reduce:md:pointer-fine:transition-none">
+      <span className="hidden w-full shrink-0 md:pointer-fine:grid md:pointer-fine:grid-rows-[0fr] md:pointer-fine:opacity-0 md:pointer-fine:transition-card-reveal md:pointer-fine:group-hover:grid-rows-[1fr] md:pointer-fine:group-hover:opacity-100 motion-reduce:md:pointer-fine:transition-none">
         <span className="block min-h-0 overflow-hidden">
           <CardMeta title={title} year={year} className="relative py-1" />
         </span>
