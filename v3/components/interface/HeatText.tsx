@@ -5,7 +5,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 const MAX_DPR = 2;
 const TRAIL_SCALE = 0.25;
 const BLUR_SIGMAS: [number, number, number] = [2.5, 6, 14];
-const SPLAT_RADIUS = 60;
+const SPLAT_RADIUS = 32;
 const IDLE_MS = 2400;
 
 const VERTEX_SHADER = `
@@ -359,7 +359,7 @@ export function HeatText({
 
       const moved = Math.hypot(pointer.x - pointer.lastX, pointer.y - pointer.lastY);
       const active = pointer.inside && !disabledRef.current;
-      const strength = active ? Math.min(dt * 2 + moved / 90, 0.6) : 0;
+      const strength = active ? Math.min(dt * 3 + moved / 50, 0.8) : 0;
 
       const [read, write] = trails;
       gl.useProgram(trailProgram);
@@ -373,7 +373,7 @@ export function HeatText({
       gl.uniform2f(uniform(trailProgram, "pointerTo"), pointer.x, height - pointer.y);
       gl.uniform1f(uniform(trailProgram, "radius"), SPLAT_RADIUS);
       gl.uniform1f(uniform(trailProgram, "strength"), strength);
-      gl.uniform1f(uniform(trailProgram, "decay"), Math.pow(0.955, dt * 60));
+      gl.uniform1f(uniform(trailProgram, "decay"), Math.pow(0.94, dt * 60));
       gl.uniform1f(uniform(trailProgram, "fade"), 0.2 * dt);
       gl.uniform1f(uniform(trailProgram, "time"), time);
       drawQuad();
