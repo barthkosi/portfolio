@@ -6,6 +6,7 @@ import {
   type Ref,
   useCallback,
   useEffect,
+  useEffectEvent,
   useImperativeHandle,
   useRef,
   useState,
@@ -72,40 +73,47 @@ function ContentCategoryView({
   category: ContentCategory;
   onNavigate: () => void;
 }) {
-  const [items, setItems] = useState<PostMeta[] | null>(
-    () => cachedContentIndex?.[category] ?? null,
-  );
-  const [error, setError] = useState<string | null>(null);
+  const [fetchState, setFetchState] = useState<{
+    index: ContentIndex | null;
+    error: string | null;
+  }>(() => ({
+    index: cachedContentIndex,
+    error: null,
+  }));
   const [measuredSizes, setMeasuredSizes] = useState<
     Record<string, { width: number; height: number }>
   >(() => Object.fromEntries(cachedCoverSizes));
 
   useEffect(() => {
-    let active = true;
     if (cachedContentIndex) {
       return;
     }
 
+    let active = true;
     fetchContentIndex()
       .then((index) => {
         if (active) {
-          setError(null);
-          setItems(index[category] ?? []);
+          setFetchState({ index, error: null });
         }
       })
       .catch((err: unknown) => {
         if (active) {
-          setError(
-            err instanceof Error ? err.message : "Failed to load content",
-          );
-          setItems([]);
+          setFetchState({
+            index: null,
+            error:
+              err instanceof Error ? err.message : "Failed to load content",
+          });
         }
       });
 
     return () => {
       active = false;
     };
-  }, [category]);
+  }, []);
+
+  const index = cachedContentIndex ?? fetchState.index;
+  const error = index ? null : fetchState.error;
+  const items = index ? (index[category] ?? []) : error ? [] : null;
 
   const handleImageLoad = useCallback(
     (id: string, dimensions: { width: number; height: number }) => {
@@ -279,10 +287,16 @@ async function fetchMediaFolder(folder: string): Promise<MediaItem[]> {
 
 function MediaMasonry({ folder }: { folder: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [items, setItems] = useState<MediaItem[] | null>(
-    () => cachedMedia.get(folder) ?? null,
-  );
-  const [error, setError] = useState<string | null>(null);
+  const cachedItems = cachedMedia.get(folder) ?? null;
+  const [fetchState, setFetchState] = useState<{
+    folder: string;
+    items: MediaItem[] | null;
+    error: string | null;
+  }>(() => ({
+    folder,
+    items: cachedItems,
+    error: null,
+  }));
   const [measuredSizes, setMeasuredSizes] = useState<
     Record<string, { width: number; height: number }>
   >({});
@@ -291,23 +305,24 @@ function MediaMasonry({ folder }: { folder: string }) {
   );
 
   useEffect(() => {
-    let active = true;
-    const cached = cachedMedia.get(folder);
-    if (cached) {
+    if (cachedMedia.has(folder)) {
       return;
     }
 
+    let active = true;
     fetchMediaFolder(folder)
       .then((nextItems) => {
         if (active) {
-          setError(null);
-          setItems(nextItems);
+          setFetchState({ folder, items: nextItems, error: null });
         }
       })
       .catch((err: unknown) => {
         if (active) {
-          setError(err instanceof Error ? err.message : "Failed to load media");
-          setItems([]);
+          setFetchState({
+            folder,
+            items: [],
+            error: err instanceof Error ? err.message : "Failed to load media",
+          });
         }
       });
 
@@ -315,6 +330,10 @@ function MediaMasonry({ folder }: { folder: string }) {
       active = false;
     };
   }, [folder]);
+
+  const currentFetchState = fetchState.folder === folder ? fetchState : null;
+  const error = cachedItems ? null : (currentFetchState?.error ?? null);
+  const items = cachedItems ?? currentFetchState?.items ?? null;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -678,13 +697,8 @@ export function Navigation({
   });
 
   const lastScrollY = useRef(0);
-  const isOpenRef = useRef(isOpen);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    isOpenRef.current = isOpen;
-  }, [isOpen]);
 
   const replacePath = useCallback(
     (path: string) => {
@@ -696,20 +710,23 @@ export function Navigation({
     [syncUrl],
   );
 
+  const onAppScroll = useEffectEvent((currentY: number) => {
+    if (isOpen) return;
+    if (currentY > lastScrollY.current && currentY > 16) {
+      setIsSmall(true);
+    } else if (currentY < lastScrollY.current || currentY <= 16) {
+      setIsSmall(false);
+    }
+    lastScrollY.current = currentY;
+  });
+
   useEffect(() => {
     const scrollTarget = document.getElementById("app-scroll");
     const getScrollY = () => (scrollTarget ? scrollTarget.scrollTop : window.scrollY);
     lastScrollY.current = getScrollY();
 
     const handleScroll = () => {
-      if (isOpenRef.current) return;
-      const currentY = getScrollY();
-      if (currentY > lastScrollY.current && currentY > 16) {
-        setIsSmall(true);
-      } else if (currentY < lastScrollY.current || currentY <= 16) {
-        setIsSmall(false);
-      }
-      lastScrollY.current = currentY;
+      onAppScroll(getScrollY());
     };
 
     const listenerTarget: EventTarget = scrollTarget ?? window;
@@ -776,12 +793,16 @@ export function Navigation({
     [replacePath],
   );
 
+  const onDismiss = useEffectEvent(() => {
+    setIsOpen(false);
+    replacePath("/");
+  });
+
   useEffect(() => {
     if (!isOpen) return;
     const handlePointerDown = (event: PointerEvent) => {
       if (navRef.current && !navRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        replacePath("/");
+        onDismiss();
       }
     };
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -792,8 +813,7 @@ export function Navigation({
         ) {
           document.activeElement.blur();
         }
-        setIsOpen(false);
-        replacePath("/");
+        onDismiss();
       }
     };
 
@@ -803,7 +823,7 @@ export function Navigation({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, replacePath]);
+  }, [isOpen]);
 
   const handleToggleOpen = () => {
     const next = !isOpen;
