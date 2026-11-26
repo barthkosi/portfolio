@@ -233,9 +233,8 @@ export function HeatText({
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
 
-    const hoverQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (!hoverQuery.matches || motionQuery.matches) return;
+    if (motionQuery.matches) return;
 
     const gl = canvas.getContext("webgl", {
       alpha: true,
@@ -405,11 +404,11 @@ export function HeatText({
       }
     };
 
-    const handlePointerMove = (event: PointerEvent) => {
-      if (event.pointerType === "touch" || disabledRef.current) return;
+    const updatePointer = (clientX: number, clientY: number) => {
+      if (disabledRef.current) return;
       const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
       const inside = x >= 0 && y >= 0 && x <= rect.width && y <= rect.height;
       if (inside && !pointer.inside) {
         pointer.lastX = x;
@@ -422,6 +421,23 @@ export function HeatText({
         lastActive = performance.now();
         frame = requestAnimationFrame(render);
       }
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      updatePointer(event.clientX, event.clientY);
+    };
+
+    const handleTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+      pointer.inside = false;
+      updatePointer(touch.clientX, touch.clientY);
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (touch) updatePointer(touch.clientX, touch.clientY);
     };
 
     const handlePointerLeave = () => {
@@ -438,6 +454,10 @@ export function HeatText({
     resizeObserver.observe(container);
     document.fonts.ready.then(scheduleBuild);
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
+    window.addEventListener("touchend", handlePointerLeave, { passive: true });
+    window.addEventListener("touchcancel", handlePointerLeave, { passive: true });
     document.documentElement.addEventListener("pointerleave", handlePointerLeave);
 
     return () => {
@@ -446,6 +466,10 @@ export function HeatText({
       cancelAnimationFrame(resizeFrame);
       resizeObserver.disconnect();
       window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handlePointerLeave);
+      window.removeEventListener("touchcancel", handlePointerLeave);
       document.documentElement.removeEventListener("pointerleave", handlePointerLeave);
       if (maskTexture) gl.deleteTexture(maskTexture);
       deleteTarget(gl, field);
