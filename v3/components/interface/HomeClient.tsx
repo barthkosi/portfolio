@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { AvatarIntro } from "@/components/interface/AvatarIntro";
 import { Barth } from "@/components/interface/Barth";
+import { HeatText } from "@/components/interface/HeatText";
 import {
   Navigation,
   type NavigationHandle,
@@ -45,7 +46,8 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
               isExpanded ? "pointer-events-none" : "cursor-pointer"
             }`}
           />
-          <div
+          <HeatText
+            disabled={isExpanded}
             className={`relative flex w-full shrink-0 flex-col items-start gap-5 transition-home-fade ${
               isExpanded ? "pointer-events-none opacity-0" : "opacity-100"
             }`}
@@ -56,7 +58,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
             <p className="body-sm w-full shrink-0 text-center text-pretty text-content-primary">
               He has 4+ years of experience and has worked with businesses and studios building intuitive products.
             </p>
-          </div>
+          </HeatText>
         </div>
         <nav
           aria-label="Quick links"
