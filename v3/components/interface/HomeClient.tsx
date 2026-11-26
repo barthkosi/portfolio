@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { AvatarIntro } from "@/components/AvatarIntro";
-import { Barth } from "@/components/Barth";
+import { AvatarIntro } from "@/components/interface/AvatarIntro";
+import { Barth } from "@/components/interface/Barth";
 import {
   Navigation,
   type NavigationHandle,
   type NavTab,
-} from "@/components/Navigation";
+} from "@/components/interface/Navigation";
 
 export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
   const [hasEntered, setHasEntered] = useState(Boolean(initialTab));

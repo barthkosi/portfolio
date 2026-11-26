@@ -1,19 +1,19 @@
 import { Fragment, type ReactNode } from "react";
-import { BlogCodeBlock } from "@/components/BlogCodeBlock";
-import { BlogListBlock } from "@/components/BlogListBlock";
-import { BlogMediaBlock } from "@/components/BlogMediaBlock";
+import { BlogCodeBlock } from "@/components/interface/BlogCodeBlock";
+import { BlogListBlock } from "@/components/interface/BlogListBlock";
+import { BlogMediaBlock } from "@/components/interface/BlogMediaBlock";
 import {
   BlogBold,
   BlogInlineCode,
   BlogItalic,
   BlogLink,
   BlogStrikethrough,
-} from "@/components/BlogRichText";
+} from "@/components/interface/BlogRichText";
 import {
   BlogTextBlock,
   mapNotionHeadingLevel,
-} from "@/components/BlogTextBlock";
-import { Navigation } from "@/components/Navigation";
+} from "@/components/interface/BlogTextBlock";
+import { Navigation } from "@/components/interface/Navigation";
 import {
   type ContentBlock,
   formatPostDate,

@@ -11,8 +11,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { Card } from "@/components/Card";
-import { InputField } from "@/components/InputField";
+import { Card } from "@/components/interface/Card";
+import { InputField } from "@/components/interface/InputField";
 import {
   type ContentCategory,
   type ContentIndex,

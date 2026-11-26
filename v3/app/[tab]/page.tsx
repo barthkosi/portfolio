@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { HomeClient } from "@/components/HomeClient";
+import { HomeClient } from "@/components/interface/HomeClient";
 import { pathToTab, tabToPath } from "@/lib/navigation";
 
 export function generateStaticParams() {
