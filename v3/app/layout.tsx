@@ -3,7 +3,7 @@ import { Instrument_Sans, Inter } from "next/font/google";
 import { DisablePinchZoom } from "@/components/logic/DisablePinchZoom";
 import { DEFAULT_THEME_COLOR } from "@/lib/theme";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, SOCIAL_LINKS } from "@/lib/site";
-import "./globals.css";
+import "@/styles/globals.css";
 
 const headingFont = Instrument_Sans({
   subsets: ["latin"],
