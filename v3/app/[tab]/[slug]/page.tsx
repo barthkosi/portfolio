@@ -21,7 +21,7 @@ export async function generateMetadata({
   }
 
   const post = await getPostBySlug(category, slug);
-  if (!post) {
+  if (!post || post.meta.locked) {
     return {};
   }
 
@@ -87,7 +87,7 @@ export default async function ContentPostPage({
   }
 
   const post = await getPostBySlug(category, slug);
-  if (!post) {
+  if (!post || post.meta.locked) {
     redirect("/");
   }
 

@@ -15,10 +15,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   const posts: MetadataRoute.Sitemap = CONTENT_CATEGORIES.flatMap((category) =>
-    index[category].map((post) => ({
-      url: `${SITE_URL}/${category}/${post.slug}`,
-      lastModified: post.updatedAt,
-    })),
+    index[category]
+      .filter((post) => !post.locked)
+      .map((post) => ({
+        url: `${SITE_URL}/${category}/${post.slug}`,
+        lastModified: post.updatedAt,
+      })),
   );
 
   return [...pages, ...posts];

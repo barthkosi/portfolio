@@ -204,18 +204,22 @@ function ContentCategoryView({
   if (category === "writing") {
     return (
       <div className="relative flex w-full flex-col items-start gap-2">
-        {items.map((item) => (
-          <Card
-            key={item.id}
-            variant="Horizontal"
-            title={item.title}
-            year={formatPostYear(item.date)}
-            image={item.coverImage ?? undefined}
-            alt={item.title}
-            href={`/${category}/${item.slug}`}
-            onClick={onNavigate}
-          />
-        ))}
+        {items.map((item) => {
+          const cardTitle = item.cardTitle || item.title;
+          const isLocked = Boolean(item.locked);
+          return (
+            <Card
+              key={item.id}
+              variant="Horizontal"
+              title={cardTitle}
+              year={isLocked ? "Coming soon" : formatPostYear(item.date)}
+              image={item.coverImage ?? undefined}
+              alt={cardTitle}
+              href={isLocked ? undefined : `/${category}/${item.slug}`}
+              onClick={isLocked ? undefined : onNavigate}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -231,24 +235,28 @@ function ContentCategoryView({
     };
   };
 
-  const renderCard = (item: PostMeta) => (
-    <Card
-      key={item.id}
-      variant="Default"
-      style={getAspectStyle(item)}
-      title={item.title}
-      year={formatPostYear(item.date)}
-      image={item.coverImage ?? undefined}
-      alt={item.title}
-      href={`/${category}/${item.slug}`}
-      onClick={onNavigate}
-      onImageLoad={
-        item.coverWidth && item.coverHeight
-          ? undefined
-          : (dims) => handleImageLoad(item.id, dims)
-      }
-    />
-  );
+  const renderCard = (item: PostMeta) => {
+    const cardTitle = item.cardTitle || item.title;
+    const isLocked = Boolean(item.locked);
+    return (
+      <Card
+        key={item.id}
+        variant="Default"
+        style={getAspectStyle(item)}
+        title={cardTitle}
+        year={isLocked ? "Coming soon" : formatPostYear(item.date)}
+        image={item.coverImage ?? undefined}
+        alt={cardTitle}
+        href={isLocked ? undefined : `/${category}/${item.slug}`}
+        onClick={isLocked ? undefined : onNavigate}
+        onImageLoad={
+          item.coverWidth && item.coverHeight
+            ? undefined
+            : (dims) => handleImageLoad(item.id, dims)
+        }
+      />
+    );
+  };
 
   if (!isDesktop) {
     return (
