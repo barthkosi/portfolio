@@ -70,6 +70,7 @@ type NotionPropertyValue = {
   multi_select?: Array<{ name?: string }>;
   status?: { name?: string } | null;
   date?: { start?: string | null } | null;
+  checkbox?: boolean;
 };
 
 type NotionPageObject = {
@@ -240,9 +241,16 @@ function getPageStatus(page: NotionPageObject): string {
   return (prop.select?.name ?? prop.status?.name ?? "").trim();
 }
 
+function isLockedPage(page: NotionPageObject): boolean {
+  const prop = getProperty(page, "Locked");
+  return prop?.checkbox === true;
+}
+
 function isPublishedPage(page: NotionPageObject): boolean {
   if (page.archived || page.in_trash) return false;
-  return getPageStatus(page).toLowerCase() === "finished";
+  return (
+    getPageStatus(page).toLowerCase() === "finished" || isLockedPage(page)
+  );
 }
 
 function extensionFromContentTypeOrUrl(
@@ -648,6 +656,11 @@ async function buildPostDocument(
   const titleProp = getProperty(page, "Title");
   const title = richTextToPlain(titleProp?.title).trim() || "Untitled";
 
+  const cardTitleProp = getProperty(page, "Card Title");
+  const cardTitle = richTextToPlain(cardTitleProp?.rich_text).trim();
+
+  const locked = isLockedPage(page);
+
   const descriptionProp = getProperty(page, "Description");
   const description = richTextToPlain(descriptionProp?.rich_text).trim();
 
@@ -689,8 +702,9 @@ async function buildPostDocument(
     coverImage && !VIDEO_EXT_RE.test(coverImage)
       ? await probeImageDimensions(coverImage)
       : null;
-  const rawBlocks = await fetchBlockChildren(page.id);
-  const blocks = await transformBlocks(rawBlocks, page.id);
+  const blocks = locked
+    ? []
+    : await transformBlocks(await fetchBlockChildren(page.id), page.id);
 
   const meta: PostMeta = {
     id: page.id,
@@ -698,9 +712,11 @@ async function buildPostDocument(
     category,
     layout,
     title,
+    ...(cardTitle ? { cardTitle } : {}),
     description,
     date,
     genre,
+    ...(locked ? { locked: true } : {}),
     coverImage,
     ...(coverDimensions
       ? {
@@ -763,26 +779,58 @@ export async function syncNotionPageById(
   };
 }
 
-async function queryFinishedPages(
+async function queryPublishedPages(
   databaseId: string,
 ): Promise<NotionPageObject[]> {
   const pages: NotionPageObject[] = [];
   let cursor: string | undefined;
-
-  do {
-    const body: Record<string, unknown> = {
-      filter: {
+  let filter: Record<string, unknown> = {
+    or: [
+      {
         property: "Status",
         select: { equals: "Finished" },
       },
+      {
+        property: "Locked",
+        checkbox: { equals: true },
+      },
+    ],
+  };
+
+  do {
+    const body: Record<string, unknown> = {
+      filter,
       page_size: 100,
     };
     if (cursor) body.start_cursor = cursor;
 
-    const data = await notionRequest<NotionListResponse<NotionPageObject>>(
-      `/databases/${databaseId}/query`,
-      { method: "POST", body },
-    );
+    let data: NotionListResponse<NotionPageObject>;
+    try {
+      data = await notionRequest<NotionListResponse<NotionPageObject>>(
+        `/databases/${databaseId}/query`,
+        { method: "POST", body },
+      );
+    } catch (err) {
+      if (
+        !cursor &&
+        "or" in filter &&
+        err instanceof Error &&
+        err.message.includes("(400)") &&
+        err.message.toLowerCase().includes("locked")
+      ) {
+        filter = {
+          property: "Status",
+          select: { equals: "Finished" },
+        };
+        data = await notionRequest<NotionListResponse<NotionPageObject>>(
+          `/databases/${databaseId}/query`,
+          { method: "POST", body: { filter, page_size: 100 } },
+        );
+      } else {
+        throw err;
+      }
+    }
+
     pages.push(...(data.results ?? []));
     cursor = data.has_more && data.next_cursor ? data.next_cursor : undefined;
   } while (cursor);
@@ -805,7 +853,7 @@ export async function syncNotionCategories(
 
   for (const category of categories) {
     const dbId = await getDatabaseIdForCategory(category);
-    const pages = await queryFinishedPages(dbId);
+    const pages = await queryPublishedPages(dbId);
     const publishedPages = pages.filter(isPublishedPage);
 
     const posts: PostDocument[] = [];

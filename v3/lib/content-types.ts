@@ -78,9 +78,11 @@ export type PostMeta = {
   category: ContentCategory;
   layout?: PostLayout;
   title: string;
+  cardTitle?: string;
   description: string;
   date: string | null;
   genre: string[];
+  locked?: boolean;
   coverImage: string | null;
   coverWidth?: number;
   coverHeight?: number;
