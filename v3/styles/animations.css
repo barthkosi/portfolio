@@ -53,7 +53,7 @@
 }
 
 @utility transition-nav-icon {
-  transition-property: transform;
+  transition-property: transform, translate, scale, rotate;
   transition-duration: var(--duration-base);
   transition-timing-function: var(--ease-fast);
 }
