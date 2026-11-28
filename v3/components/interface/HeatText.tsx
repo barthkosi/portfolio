@@ -1,12 +1,21 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useEffectEvent, useRef, type ReactNode } from "react";
 
 const MAX_DPR = 2;
 const TRAIL_SCALE = 0.25;
 const BLUR_SIGMAS: [number, number, number] = [2.5, 6, 14];
 const SPLAT_RADIUS = 32;
+const REVEAL_RADIUS = 22;
+const REVEAL_DURATION_MS = 750;
+const REVEAL_START_OFFSET_PX = 28;
+const REVEAL_END_OFFSET_PX = 34;
+const REVEAL_FADE_START_OFFSET_PX = 22;
+const REVEAL_MASK_LAG_PX = 16;
+const REVEAL_MASK_FEATHER_PX = 6;
+const HIDE_SETTLE_MS = 550;
 const IDLE_MS = 2400;
+const HIDDEN_MASK = "linear-gradient(to bottom, transparent 0%, transparent 100%)";
 
 const VERTEX_SHADER = `
 attribute vec2 position;
@@ -53,6 +62,10 @@ uniform vec2 pointerFrom;
 uniform vec2 pointerTo;
 uniform float radius;
 uniform float strength;
+uniform float revealFromY;
+uniform float revealToY;
+uniform float revealRadius;
+uniform float revealStrength;
 uniform float decay;
 uniform float fade;
 uniform float time;
@@ -70,10 +83,20 @@ void main() {
     sin(px.y * 0.045 + time * 2.1),
     cos(px.x * 0.04 - time * 1.7) * 0.5 + 0.7
   ) * 0.6;
-  float previousHeat = texture2D(previous, vUv - flow / resolution).r;
+  vec2 sampleUv = vUv - flow / resolution;
+  float inBounds = step(0.0, sampleUv.y) * step(sampleUv.y, 1.0);
+  float previousHeat = texture2D(previous, sampleUv).r * inBounds;
   float d = segmentDistance(px, pointerFrom, pointerTo);
   float splat = strength * exp(-(d * d) / (radius * radius));
-  float heat = max(previousHeat * decay - fade, 0.0) + splat;
+  float revealWave =
+    sin(px.x * 0.024 + time * 2.3) * 5.0 +
+    sin(px.x * 0.058 - time * 1.7) * 2.5;
+  float yFrom = revealFromY + revealWave;
+  float yTo = revealToY + revealWave;
+  float dReveal = max(max(min(yFrom, yTo) - px.y, px.y - max(yFrom, yTo)), 0.0);
+  float revealSplat =
+    revealStrength * exp(-(dReveal * dReveal) / (revealRadius * revealRadius));
+  float heat = max(previousHeat * decay - fade, 0.0) + splat + revealSplat;
   gl_FragColor = vec4(min(heat, 1.0), 0.0, 0.0, 1.0);
 }`;
 
@@ -117,6 +140,21 @@ void main() {
 }`;
 
 type Target = { texture: WebGLTexture; framebuffer: WebGLFramebuffer };
+type HeatController = { setRevealed: (revealed: boolean) => void };
+
+function smoothstep(edge0: number, edge1: number, x: number) {
+  const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+function setElementMask(element: HTMLElement, value: string) {
+  element.style.maskImage = value;
+  if (value) {
+    element.style.setProperty("-webkit-mask-image", value);
+  } else {
+    element.style.removeProperty("-webkit-mask-image");
+  }
+}
 
 function compile(gl: WebGLRenderingContext, fragmentSource: string) {
   const program = gl.createProgram();
@@ -214,24 +252,34 @@ function drawTextMask(container: HTMLElement, canvasRect: DOMRect, dpr: number) 
 export function HeatText({
   children,
   className,
+  contentClassName,
   disabled = false,
+  revealed = true,
+  onRevealComplete,
 }: {
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
   disabled?: boolean;
+  revealed?: boolean;
+  onRevealComplete?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const disabledRef = useRef(disabled);
+  const controllerRef = useRef<HeatController | null>(null);
 
-  useEffect(() => {
-    disabledRef.current = disabled;
-  }, [disabled]);
+  const getDisabled = useEffectEvent(() => disabled);
+  const getInitialRevealed = useEffectEvent(() => revealed);
+  const handleRevealComplete = useEffectEvent(() => {
+    onRevealComplete?.();
+  });
 
   useEffect(() => {
     const container = containerRef.current;
+    const content = contentRef.current;
     const canvas = canvasRef.current;
-    if (!container || !canvas) return;
+    if (!container || !content || !canvas) return;
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (motionQuery.matches) return;
@@ -261,6 +309,8 @@ export function HeatText({
 
     let width = 0;
     let height = 0;
+    let padTop = 0;
+    let textHeight = 0;
     let pixelWidth = 0;
     let pixelHeight = 0;
     let trailWidth = 0;
@@ -271,19 +321,71 @@ export function HeatText({
     let background: [number, number, number] = [0, 0, 0];
 
     const pointer = { x: 0, y: 0, lastX: 0, lastY: 0, inside: false };
+    let isRevealed = getInitialRevealed();
+    const reveal = {
+      active: false,
+      startTime: 0,
+      prevY: -REVEAL_START_OFFSET_PX,
+      completed: isRevealed,
+    };
     let lastActive = -Infinity;
     let lastFrame = 0;
     let frame = 0;
+    let hideTimerId: number | undefined;
+    let hideTransitionListener: ((event: TransitionEvent) => void) | null = null;
     let disposed = false;
 
     const drawQuad = () => gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    const cancelPendingHide = () => {
+      if (hideTimerId !== undefined) {
+        window.clearTimeout(hideTimerId);
+        hideTimerId = undefined;
+      }
+      if (hideTransitionListener) {
+        container.removeEventListener("transitionend", hideTransitionListener);
+        hideTransitionListener = null;
+      }
+    };
+
+    const clearTrails = () => {
+      if (!trails) return;
+      for (const target of trails) {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, target.framebuffer);
+        gl.viewport(0, 0, trailWidth, trailHeight);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      }
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, pixelWidth, pixelHeight);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    };
+
+    const applyRevealMask = (maskY: number) => {
+      const start = maskY - REVEAL_MASK_FEATHER_PX;
+      const end = maskY + REVEAL_MASK_FEATHER_PX;
+      if (end <= 0) {
+        setElementMask(content, HIDDEN_MASK);
+      } else if (start >= textHeight) {
+        setElementMask(content, "");
+      } else {
+        setElementMask(
+          content,
+          `linear-gradient(to bottom, #000 ${start.toFixed(1)}px, transparent ${end.toFixed(1)}px)`,
+        );
+      }
+    };
 
     const build = () => {
       if (disposed) return;
       const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
       const rect = canvas.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
       width = rect.width;
       height = rect.height;
+      padTop = containerRect.top - rect.top;
+      textHeight = containerRect.height;
       pixelWidth = Math.max(1, Math.round(width * dpr));
       pixelHeight = Math.max(1, Math.round(height * dpr));
       trailWidth = Math.max(1, Math.round(width * TRAIL_SCALE));
@@ -356,8 +458,46 @@ export function HeatText({
       lastFrame = now;
       const time = now / 1000;
 
+      let revealFromGlY = -1000;
+      let revealToGlY = -1000;
+      let revealStrength = 0;
+
+      if (reveal.active) {
+        if (!reveal.startTime) {
+          reveal.startTime = now;
+        }
+        const rawProgress = Math.min(1, (now - reveal.startTime) / REVEAL_DURATION_MS);
+        const smooth = rawProgress * rawProgress * (3 - 2 * rawProgress);
+        const eased = 0.55 * rawProgress + 0.45 * smooth;
+
+        const startY = -REVEAL_START_OFFSET_PX;
+        const endY = textHeight + REVEAL_END_OFFSET_PX;
+        const currY = startY + (endY - startY) * eased;
+        const entryEnv = smoothstep(startY, -10, currY);
+        const exitEnv = 1 - smoothstep(textHeight + REVEAL_FADE_START_OFFSET_PX, endY, currY);
+        const envelope = entryEnv * exitEnv;
+
+        revealFromGlY = height - (padTop + reveal.prevY);
+        revealToGlY = height - (padTop + currY);
+        revealStrength =
+          Math.min(1 - Math.exp(-22 * dt) + Math.abs(currY - reveal.prevY) / 40, 0.95) *
+          envelope;
+
+        applyRevealMask(currY - REVEAL_MASK_LAG_PX);
+        reveal.prevY = currY;
+
+        if (rawProgress >= 1) {
+          reveal.active = false;
+          setElementMask(content, "");
+          if (!reveal.completed) {
+            reveal.completed = true;
+            handleRevealComplete();
+          }
+        }
+      }
+
       const moved = Math.hypot(pointer.x - pointer.lastX, pointer.y - pointer.lastY);
-      const active = pointer.inside && !disabledRef.current;
+      const active = pointer.inside && !getDisabled() && isRevealed && !reveal.active;
       const strength = active ? Math.min(dt * 3 + moved / 50, 0.8) : 0;
 
       const [read, write] = trails;
@@ -372,6 +512,10 @@ export function HeatText({
       gl.uniform2f(uniform(trailProgram, "pointerTo"), pointer.x, height - pointer.y);
       gl.uniform1f(uniform(trailProgram, "radius"), SPLAT_RADIUS);
       gl.uniform1f(uniform(trailProgram, "strength"), strength);
+      gl.uniform1f(uniform(trailProgram, "revealFromY"), revealFromGlY);
+      gl.uniform1f(uniform(trailProgram, "revealToY"), revealToGlY);
+      gl.uniform1f(uniform(trailProgram, "revealRadius"), REVEAL_RADIUS);
+      gl.uniform1f(uniform(trailProgram, "revealStrength"), revealStrength);
       gl.uniform1f(uniform(trailProgram, "decay"), Math.pow(0.94, dt * 60));
       gl.uniform1f(uniform(trailProgram, "fade"), 0.2 * dt);
       gl.uniform1f(uniform(trailProgram, "time"), time);
@@ -394,7 +538,7 @@ export function HeatText({
       gl.uniform3f(uniform(compositeProgram, "background"), ...background);
       drawQuad();
 
-      if (active) lastActive = now;
+      if (active || reveal.active) lastActive = now;
       if (now - lastActive < IDLE_MS) {
         frame = requestAnimationFrame(render);
       } else {
@@ -404,8 +548,53 @@ export function HeatText({
       }
     };
 
+    const setRevealed = (nextRevealed: boolean) => {
+      if (disposed || nextRevealed === isRevealed) return;
+      isRevealed = nextRevealed;
+      cancelPendingHide();
+
+      if (nextRevealed) {
+        if (!field || !trails || textHeight <= 0) {
+          build();
+        } else {
+          clearTrails();
+        }
+        setElementMask(content, HIDDEN_MASK);
+        reveal.active = true;
+        reveal.startTime = 0;
+        reveal.prevY = -REVEAL_START_OFFSET_PX;
+        reveal.completed = false;
+        lastFrame = 0;
+        lastActive = performance.now();
+        if (!frame) {
+          frame = requestAnimationFrame(render);
+        }
+      } else {
+        reveal.active = false;
+        const finishHide = () => {
+          cancelPendingHide();
+          if (disposed || isRevealed) return;
+          setElementMask(content, HIDDEN_MASK);
+          clearTrails();
+        };
+        hideTransitionListener = (event: TransitionEvent) => {
+          if (event.target === container && event.propertyName === "opacity") {
+            finishHide();
+          }
+        };
+        container.addEventListener("transitionend", hideTransitionListener);
+        hideTimerId = window.setTimeout(finishHide, HIDE_SETTLE_MS);
+      }
+    };
+
+    if (!isRevealed) {
+      setElementMask(content, HIDDEN_MASK);
+    }
+
+    controllerRef.current = { setRevealed };
+
     const updatePointer = (clientX: number, clientY: number) => {
-      if (disabledRef.current) return;
+      if (getDisabled() || !isRevealed) return;
       const rect = canvas.getBoundingClientRect();
       const x = clientX - rect.left;
       const y = clientY - rect.top;
@@ -417,7 +606,7 @@ export function HeatText({
       pointer.x = x;
       pointer.y = y;
       pointer.inside = inside;
-      if (inside && !frame) {
+      if (inside && !frame && !reveal.active) {
         lastActive = performance.now();
         frame = requestAnimationFrame(render);
       }
@@ -462,6 +651,8 @@ export function HeatText({
 
     return () => {
       disposed = true;
+      controllerRef.current = null;
+      cancelPendingHide();
       cancelAnimationFrame(frame);
       cancelAnimationFrame(resizeFrame);
       resizeObserver.disconnect();
@@ -471,6 +662,7 @@ export function HeatText({
       window.removeEventListener("touchend", handlePointerLeave);
       window.removeEventListener("touchcancel", handlePointerLeave);
       document.documentElement.removeEventListener("pointerleave", handlePointerLeave);
+      setElementMask(content, "");
       if (maskTexture) gl.deleteTexture(maskTexture);
       deleteTarget(gl, field);
       trails?.forEach((target) => deleteTarget(gl, target));
@@ -481,9 +673,27 @@ export function HeatText({
     };
   }, []);
 
+  useEffect(() => {
+    const controller = controllerRef.current;
+    if (controller) {
+      controller.setRevealed(revealed);
+      return;
+    }
+    if (revealed) {
+      handleRevealComplete();
+    }
+  }, [revealed]);
+
   return (
-    <div ref={containerRef} className={className}>
-      {children}
+    <div
+      ref={containerRef}
+      className={`${className ?? ""} ${
+        revealed ? "" : "pointer-events-none opacity-0 transition-home-fade"
+      }`}
+    >
+      <div ref={contentRef} className={contentClassName}>
+        {children}
+      </div>
       <canvas
         ref={canvasRef}
         aria-hidden="true"
