@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   type MouseEvent,
   type Ref,
@@ -14,6 +13,7 @@ import {
 } from "react";
 import { Card } from "@/components/interface/Card";
 import { InputField } from "@/components/interface/InputField";
+import { TransitionLink } from "@/components/interface/PageTransition";
 import {
   type ContentCategory,
   type ContentIndex,
@@ -895,9 +895,7 @@ export function Navigation({
       event.preventDefault();
       setIsOpen(false);
       replacePath("/");
-      return;
     }
-    setIsOpen(false);
   };
 
   const widthClass = isOpen
@@ -984,10 +982,11 @@ export function Navigation({
         </div>
       )}
 
-      <Link
+      <TransitionLink
         href="/"
         aria-label="Barth Home"
         onClick={handleLogoClick}
+        onCovered={() => setIsOpen(false)}
         className="absolute top-[5px] left-[-32px] z-10 flex size-[71.36px] cursor-pointer items-center justify-center outline-none"
       >
         <span aria-hidden="true" className="block -rotate-12 flex-none">
@@ -999,7 +998,7 @@ export function Navigation({
             />
           </span>
         </span>
-      </Link>
+      </TransitionLink>
     </header>
   );
 }

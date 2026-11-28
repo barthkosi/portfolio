@@ -74,6 +74,7 @@ export function AvatarIntro({
       canvas,
       antialias: true,
       alpha: true,
+      preserveDrawingBuffer: true,
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;

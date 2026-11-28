@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Instrument_Sans, Inter } from "next/font/google";
+import { PageTransitionProvider } from "@/components/interface/PageTransition";
 import { DisablePinchZoom } from "@/components/logic/DisablePinchZoom";
 import { DEFAULT_THEME_COLOR } from "@/lib/theme";
 import {
@@ -101,9 +102,11 @@ export default function RootLayout({
           }}
         />
         <DisablePinchZoom />
-        <div id="app-scroll" className="app-scroll">
-          {children}
-        </div>
+        <PageTransitionProvider>
+          <div id="app-scroll" className="app-scroll">
+            {children}
+          </div>
+        </PageTransitionProvider>
       </body>
     </html>
   );

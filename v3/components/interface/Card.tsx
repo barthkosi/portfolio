@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { CSSProperties } from "react";
+import { TransitionLink } from "@/components/interface/PageTransition";
 
 export type CardVariant = "Default" | "Media" | "Horizontal";
 
@@ -56,13 +56,13 @@ export function Card({
   const wrapIfLink = (content: React.ReactNode) => {
     if (!href) return content;
     return (
-      <Link
+      <TransitionLink
         href={href}
-        onClick={onClick}
+        onCovered={onClick}
         className="block w-full shrink-0"
       >
         {content}
-      </Link>
+      </TransitionLink>
     );
   };
 
