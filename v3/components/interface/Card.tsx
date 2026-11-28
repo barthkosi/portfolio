@@ -28,7 +28,7 @@ function CardMeta({
 }) {
   return (
     <span
-      className={`flex w-full items-center justify-between gap-2 px-2 ${className || ""}`}
+      className={`flex w-full items-center justify-between gap-2 ${className || ""}`}
     >
       <span className="label-sm block h-fit w-fit min-w-0 truncate text-content-primary">
         {title}
@@ -159,49 +159,52 @@ export function Card({
 
   return wrapIfLink(
     <span
-      style={style}
-      className={`group relative flex w-full shrink-0 flex-col items-start gap-0 overflow-hidden rounded-[4px] bg-background-tertiary ${aspectClass || ""} ${className || ""}`}
+      className={`group relative flex w-full shrink-0 flex-col items-start gap-2 md:pointer-fine:gap-0 ${className || ""}`}
     >
-      <span className="relative block min-h-px w-full flex-[1_0_0] overflow-hidden rounded-t-[4px] bg-background-tertiary">
-        {image && (
-          <span
-            style={innerAspectStyle}
-            className={`pointer-events-none absolute top-0 left-0 block w-full ${
-              innerAspectStyle ? "" : aspectClass || "h-full"
-            }`}
-          >
-            <img
-              src={image}
-              alt={alt ?? title}
-              decoding="async"
-              onLoad={
-                onImageLoad
-                  ? (event) => {
-                      const { naturalWidth, naturalHeight } = event.currentTarget;
-                      if (naturalWidth > 0 && naturalHeight > 0) {
-                        onImageLoad({
-                          width: naturalWidth,
-                          height: naturalHeight,
-                        });
+      <span
+        style={style}
+        className={`relative flex w-full shrink-0 flex-col items-start gap-0 overflow-hidden rounded-[4px] bg-background-tertiary ${aspectClass || ""}`}
+      >
+        <span className="relative block min-h-px w-full flex-[1_0_0] overflow-hidden rounded-t-[4px] bg-background-tertiary">
+          {image && (
+            <span
+              style={innerAspectStyle}
+              className={`pointer-events-none absolute top-0 left-0 block w-full ${
+                innerAspectStyle ? "" : aspectClass || "h-full"
+              }`}
+            >
+              <img
+                src={image}
+                alt={alt ?? title}
+                decoding="async"
+                onLoad={
+                  onImageLoad
+                    ? (event) => {
+                        const { naturalWidth, naturalHeight } =
+                          event.currentTarget;
+                        if (naturalWidth > 0 && naturalHeight > 0) {
+                          onImageLoad({
+                            width: naturalWidth,
+                            height: naturalHeight,
+                          });
+                        }
                       }
-                    }
-                  : undefined
-              }
-              className="block size-full object-cover"
-            />
+                    : undefined
+                }
+                className="block size-full object-cover"
+              />
+            </span>
+          )}
+        </span>
+        <span className="hidden w-full shrink-0 md:pointer-fine:grid md:pointer-fine:grid-rows-[0fr] md:pointer-fine:opacity-0 md:pointer-fine:transition-card-reveal md:pointer-fine:group-hover:grid-rows-[1fr] md:pointer-fine:group-hover:opacity-100 motion-reduce:md:pointer-fine:transition-none">
+          <span className="block min-h-0 overflow-hidden">
+            <CardMeta title={title} year={year} className="relative px-2 py-1" />
           </span>
-        )}
-        <CardMeta
-          title={title}
-          year={year}
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-overlay-100/70 via-overlay-100/35 to-overlay-0 pt-4 pb-1 md:pointer-fine:hidden"
-        />
-      </span>
-      <span className="hidden w-full shrink-0 md:pointer-fine:grid md:pointer-fine:grid-rows-[0fr] md:pointer-fine:opacity-0 md:pointer-fine:transition-card-reveal md:pointer-fine:group-hover:grid-rows-[1fr] md:pointer-fine:group-hover:opacity-100 motion-reduce:md:pointer-fine:transition-none">
-        <span className="block min-h-0 overflow-hidden">
-          <CardMeta title={title} year={year} className="relative py-1" />
         </span>
       </span>
+      {(title || year) && (
+        <CardMeta title={title} year={year} className="md:pointer-fine:hidden" />
+      )}
     </span>,
   );
 }
