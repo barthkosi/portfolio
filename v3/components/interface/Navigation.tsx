@@ -721,6 +721,7 @@ export function Navigation({
   const lastScrollY = useRef(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
+  const controlsRef = useRef<HTMLDivElement>(null);
 
   const replacePath = useCallback(
     (path: string) => {
@@ -826,8 +827,14 @@ export function Navigation({
 
   useEffect(() => {
     if (!isOpen) return;
+    const isInsideNav = (node: Node | null) =>
+      Boolean(
+        node &&
+          (navRef.current?.contains(node) ||
+            controlsRef.current?.contains(node)),
+      );
     const handlePointerDown = (event: PointerEvent) => {
-      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+      if (!isInsideNav(event.target as Node | null)) {
         onDismiss();
       }
     };
@@ -835,7 +842,7 @@ export function Navigation({
       if (event.key === "Escape") {
         if (
           document.activeElement instanceof HTMLElement &&
-          navRef.current?.contains(document.activeElement)
+          isInsideNav(document.activeElement)
         ) {
           document.activeElement.blur();
         }
@@ -899,111 +906,124 @@ export function Navigation({
     }
   };
 
-  const widthClass = isOpen
-    ? "left-4 right-4 h-[calc(100dvh-32px-env(safe-area-inset-bottom,0px))] bg-background-secondary md:left-1/2 md:right-auto md:h-[80dvh] md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]"
+  const shellSizeClass = isOpen
+    ? "left-4 right-4 h-[calc(100dvh-32px-env(safe-area-inset-bottom,0px))] md:left-1/2 md:right-auto md:h-[80dvh] md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]"
     : isSmall
-      ? "left-4 right-4 h-[52px] bg-background-tertiary backdrop-blur-[2px] md:left-1/2 md:right-auto md:w-[360px] md:-translate-x-1/2"
-      : "left-4 right-4 h-[52px] bg-background-tertiary backdrop-blur-[2px] md:left-1/2 md:right-auto md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]";
+      ? "left-4 right-4 h-[52px] md:left-1/2 md:right-auto md:w-[360px] md:-translate-x-1/2"
+      : "left-4 right-4 h-[52px] md:left-1/2 md:right-auto md:w-[calc(100vw-64px)] md:-translate-x-1/2 lg:w-[800px]";
+
+  const shellSurfaceClass = isOpen
+    ? "bg-background-secondary"
+    : "bg-background-tertiary backdrop-blur-[2px]";
 
   return (
-    <header
-      ref={navRef}
-      className={`fixed top-4 z-50 flex flex-col items-end gap-[44px] overflow-clip rounded-[12px] p-2 transition-nav-shell ${widthClass}`}
-    >
-      <button
-        type="button"
-        onClick={handleToggleOpen}
-        aria-label={isOpen ? "Close navigation" : "Open navigation"}
-        aria-expanded={isOpen}
-        className="relative flex h-fit w-fit shrink-0 cursor-pointer flex-row items-center gap-2 p-2 outline-none"
+    <>
+      <div
+        ref={controlsRef}
+        className={`pointer-events-none fixed top-4 z-[51] flex flex-col items-end overflow-clip rounded-[12px] p-2 mix-blend-difference transition-nav-shell ${shellSizeClass}`}
       >
-        <span
-          aria-hidden="true"
-          className="relative block size-5 shrink-0 overflow-clip"
+        <button
+          type="button"
+          onClick={handleToggleOpen}
+          aria-label={isOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={isOpen}
+          className="pointer-events-auto relative flex h-fit w-fit shrink-0 cursor-pointer flex-row items-center gap-2 p-2 outline-none"
         >
-          <span className="absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse" />
           <span
-            className={`absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse transition-nav-icon ${
-              isOpen ? "rotate-0" : "-rotate-90"
-            }`}
-          />
-        </span>
-      </button>
-
-      {isOpen && (
-        <div className="nav-fade-in relative flex min-h-0 w-full flex-1 flex-col items-start gap-5 md:grid md:grid-cols-8 md:grid-rows-[minmax(0,1fr)] md:items-stretch md:gap-3">
-          <div
-            className={`${
-              mobileView === "menu" ? "flex" : "hidden"
-            } w-full flex-1 flex-col items-start justify-between gap-6 md:col-span-2 md:flex md:h-full md:min-h-0 md:justify-between`}
+            aria-hidden="true"
+            className="relative block size-5 shrink-0 overflow-clip"
           >
-            <PagesList activeTab={activeTab} onSelect={handleSelectTab} />
-            <SocialLinks />
-          </div>
-
-          <section
-            aria-label={activeTab}
-            className={`${
-              mobileView === "tab" ? "flex" : "hidden"
-            } min-h-0 w-full flex-1 flex-col items-start gap-5 md:col-span-6 md:flex md:h-full md:min-h-0`}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                if (scrollContainerRef.current) {
-                  scrollContainerRef.current.scrollTop = 0;
-                }
-                setMobileView("menu");
-                setHasScrolledContent(false);
-              }}
-              aria-label="Back to menu"
-              className="flex shrink-0 cursor-pointer flex-col items-start gap-0 overflow-clip rounded-[12px] bg-background-tertiary p-2 backdrop-blur-[3px] md:hidden"
-            >
-              <span aria-hidden="true" className="relative block size-5 shrink-0">
-                <img src="/images/chevron-left.svg" alt="" className="block size-full" />
-              </span>
-            </button>
-            <div className="relative -mb-2 min-h-0 w-full flex-1">
-              {hasScrolledContent && (
-                <div className="pointer-events-none absolute top-0 right-0 left-0 z-10 h-8 bg-gradient-to-b from-background-secondary to-background-secondary/0" />
-              )}
-              <div
-                key={activeTab}
-                ref={scrollContainerRef}
-                onScroll={(e) => setHasScrolledContent(e.currentTarget.scrollTop > 0)}
-                className="nav-scrollbar h-full w-full touch-pan-y overflow-y-auto overscroll-y-contain pb-2"
-              >
-                <TabContent
-                  activeTab={activeTab}
-                  onNavigate={() => setIsOpen(false)}
-                  formState={formState}
-                  onFieldChange={handleFieldChange}
-                  onCopyEmail={handleCopyEmail}
-                  copied={copied}
-                />
-              </div>
-            </div>
-          </section>
-        </div>
-      )}
-
-      <TransitionLink
-        href="/"
-        aria-label="Barth Home"
-        onClick={handleLogoClick}
-        onCovered={() => setIsOpen(false)}
-        className="absolute top-[5px] left-[-32px] z-10 flex size-[71.36px] cursor-pointer items-center justify-center outline-none"
-      >
-        <span aria-hidden="true" className="block -rotate-12 flex-none">
-          <span className="relative block size-[60.165px]">
-            <img
-              src="/images/nav-logo.svg"
-              alt=""
-              className="pointer-events-none block size-full"
+            <span className="absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse" />
+            <span
+              className={`absolute top-[9.25px] left-[4px] h-[1.5px] w-[12px] rounded-full bg-background-base-inverse transition-nav-icon ${
+                isOpen ? "rotate-0" : "-rotate-90"
+              }`}
             />
           </span>
-        </span>
-      </TransitionLink>
-    </header>
+        </button>
+
+        <TransitionLink
+          href="/"
+          aria-label="Barth Home"
+          onClick={handleLogoClick}
+          onCovered={() => setIsOpen(false)}
+          className="pointer-events-auto absolute top-[5px] left-[-32px] z-10 flex size-[71.36px] cursor-pointer items-center justify-center outline-none"
+        >
+          <span aria-hidden="true" className="block -rotate-12 flex-none">
+            <span className="relative block size-[60.165px]">
+              <img
+                src="/images/nav-logo.svg"
+                alt=""
+                className="pointer-events-none block size-full"
+              />
+            </span>
+          </span>
+        </TransitionLink>
+      </div>
+
+      <header
+        ref={navRef}
+        className={`fixed top-4 z-50 flex flex-col items-end gap-[44px] overflow-clip rounded-[12px] p-2 transition-nav-shell ${shellSizeClass} ${shellSurfaceClass}`}
+      >
+        <div aria-hidden="true" className="h-9 w-9 shrink-0" />
+
+        {isOpen && (
+          <div className="nav-fade-in relative flex min-h-0 w-full flex-1 flex-col items-start gap-5 md:grid md:grid-cols-8 md:grid-rows-[minmax(0,1fr)] md:items-stretch md:gap-3">
+            <div
+              className={`${
+                mobileView === "menu" ? "flex" : "hidden"
+              } w-full flex-1 flex-col items-start justify-between gap-6 md:col-span-2 md:flex md:h-full md:min-h-0 md:justify-between`}
+            >
+              <PagesList activeTab={activeTab} onSelect={handleSelectTab} />
+              <SocialLinks />
+            </div>
+
+            <section
+              aria-label={activeTab}
+              className={`${
+                mobileView === "tab" ? "flex" : "hidden"
+              } min-h-0 w-full flex-1 flex-col items-start gap-5 md:col-span-6 md:flex md:h-full md:min-h-0`}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  if (scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollTop = 0;
+                  }
+                  setMobileView("menu");
+                  setHasScrolledContent(false);
+                }}
+                aria-label="Back to menu"
+                className="flex shrink-0 cursor-pointer flex-col items-start gap-0 overflow-clip rounded-[12px] bg-background-tertiary p-2 backdrop-blur-[3px] md:hidden"
+              >
+                <span aria-hidden="true" className="relative block size-5 shrink-0">
+                  <img src="/images/chevron-left.svg" alt="" className="block size-full" />
+                </span>
+              </button>
+              <div className="relative -mb-2 min-h-0 w-full flex-1">
+                {hasScrolledContent && (
+                  <div className="pointer-events-none absolute top-0 right-0 left-0 z-10 h-8 bg-gradient-to-b from-background-secondary to-background-secondary/0" />
+                )}
+                <div
+                  key={activeTab}
+                  ref={scrollContainerRef}
+                  onScroll={(e) => setHasScrolledContent(e.currentTarget.scrollTop > 0)}
+                  className="nav-scrollbar h-full w-full touch-pan-y overflow-y-auto overscroll-y-contain pb-2"
+                >
+                  <TabContent
+                    activeTab={activeTab}
+                    onNavigate={() => setIsOpen(false)}
+                    formState={formState}
+                    onFieldChange={handleFieldChange}
+                    onCopyEmail={handleCopyEmail}
+                    copied={copied}
+                  />
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+      </header>
+    </>
   );
 }
