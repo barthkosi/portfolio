@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { type TransitionEvent, useCallback, useEffect, useRef, useState } from "react";
 import { AvatarIntro } from "@/components/interface/AvatarIntro";
 import { Barth } from "@/components/interface/Barth";
 import { HeatText } from "@/components/interface/HeatText";
@@ -10,16 +10,48 @@ import {
   type NavTab,
 } from "@/components/interface/Navigation";
 
+const QUICK_LINKS_FADE_FALLBACK_MS = 550;
+
 export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
   const [hasEntered, setHasEntered] = useState(Boolean(initialTab));
   const [isExpanded, setIsExpanded] = useState(!initialTab);
+  const [isDocked, setIsDocked] = useState(Boolean(initialTab));
+  const [hasRevealedText, setHasRevealedText] = useState(Boolean(initialTab));
   const slotRef = useRef<HTMLButtonElement>(null);
   const navigationRef = useRef<NavigationHandle>(null);
 
   const handleIntroComplete = useCallback(() => {
-    setHasEntered(true);
     setIsExpanded(false);
   }, []);
+
+  const handleDockComplete = useCallback(() => {
+    setIsDocked(true);
+  }, []);
+
+  const handleRevealComplete = useCallback(() => {
+    setHasRevealedText(true);
+  }, []);
+
+  const handleQuickLinksTransitionEnd = useCallback(
+    (event: TransitionEvent<HTMLElement>) => {
+      if (
+        event.target === event.currentTarget &&
+        event.propertyName === "opacity" &&
+        hasRevealedText
+      ) {
+        setHasEntered(true);
+      }
+    },
+    [hasRevealedText],
+  );
+
+  useEffect(() => {
+    if (!hasRevealedText || hasEntered) return;
+    const timerId = window.setTimeout(() => {
+      setHasEntered(true);
+    }, QUICK_LINKS_FADE_FALLBACK_MS);
+    return () => window.clearTimeout(timerId);
+  }, [hasRevealedText, hasEntered]);
 
   const handleCollapse = useCallback(() => {
     setIsExpanded(false);
@@ -27,9 +59,12 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
 
   const handleExpand = useCallback(() => {
     setIsExpanded(true);
+    setIsDocked(false);
+    setHasRevealedText(false);
   }, []);
 
   const handleOpenTab = useCallback((tab: NavTab) => {
+    setHasEntered(true);
     navigationRef.current?.openTab(tab);
   }, []);
 
@@ -48,9 +83,10 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
           />
           <HeatText
             disabled={isExpanded}
-            className={`relative flex w-full shrink-0 flex-col items-start gap-5 transition-home-fade ${
-              isExpanded ? "pointer-events-none opacity-0" : "opacity-100"
-            }`}
+            revealed={isDocked}
+            onRevealComplete={handleRevealComplete}
+            className="relative w-full shrink-0"
+            contentClassName="flex w-full flex-col items-start gap-5"
           >
             <h1 className="body-sm w-full shrink-0 text-center text-pretty text-content-primary">
               Barth is a design engineer building  beautiful and intuitive digital products.
@@ -62,8 +98,9 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
         </div>
         <nav
           aria-label="Quick links"
+          onTransitionEnd={handleQuickLinksTransitionEnd}
           className={`relative flex h-fit w-fit shrink-0 flex-row items-start justify-center gap-8 transition-home-fade ${
-            isExpanded ? "pointer-events-none opacity-0" : "opacity-100"
+            hasRevealedText ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
         >
           <button
@@ -101,6 +138,7 @@ export function HomeClient({ initialTab }: { initialTab?: NavTab }) {
         skipIntro={Boolean(initialTab)}
         onIntroComplete={handleIntroComplete}
         onCollapse={handleCollapse}
+        onDockComplete={handleDockComplete}
       />
     </div>
   );
