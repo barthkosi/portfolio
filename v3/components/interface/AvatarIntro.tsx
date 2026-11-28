@@ -16,6 +16,7 @@ const IDLE_RAD_PER_SEC = 0.6;
 const EASE_RATE = 1.6;
 const DRAG_RAD_PER_PX = 0.008;
 const MORPH_RATE = 9;
+const DOCK_SETTLED_MORPH = 0.985;
 const TAP_MAX_DIST_PX = 6;
 const TAP_MAX_DURATION_MS = 300;
 
@@ -25,6 +26,7 @@ interface AvatarIntroProps {
   skipIntro?: boolean;
   onIntroComplete: () => void;
   onCollapse: () => void;
+  onDockComplete?: () => void;
 }
 
 export function AvatarIntro({
@@ -33,6 +35,7 @@ export function AvatarIntro({
   skipIntro = false,
   onIntroComplete,
   onCollapse,
+  onDockComplete,
 }: AvatarIntroProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
@@ -42,6 +45,9 @@ export function AvatarIntro({
   const getSkipIntro = useEffectEvent(() => skipIntro);
   const handleIntroComplete = useEffectEvent(onIntroComplete);
   const handleCollapse = useEffectEvent(onCollapse);
+  const handleDockComplete = useEffectEvent(() => {
+    onDockComplete?.();
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -103,6 +109,7 @@ export function AvatarIntro({
 
     // morph: 0 = full-size centered (46vmin), 1 = docked in 64px slot
     let morph = getIsExpanded() ? 0 : 1;
+    let dockNotified = !getIsExpanded();
 
     let dragging = false;
     let pointerDownX = 0;
@@ -175,6 +182,7 @@ export function AvatarIntro({
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && getIsExpanded() && introDone) {
+        dockNotified = false;
         handleCollapse();
       }
     };
@@ -272,6 +280,7 @@ export function AvatarIntro({
         now - lastT > 80 ? IDLE_RAD_PER_SEC * Math.sign(dragVel || 1) : dragVel;
 
       if (wasTap && introDone && getIsExpanded()) {
+        dockNotified = false;
         handleCollapse();
       }
     };
@@ -313,7 +322,11 @@ export function AvatarIntro({
         spinner.rotation.y += velocity * dt;
       }
 
-      const targetMorph = getIsExpanded() ? 0 : 1;
+      const expanded = getIsExpanded();
+      const targetMorph = expanded ? 0 : 1;
+      if (expanded) {
+        dockNotified = false;
+      }
       if (Math.abs(targetMorph - morph) > 0.0005) {
         morph += (targetMorph - morph) * (1 - Math.exp(-MORPH_RATE * dt));
         if (Math.abs(targetMorph - morph) <= 0.0005) {
@@ -321,6 +334,10 @@ export function AvatarIntro({
         }
         measureSlot();
         updateCamera();
+      }
+      if (!expanded && !dockNotified && morph >= DOCK_SETTLED_MORPH) {
+        dockNotified = true;
+        handleDockComplete();
       }
 
       renderer.render(scene, camera);
