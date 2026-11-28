@@ -828,7 +828,7 @@ async function waitForPageAssets(root: HTMLElement): Promise<void> {
     if (
       rect.width <= 0 ||
       rect.height <= 0 ||
-      rect.top >= vh * 1.1 ||
+      rect.top >= vh ||
       rect.bottom <= 0 ||
       rect.right <= 0 ||
       rect.left >= vw
