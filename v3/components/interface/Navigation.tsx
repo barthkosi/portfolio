@@ -204,7 +204,7 @@ function ContentCategoryView({
   if (category === "writing") {
     return (
       <div className="relative flex w-full flex-col items-start gap-2">
-        {items.map((item) => {
+        {items.map((item, index) => {
           const cardTitle = item.cardTitle || item.title;
           const isLocked = Boolean(item.locked);
           return (
@@ -214,9 +214,11 @@ function ContentCategoryView({
               title={cardTitle}
               year={isLocked ? "Coming soon" : formatPostYear(item.date)}
               image={item.coverImage ?? undefined}
+              imageWidth={item.coverWidth}
               alt={cardTitle}
               href={isLocked ? undefined : `/${category}/${item.slug}`}
               onClick={isLocked ? undefined : onNavigate}
+              priority={index < 6}
             />
           );
         })}
@@ -235,7 +237,7 @@ function ContentCategoryView({
     };
   };
 
-  const renderCard = (item: PostMeta) => {
+  const renderCard = (item: PostMeta, index: number) => {
     const cardTitle = item.cardTitle || item.title;
     const isLocked = Boolean(item.locked);
     return (
@@ -246,9 +248,11 @@ function ContentCategoryView({
         title={cardTitle}
         year={isLocked ? "Coming soon" : formatPostYear(item.date)}
         image={item.coverImage ?? undefined}
+        imageWidth={item.coverWidth}
         alt={cardTitle}
         href={isLocked ? undefined : `/${category}/${item.slug}`}
         onClick={isLocked ? undefined : onNavigate}
+        priority={index < 4}
         onImageLoad={
           item.coverWidth && item.coverHeight
             ? undefined
@@ -261,21 +265,25 @@ function ContentCategoryView({
   if (!isDesktop) {
     return (
       <div className="relative flex w-full flex-col items-start gap-4">
-        {items.map(renderCard)}
+        {items.map((item, index) => renderCard(item, index))}
       </div>
     );
   }
 
-  const leftItems = items.filter((_, i) => i % 2 === 0);
-  const rightItems = items.filter((_, i) => i % 2 === 1);
+  const leftItems = items
+    .map((item, index) => ({ item, index }))
+    .filter(({ index }) => index % 2 === 0);
+  const rightItems = items
+    .map((item, index) => ({ item, index }))
+    .filter(({ index }) => index % 2 === 1);
 
   return (
     <div className="relative flex w-full flex-row items-start gap-2">
       <div className="relative flex w-full min-w-px flex-[1_0_0] flex-col items-start justify-center gap-2">
-        {leftItems.map(renderCard)}
+        {leftItems.map(({ item, index }) => renderCard(item, index))}
       </div>
       <div className="relative flex w-full min-w-px flex-[1_0_0] flex-col items-start justify-center gap-2">
-        {rightItems.map(renderCard)}
+        {rightItems.map(({ item, index }) => renderCard(item, index))}
       </div>
     </div>
   );
@@ -428,7 +436,7 @@ function MediaMasonry({ folder }: { folder: string }) {
     return (
       <div ref={containerRef} className="relative w-full">
         <div className="w-full columns-2 gap-2 md:columns-3">
-          {items.map((item) => {
+          {items.map((item, index) => {
             const size =
               measuredSizes[item.id] ??
               (item.width && item.height
@@ -439,7 +447,9 @@ function MediaMasonry({ folder }: { folder: string }) {
                 <Card
                   variant="Media"
                   image={item.src}
+                  imageWidth={item.width}
                   alt={item.alt}
+                  priority={index < 6}
                   style={{ aspectRatio: `${size.width} / ${size.height}` }}
                   onImageLoad={(dims) => handleImageLoad(item.id, dims)}
                 />
@@ -477,7 +487,7 @@ function MediaMasonry({ folder }: { folder: string }) {
   return (
     <div ref={containerRef} className="relative w-full">
       <div className="relative w-full" style={{ height: totalHeight }}>
-        {positioned.map(({ item, x, y, itemHeight }) => (
+        {positioned.map(({ item, x, y, itemHeight }, index) => (
           <div
             key={item.id}
             className="absolute top-0 left-0"
@@ -490,7 +500,9 @@ function MediaMasonry({ folder }: { folder: string }) {
             <Card
               variant="Media"
               image={item.src}
+              imageWidth={item.width}
               alt={item.alt}
+              priority={index < 6}
               className="h-full"
               onImageLoad={
                 item.width && item.height

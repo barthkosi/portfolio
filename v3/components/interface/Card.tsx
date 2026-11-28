@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { TransitionLink } from "@/components/interface/PageTransition";
+import { getOptimizedImageProps } from "@/lib/media";
 
 export type CardVariant = "Default" | "Media" | "Horizontal";
 
@@ -9,13 +10,20 @@ type CardProps = {
   title?: string;
   year?: string;
   image?: string;
+  imageWidth?: number | null;
   alt?: string;
   href?: string;
   onClick?: () => void;
+  priority?: boolean;
   className?: string;
   style?: CSSProperties;
   onImageLoad?: (dimensions: { width: number; height: number }) => void;
 };
+
+const HORIZONTAL_IMAGE_WIDTHS = [240] as const;
+const MEDIA_IMAGE_WIDTHS = [480] as const;
+const DEFAULT_IMAGE_WIDTHS = [480, 800] as const;
+const DEFAULT_IMAGE_SIZES = "(min-width: 768px) 300px, calc(100vw - 48px)";
 
 function CardMeta({
   title,
@@ -46,13 +54,17 @@ export function Card({
   title = "Title",
   year = "2026",
   image,
+  imageWidth,
   alt,
   href,
   onClick,
+  priority = false,
   className,
   style,
   onImageLoad,
 }: CardProps) {
+  const imageLoading = priority ? "eager" : "lazy";
+
   const wrapIfLink = (content: React.ReactNode) => {
     if (!href) return content;
     return (
@@ -67,16 +79,25 @@ export function Card({
   };
 
   if (variant === "Horizontal") {
+    const imgProps = image
+      ? getOptimizedImageProps({
+          src: image,
+          widths: HORIZONTAL_IMAGE_WIDTHS,
+          maxWidth: imageWidth,
+        })
+      : null;
+
     return wrapIfLink(
       <span
         style={style}
         className={`relative flex w-full shrink-0 items-center gap-0 rounded-[4px] ${className || ""}`}
       >
         <span className="relative block aspect-[71.11111450195312/40] max-h-[54px] max-w-[96px] min-w-px flex-[1_0_0] overflow-hidden rounded-[4px] bg-background-tertiary">
-          {image && (
+          {imgProps && (
             <img
-              src={image}
+              {...imgProps}
               alt={alt ?? title}
+              loading={imageLoading}
               decoding="async"
               className="pointer-events-none block size-full object-cover"
             />
@@ -95,15 +116,24 @@ export function Card({
   }
 
   if (variant === "Media") {
+    const imgProps = image
+      ? getOptimizedImageProps({
+          src: image,
+          widths: MEDIA_IMAGE_WIDTHS,
+          maxWidth: imageWidth,
+        })
+      : null;
+
     const mediaTag = href ? (
       <span
         style={style}
         className={`relative block w-full shrink-0 overflow-hidden rounded-[4px] bg-background-tertiary ${aspectClass || ""} ${className || ""}`}
       >
-        {image && (
+        {imgProps && (
           <img
-            src={image}
+            {...imgProps}
             alt={alt ?? ""}
+            loading={imageLoading}
             decoding="async"
             onLoad={
               onImageLoad
@@ -127,10 +157,11 @@ export function Card({
         style={style}
         className={`relative w-full shrink-0 overflow-hidden rounded-[4px] bg-background-tertiary ${aspectClass || ""} ${className || ""}`}
       >
-        {image && (
+        {imgProps && (
           <img
-            src={image}
+            {...imgProps}
             alt={alt ?? ""}
+            loading={imageLoading}
             decoding="async"
             onLoad={
               onImageLoad
@@ -157,6 +188,15 @@ export function Card({
     ? { aspectRatio: style.aspectRatio }
     : undefined;
 
+  const defaultImgProps = image
+    ? getOptimizedImageProps({
+        src: image,
+        widths: DEFAULT_IMAGE_WIDTHS,
+        sizes: DEFAULT_IMAGE_SIZES,
+        maxWidth: imageWidth,
+      })
+    : null;
+
   return wrapIfLink(
     <span
       className={`group relative flex w-full shrink-0 flex-col items-start gap-2 md:pointer-fine:gap-0 ${className || ""}`}
@@ -166,7 +206,7 @@ export function Card({
         className={`relative flex w-full shrink-0 flex-col items-start gap-0 overflow-hidden rounded-[4px] bg-background-tertiary ${aspectClass || ""}`}
       >
         <span className="relative block min-h-px w-full flex-[1_0_0] overflow-hidden rounded-t-[4px] bg-background-tertiary">
-          {image && (
+          {defaultImgProps && (
             <span
               style={innerAspectStyle}
               className={`pointer-events-none absolute top-0 left-0 block w-full ${
@@ -174,8 +214,9 @@ export function Card({
               }`}
             >
               <img
-                src={image}
+                {...defaultImgProps}
                 alt={alt ?? title}
+                loading={imageLoading}
                 decoding="async"
                 onLoad={
                   onImageLoad
