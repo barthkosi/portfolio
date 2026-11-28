@@ -68,9 +68,11 @@ const TRAIL_SCALE = 0.25;
 const BLUR_SIGMAS: [number, number, number] = [3, 8, 18];
 const SWEEP_DURATION_MS = 850;
 const IDLE_MS = 2200;
+const CONTENT_WAIT_TIMEOUT_MS = 2500;
 const IMAGE_WAIT_TIMEOUT_MS = 2500;
 const VIDEO_WAIT_TIMEOUT_MS = 1500;
 const ROUTE_TIMEOUT_MS = 15000;
+const PENDING_CONTENT_SELECTOR = '[data-transition-pending="true"]';
 
 const VERTEX_SHADER = `
 attribute vec2 position;
@@ -325,6 +327,10 @@ function normalizePath(href: string): string {
   }
 }
 
+function isHomePath(pathname: string | null): boolean {
+  return !pathname || pathname === "/";
+}
+
 function isModifiedEvent(event: MouseEvent<HTMLAnchorElement>): boolean {
   return (
     event.metaKey ||
@@ -435,6 +441,47 @@ function drawCoverImage(
   ctx.drawImage(source, dx, dy, dw, dh);
 }
 
+type Occluder = {
+  element: Element;
+  rect: DOMRect;
+  radius: number;
+  zIndex: number;
+};
+
+function isOpaqueCssColor(color: string): boolean {
+  if (!color || color === "transparent") return false;
+  const slashMatch = color.match(/\/\s*([\d.]+%?)\s*\)$/);
+  if (slashMatch) {
+    const raw = slashMatch[1];
+    const alpha = raw.endsWith("%")
+      ? Number.parseFloat(raw) / 100
+      : Number.parseFloat(raw);
+    return alpha >= 0.99;
+  }
+  const rgbaMatch = color.match(
+    /^rgba\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+\s*,\s*([\d.]+)\s*\)$/i,
+  );
+  if (rgbaMatch) {
+    return Number.parseFloat(rgbaMatch[1]) >= 0.99;
+  }
+  return true;
+}
+
+function getEffectiveZIndex(el: Element, root: Element): number {
+  let effective = 0;
+  let current: Element | null = el;
+  while (current && current !== root.parentElement) {
+    const style = getComputedStyle(current);
+    const z = Number.parseInt(style.zIndex, 10);
+    if (style.position !== "static" && !Number.isNaN(z)) {
+      effective = z;
+    }
+    if (current === root) break;
+    current = current.parentElement;
+  }
+  return effective;
+}
+
 function drawScreenMask(
   root: HTMLElement,
   width: number,
@@ -448,6 +495,50 @@ function drawScreenMask(
   if (!ctx) return surface;
 
   ctx.scale(scale, scale);
+
+  const occluders: Occluder[] = [];
+  for (const header of root.querySelectorAll("header")) {
+    const style = getComputedStyle(header);
+    if (style.position !== "fixed" || !isOpaqueCssColor(style.backgroundColor)) {
+      continue;
+    }
+    if (getEffectiveOpacity(header, root) <= 0.95) continue;
+    const rect = header.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) continue;
+    occluders.push({
+      element: header,
+      rect,
+      radius: Number.parseFloat(style.borderTopLeftRadius) || 0,
+      zIndex: getEffectiveZIndex(header, root),
+    });
+  }
+
+  const applyOcclusionClip = (el: Element) => {
+    if (occluders.length === 0) return;
+    const elZ = getEffectiveZIndex(el, root);
+    for (const occ of occluders) {
+      if (occ.element === el || occ.element.contains(el)) continue;
+      if (elZ > occ.zIndex) continue;
+      ctx.beginPath();
+      ctx.rect(0, 0, width, height);
+      const r = Math.max(
+        0,
+        Math.min(occ.radius, occ.rect.width / 2, occ.rect.height / 2),
+      );
+      if (r > 0) {
+        ctx.roundRect(
+          occ.rect.left,
+          occ.rect.top,
+          occ.rect.width,
+          occ.rect.height,
+          r,
+        );
+      } else {
+        ctx.rect(occ.rect.left, occ.rect.top, occ.rect.width, occ.rect.height);
+      }
+      ctx.clip("evenodd");
+    }
+  };
 
   const elements = root.querySelectorAll(
     "header, button, a, figure, pre, input, textarea, img, video, canvas",
@@ -495,6 +586,7 @@ function drawScreenMask(
       const effectiveRadius = Math.max(radius, parentRadius);
 
       ctx.save();
+      applyOcclusionClip(el);
       ctx.beginPath();
       ctx.rect(
         clip.left,
@@ -601,6 +693,7 @@ function drawScreenMask(
     if (!hasSurface && !hasBorder) continue;
 
     ctx.save();
+    applyOcclusionClip(el);
     ctx.beginPath();
     ctx.rect(
       clip.left,
@@ -658,6 +751,7 @@ function drawScreenMask(
 
     const style = getComputedStyle(parent);
     ctx.save();
+    applyOcclusionClip(parent);
     ctx.beginPath();
     ctx.rect(
       clip.left,
@@ -813,25 +907,64 @@ function waitWithTimeout(promise: Promise<unknown>, ms: number): Promise<void> {
   });
 }
 
-async function waitForPageAssets(root: HTMLElement): Promise<void> {
-  const vh = window.innerHeight;
-  const vw = window.innerWidth;
+function waitForPendingContent(root: HTMLElement): Promise<void> {
+  if (!root.querySelector(PENDING_CONTENT_SELECTOR)) {
+    return Promise.resolve();
+  }
 
+  return new Promise<void>((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      observer.disconnect();
+      requestAnimationFrame(() => resolve());
+    };
+
+    const observer = new MutationObserver(() => {
+      if (!root.querySelector(PENDING_CONTENT_SELECTOR)) {
+        finish();
+      }
+    });
+
+    const timer = window.setTimeout(finish, CONTENT_WAIT_TIMEOUT_MS);
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-transition-pending"],
+    });
+
+    if (!root.querySelector(PENDING_CONTENT_SELECTOR)) {
+      finish();
+    }
+  });
+}
+
+async function waitForPageAssets(root: HTMLElement): Promise<void> {
   const fontWait = document.fonts?.ready
     ? waitWithTimeout(document.fonts.ready, 1000)
     : Promise.resolve();
+
+  await waitForPendingContent(root);
+
+  const vh = window.innerHeight;
+  const vw = window.innerWidth;
 
   const imgs = Array.from(root.querySelectorAll("img"));
   const imageWaits: Promise<void>[] = [];
   for (const img of imgs) {
     const rect = img.getBoundingClientRect();
+    const clip = getAncestorClipRect(img, root, vw, vh);
     if (
+      !clip ||
       rect.width <= 0 ||
       rect.height <= 0 ||
-      rect.top >= vh ||
-      rect.bottom <= 0 ||
-      rect.right <= 0 ||
-      rect.left >= vw
+      rect.top >= clip.bottom ||
+      rect.bottom <= clip.top ||
+      rect.right <= clip.left ||
+      rect.left >= clip.right
     ) {
       continue;
     }
@@ -856,7 +989,16 @@ async function waitForPageAssets(root: HTMLElement): Promise<void> {
   const videoWaits: Promise<void>[] = [];
   for (const video of videos) {
     const rect = video.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0 || rect.top >= vh || rect.bottom <= 0) {
+    const clip = getAncestorClipRect(video, root, vw, vh);
+    if (
+      !clip ||
+      rect.width <= 0 ||
+      rect.height <= 0 ||
+      rect.top >= clip.bottom ||
+      rect.bottom <= clip.top ||
+      rect.right <= clip.left ||
+      rect.left >= clip.right
+    ) {
       continue;
     }
     if (video.readyState < 2) {
@@ -960,12 +1102,23 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const [phaseState, setPhaseState] = useState<TransitionPhase>("idle");
+  const [phaseState, setPhaseState] = useState<TransitionPhase>(() =>
+    isHomePath(pathname) ? "idle" : "loading",
+  );
+  const [initialCoverActive, setInitialCoverActive] = useState(
+    () => !isHomePath(pathname),
+  );
 
   const snapshotHostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<GlEngine | null>(null);
-  const phaseRef = useRef<TransitionPhase>("idle");
+  const phaseRef = useRef<TransitionPhase>(
+    isHomePath(pathname) ? "idle" : "loading",
+  );
+  const transitionKindRef = useRef<"navigation" | "initial" | null>(
+    isHomePath(pathname) ? null : "initial",
+  );
+  const shouldPlayInitialRevealRef = useRef(!isHomePath(pathname));
   const startPathnameRef = useRef(pathname);
   const sawPendingRef = useRef(false);
   const preparingSweepRef = useRef(false);
@@ -980,16 +1133,19 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
 
   const clearSnapshot = useCallback(() => {
     const host = snapshotHostRef.current;
-    if (!host) return;
-    host.style.display = "none";
-    host.style.backgroundColor = "";
-    setElementMask(host, "");
-    host.replaceChildren();
+    if (host) {
+      host.style.display = "none";
+      host.style.backgroundColor = "";
+      setElementMask(host, "");
+      host.replaceChildren();
+    }
+    setInitialCoverActive(false);
   }, []);
 
   const cleanupTransition = useCallback(() => {
     runIdRef.current += 1;
     preparingSweepRef.current = false;
+    transitionKindRef.current = null;
     if (routeTimeoutRef.current !== undefined) {
       window.clearTimeout(routeTimeoutRef.current);
       routeTimeoutRef.current = undefined;
@@ -1022,185 +1178,198 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
     setPhase("idle");
   }, [clearSnapshot, setPhase]);
 
-  const startSweep = useCallback(() => {
-    const engine = engineRef.current;
-    const canvas = canvasRef.current;
-    const host = snapshotHostRef.current;
-    const appScroll = document.getElementById("app-scroll");
-    if (!engine || !canvas || !host || !appScroll) {
-      cleanupTransition();
-      return;
-    }
-
-    const { gl, trailProgram, compositeProgram } = engine;
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
-    const maxDim = Math.max(width, height, 1);
-    const fieldScale = Math.min(FIELD_SCALE, MAX_FIELD_DIM / maxDim);
-
-    engine.width = width;
-    engine.height = height;
-    engine.pixelWidth = Math.max(1, Math.round(width * dpr));
-    engine.pixelHeight = Math.max(1, Math.round(height * dpr));
-    engine.fieldScale = fieldScale;
-    engine.fieldWidth = Math.max(1, Math.round(width * fieldScale));
-    engine.fieldHeight = Math.max(1, Math.round(height * fieldScale));
-    engine.trailWidth = Math.max(1, Math.round(width * TRAIL_SCALE));
-    engine.trailHeight = Math.max(1, Math.round(height * TRAIL_SCALE));
-    engine.background = getBackgroundRgb();
-
-    canvas.width = engine.pixelWidth;
-    canvas.height = engine.pixelHeight;
-
-    deleteTarget(gl, engine.oldField);
-    deleteTarget(gl, engine.newField);
-    engine.trails?.forEach((target) => deleteTarget(gl, target));
-
-    const oldSurface = drawScreenMask(host, width, height, fieldScale);
-    const newSurface = drawScreenMask(appScroll, width, height, fieldScale);
-    engine.oldField = buildFieldFromSurface(engine, oldSurface);
-    engine.newField = buildFieldFromSurface(engine, newSurface);
-    engine.trails = [
-      createTarget(gl, engine.trailWidth, engine.trailHeight),
-      createTarget(gl, engine.trailWidth, engine.trailHeight),
-    ];
-
-    const revealRadius = Math.max(48, Math.min(96, height * 0.085));
-    const waveAmp = revealRadius * 0.32;
-    const maskLag = waveAmp + revealRadius * 0.42;
-    const maskFeather = revealRadius * 0.22;
-    const startOffset = revealRadius * 1.1;
-    const endOffset = maskLag + maskFeather + revealRadius * 0.7;
-    const fadeStartOffset = maskLag + maskFeather + revealRadius * 0.15;
-
-    const trailUniform = (name: string) =>
-      gl.getUniformLocation(trailProgram, name);
-    const compositeUniform = (name: string) =>
-      gl.getUniformLocation(compositeProgram, name);
-
-    const runId = runIdRef.current;
-    let startTime = 0;
-    let lastFrame = 0;
-    let lastActive = performance.now();
-    let prevY = -startOffset;
-    let snapshotCleared = false;
-    let currentMaskGlY = height + maskLag + maskFeather;
-
-    setPhase("sweeping");
-
-    const render = (now: number) => {
-      rafRef.current = 0;
-      if (
-        runId !== runIdRef.current ||
-        !engine.oldField ||
-        !engine.newField ||
-        !engine.trails
-      ) {
+  const startSweep = useCallback(
+    ({ revealOnly = false }: { revealOnly?: boolean } = {}) => {
+      const engine = engineRef.current;
+      const canvas = canvasRef.current;
+      const host = snapshotHostRef.current;
+      const appScroll = document.getElementById("app-scroll");
+      if (!engine || !canvas || !host || !appScroll) {
+        cleanupTransition();
         return;
       }
 
-      const dt = Math.min((now - (lastFrame || now)) / 1000, 0.05) || 1 / 60;
-      lastFrame = now;
-      const time = now / 1000;
+      const { gl, trailProgram, compositeProgram } = engine;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+      const maxDim = Math.max(width, height, 1);
+      const fieldScale = Math.min(FIELD_SCALE, MAX_FIELD_DIM / maxDim);
 
-      if (!startTime) {
-        startTime = now;
+      engine.width = width;
+      engine.height = height;
+      engine.pixelWidth = Math.max(1, Math.round(width * dpr));
+      engine.pixelHeight = Math.max(1, Math.round(height * dpr));
+      engine.fieldScale = fieldScale;
+      engine.fieldWidth = Math.max(1, Math.round(width * fieldScale));
+      engine.fieldHeight = Math.max(1, Math.round(height * fieldScale));
+      engine.trailWidth = Math.max(1, Math.round(width * TRAIL_SCALE));
+      engine.trailHeight = Math.max(1, Math.round(height * TRAIL_SCALE));
+      engine.background = getBackgroundRgb();
+
+      canvas.width = engine.pixelWidth;
+      canvas.height = engine.pixelHeight;
+
+      deleteTarget(gl, engine.oldField);
+      deleteTarget(gl, engine.newField);
+      engine.trails?.forEach((target) => deleteTarget(gl, target));
+
+      const newSurface = drawScreenMask(appScroll, width, height, fieldScale);
+      engine.newField = buildFieldFromSurface(engine, newSurface);
+      if (revealOnly) {
+        engine.oldField = null;
+      } else {
+        const oldSurface = drawScreenMask(host, width, height, fieldScale);
+        engine.oldField = buildFieldFromSurface(engine, oldSurface);
       }
+      engine.trails = [
+        createTarget(gl, engine.trailWidth, engine.trailHeight),
+        createTarget(gl, engine.trailWidth, engine.trailHeight),
+      ];
 
-      const rawProgress = Math.min(1, (now - startTime) / SWEEP_DURATION_MS);
-      const sweeping = rawProgress < 1 || prevY < height + endOffset;
-      let revealFromGlY = -5000;
-      let revealToGlY = -5000;
-      let revealStrength = 0;
+      const revealRadius = Math.max(48, Math.min(96, height * 0.085));
+      const waveAmp = revealRadius * 0.32;
+      const maskLag = waveAmp + revealRadius * 0.42;
+      const maskFeather = revealRadius * 0.22;
+      const startOffset = revealRadius * 1.1;
+      const endOffset = maskLag + maskFeather + revealRadius * 0.7;
+      const fadeStartOffset = maskLag + maskFeather + revealRadius * 0.15;
 
-      if (sweeping) {
-        const smooth = rawProgress * rawProgress * (3 - 2 * rawProgress);
-        const eased = 0.55 * rawProgress + 0.45 * smooth;
-        const startY = -startOffset;
-        const endY = height + endOffset;
-        const currY = startY + (endY - startY) * eased;
-        const entryEnv = smoothstep(startY, -revealRadius * 0.25, currY);
-        const exitEnv =
-          1 - smoothstep(height + fadeStartOffset, endY, currY);
-        const envelope = entryEnv * exitEnv;
+      const trailUniform = (name: string) =>
+        gl.getUniformLocation(trailProgram, name);
+      const compositeUniform = (name: string) =>
+        gl.getUniformLocation(compositeProgram, name);
 
-        revealFromGlY = height - prevY;
-        revealToGlY = height - currY;
-        revealStrength =
-          Math.min(
-            1 - Math.exp(-26 * dt) + Math.abs(currY - prevY) / (revealRadius * 1.1),
-            0.95,
-          ) * envelope;
+      const runId = runIdRef.current;
+      let elapsedMs = 0;
+      let lastFrame = 0;
+      let lastActive = performance.now();
+      let prevY = -startOffset;
+      let snapshotCleared = false;
+      let currentMaskGlY = height + maskLag + maskFeather;
 
-        const maskCssY = currY - maskLag;
-        currentMaskGlY = height - maskCssY;
-        const maskStart = maskCssY - maskFeather;
-        const maskEnd = maskCssY + maskFeather;
+      setPhase("sweeping");
 
-        if (!snapshotCleared) {
-          if (maskStart >= height) {
-            clearSnapshot();
-            snapshotCleared = true;
-          } else if (maskEnd > 0) {
-            setElementMask(
-              host,
-              `linear-gradient(to bottom, transparent ${maskStart.toFixed(1)}px, #000 ${maskEnd.toFixed(1)}px)`,
-            );
-          }
+      const render = (now: number) => {
+        rafRef.current = 0;
+        if (
+          runId !== runIdRef.current ||
+          (!revealOnly && !engine.oldField) ||
+          !engine.newField ||
+          !engine.trails
+        ) {
+          return;
         }
 
-        prevY = currY;
-        lastActive = now;
-      }
+        const isFirstFrame = lastFrame === 0;
+        const dt = isFirstFrame
+          ? 1 / 60
+          : Math.min(Math.max(now - lastFrame, 0) / 1000, 0.05) || 1 / 60;
+        lastFrame = now;
+        const time = now / 1000;
 
-      const [read, write] = engine.trails;
-      gl.useProgram(trailProgram);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, write.framebuffer);
-      gl.viewport(0, 0, engine.trailWidth, engine.trailHeight);
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, read.texture);
-      gl.uniform1i(trailUniform("previous"), 0);
-      gl.uniform2f(trailUniform("resolution"), width, height);
-      gl.uniform1f(trailUniform("revealFromY"), revealFromGlY);
-      gl.uniform1f(trailUniform("revealToY"), revealToGlY);
-      gl.uniform1f(trailUniform("revealRadius"), revealRadius);
-      gl.uniform1f(trailUniform("revealStrength"), revealStrength);
-      gl.uniform1f(trailUniform("waveAmp"), waveAmp);
-      gl.uniform1f(trailUniform("decay"), Math.pow(0.935, dt * 60));
-      gl.uniform1f(trailUniform("fade"), 0.22 * dt);
-      gl.uniform1f(trailUniform("time"), time);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      engine.trails = [write, read];
+        if (!isFirstFrame) {
+          elapsedMs += dt * 1000;
+        }
 
-      gl.useProgram(compositeProgram);
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      gl.viewport(0, 0, engine.pixelWidth, engine.pixelHeight);
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, engine.oldField.texture);
-      gl.uniform1i(compositeUniform("oldMask"), 0);
-      gl.activeTexture(gl.TEXTURE1);
-      gl.bindTexture(gl.TEXTURE_2D, engine.newField.texture);
-      gl.uniform1i(compositeUniform("newMask"), 1);
-      gl.activeTexture(gl.TEXTURE2);
-      gl.bindTexture(gl.TEXTURE_2D, write.texture);
-      gl.uniform1i(compositeUniform("trail"), 2);
-      gl.uniform2f(compositeUniform("resolution"), width, height);
-      gl.uniform1f(compositeUniform("time"), time);
-      gl.uniform1f(compositeUniform("maskY"), currentMaskGlY);
-      gl.uniform1f(compositeUniform("maskFeather"), maskFeather);
-      gl.uniform3f(compositeUniform("background"), ...engine.background);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        const rawProgress = Math.min(1, elapsedMs / SWEEP_DURATION_MS);
+        const sweeping = rawProgress < 1 || prevY < height + endOffset;
+        let revealFromGlY = -5000;
+        let revealToGlY = -5000;
+        let revealStrength = 0;
 
-      if (now - lastActive < IDLE_MS) {
-        rafRef.current = requestAnimationFrame(render);
-      } else {
-        cleanupTransition();
-      }
-    };
+        if (sweeping) {
+          const smooth = rawProgress * rawProgress * (3 - 2 * rawProgress);
+          const eased = 0.55 * rawProgress + 0.45 * smooth;
+          const startY = -startOffset;
+          const endY = height + endOffset;
+          const currY = startY + (endY - startY) * eased;
+          const entryEnv = smoothstep(startY, -revealRadius * 0.25, currY);
+          const exitEnv =
+            1 - smoothstep(height + fadeStartOffset, endY, currY);
+          const envelope = entryEnv * exitEnv;
 
-    rafRef.current = requestAnimationFrame(render);
-  }, [cleanupTransition, clearSnapshot, setPhase]);
+          revealFromGlY = height - prevY;
+          revealToGlY = height - currY;
+          revealStrength =
+            Math.min(
+              1 - Math.exp(-26 * dt) + Math.abs(currY - prevY) / (revealRadius * 1.1),
+              0.95,
+            ) * envelope;
+
+          const maskCssY = currY - maskLag;
+          currentMaskGlY = height - maskCssY;
+          const maskStart = maskCssY - maskFeather;
+          const maskEnd = maskCssY + maskFeather;
+
+          if (!snapshotCleared) {
+            if (maskStart >= height) {
+              clearSnapshot();
+              snapshotCleared = true;
+            } else if (maskEnd > 0) {
+              setElementMask(
+                host,
+                `linear-gradient(to bottom, transparent ${maskStart.toFixed(1)}px, #000 ${maskEnd.toFixed(1)}px)`,
+              );
+            }
+          }
+
+          prevY = currY;
+          lastActive = now;
+        }
+
+        const [read, write] = engine.trails;
+        gl.useProgram(trailProgram);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, write.framebuffer);
+        gl.viewport(0, 0, engine.trailWidth, engine.trailHeight);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, read.texture);
+        gl.uniform1i(trailUniform("previous"), 0);
+        gl.uniform2f(trailUniform("resolution"), width, height);
+        gl.uniform1f(trailUniform("revealFromY"), revealFromGlY);
+        gl.uniform1f(trailUniform("revealToY"), revealToGlY);
+        gl.uniform1f(trailUniform("revealRadius"), revealRadius);
+        gl.uniform1f(trailUniform("revealStrength"), revealStrength);
+        gl.uniform1f(trailUniform("waveAmp"), waveAmp);
+        gl.uniform1f(trailUniform("decay"), Math.pow(0.935, dt * 60));
+        gl.uniform1f(trailUniform("fade"), 0.22 * dt);
+        gl.uniform1f(trailUniform("time"), time);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        engine.trails = [write, read];
+
+        gl.useProgram(compositeProgram);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, engine.pixelWidth, engine.pixelHeight);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(
+          gl.TEXTURE_2D,
+          (engine.oldField ?? engine.newField).texture,
+        );
+        gl.uniform1i(compositeUniform("oldMask"), 0);
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, engine.newField.texture);
+        gl.uniform1i(compositeUniform("newMask"), 1);
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, write.texture);
+        gl.uniform1i(compositeUniform("trail"), 2);
+        gl.uniform2f(compositeUniform("resolution"), width, height);
+        gl.uniform1f(compositeUniform("time"), time);
+        gl.uniform1f(compositeUniform("maskY"), currentMaskGlY);
+        gl.uniform1f(compositeUniform("maskFeather"), maskFeather);
+        gl.uniform3f(compositeUniform("background"), ...engine.background);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        if (now - lastActive < IDLE_MS) {
+          rafRef.current = requestAnimationFrame(render);
+        } else {
+          cleanupTransition();
+        }
+      };
+
+      rafRef.current = requestAnimationFrame(render);
+    },
+    [cleanupTransition, clearSnapshot, setPhase],
+  );
 
   const beginRevealAfterAssets = useEffectEvent(() => {
     if (preparingSweepRef.current) return;
@@ -1218,16 +1387,77 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
     }
     appScroll.scrollTop = 0;
 
-    waitForPageAssets(appScroll).then(() => {
-      if (runId !== runIdRef.current || phaseRef.current !== "loading") {
-        return;
+    waitForPageAssets(appScroll)
+      .catch(() => {})
+      .then(() => {
+        if (runId !== runIdRef.current || phaseRef.current !== "loading") {
+          return;
+        }
+        startSweep();
+      });
+  });
+
+  const beginInitialReveal = useEffectEvent(() => {
+    if (!shouldPlayInitialRevealRef.current) {
+      if (snapshotHostRef.current) {
+        snapshotHostRef.current.style.display = "none";
       }
-      startSweep();
-    });
+      return;
+    }
+
+    const appScroll = document.getElementById("app-scroll");
+    const host = snapshotHostRef.current;
+    if (
+      !engineRef.current ||
+      !appScroll ||
+      !host ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      shouldPlayInitialRevealRef.current = false;
+      cleanupTransition();
+      return;
+    }
+
+    runIdRef.current += 1;
+    preparingSweepRef.current = true;
+    transitionKindRef.current = "initial";
+    const runId = runIdRef.current;
+
+    host.style.display = "block";
+    host.style.backgroundColor = "var(--background-primary)";
+    setElementMask(host, "");
+    host.replaceChildren();
+    setPhase("loading");
+
+    routeTimeoutRef.current = window.setTimeout(() => {
+      if (runId === runIdRef.current && phaseRef.current === "loading") {
+        shouldPlayInitialRevealRef.current = false;
+        cleanupTransition();
+      }
+    }, ROUTE_TIMEOUT_MS);
+
+    waitForPageAssets(appScroll)
+      .catch(() => {})
+      .then(() => {
+        if (runId !== runIdRef.current || phaseRef.current !== "loading") {
+          return;
+        }
+        if (routeTimeoutRef.current !== undefined) {
+          window.clearTimeout(routeTimeoutRef.current);
+          routeTimeoutRef.current = undefined;
+        }
+        shouldPlayInitialRevealRef.current = false;
+        startSweep({ revealOnly: true });
+      });
   });
 
   useEffect(() => {
-    if (phaseRef.current !== "loading") return;
+    if (
+      phaseRef.current !== "loading" ||
+      transitionKindRef.current !== "navigation"
+    ) {
+      return;
+    }
 
     if (isPending) {
       sawPendingRef.current = true;
@@ -1240,6 +1470,7 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
   }, [isPending, pathname, phaseState]);
 
   const onPopState = useEffectEvent(() => {
+    shouldPlayInitialRevealRef.current = false;
     if (phaseRef.current !== "idle") {
       cleanupTransition();
     }
@@ -1247,7 +1478,10 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      beginInitialReveal();
+      return;
+    }
 
     const gl = canvas.getContext("webgl", {
       alpha: true,
@@ -1256,18 +1490,28 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
       depth: false,
       stencil: false,
     });
-    if (!gl) return;
+    if (!gl) {
+      beginInitialReveal();
+      return;
+    }
 
     const blurProgram = compileProgram(gl, BLUR_SHADER);
     const trailProgram = compileProgram(gl, TRAIL_SHADER);
     const compositeProgram = compileProgram(gl, COMPOSITE_SHADER);
-    if (!blurProgram || !trailProgram || !compositeProgram) return;
+    if (!blurProgram || !trailProgram || !compositeProgram) {
+      if (blurProgram) gl.deleteProgram(blurProgram);
+      if (trailProgram) gl.deleteProgram(trailProgram);
+      if (compositeProgram) gl.deleteProgram(compositeProgram);
+      beginInitialReveal();
+      return;
+    }
 
     const quad = gl.createBuffer();
     if (!quad) {
       gl.deleteProgram(blurProgram);
       gl.deleteProgram(trailProgram);
       gl.deleteProgram(compositeProgram);
+      beginInitialReveal();
       return;
     }
 
@@ -1301,10 +1545,8 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
       background: getBackgroundRgb(),
     };
 
-    if (snapshotHostRef.current) {
-      snapshotHostRef.current.style.display = "none";
-    }
     window.addEventListener("popstate", onPopState);
+    beginInitialReveal();
 
     return () => {
       window.removeEventListener("popstate", onPopState);
@@ -1356,6 +1598,7 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
 
       runIdRef.current += 1;
       preparingSweepRef.current = false;
+      transitionKindRef.current = "navigation";
       const runId = runIdRef.current;
 
       const frozen = captureFrozenPage(appScroll) as HTMLElement & {
@@ -1402,8 +1645,8 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
         aria-hidden="true"
         inert
         className={`fixed inset-0 z-[90] translate-z-0 overflow-hidden ${
-          isLoading ? "pointer-events-auto" : "pointer-events-none"
-        }`}
+          initialCoverActive ? "bg-background-primary motion-reduce:hidden " : ""
+        }${isLoading ? "pointer-events-auto" : "pointer-events-none"}`}
       />
       <canvas
         ref={canvasRef}

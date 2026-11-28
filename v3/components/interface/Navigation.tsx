@@ -165,14 +165,20 @@ function ContentCategoryView({
   if (!items) {
     if (category === "writing") {
       return (
-        <div className="relative flex w-full flex-col items-start gap-2">
+        <div
+          data-transition-pending="true"
+          className="relative flex w-full flex-col items-start gap-2"
+        >
           <Card variant="Horizontal" title="" year="" />
           <Card variant="Horizontal" title="" year="" />
         </div>
       );
     }
     return (
-      <div className="relative flex w-full flex-col items-start gap-2 md:flex-row">
+      <div
+        data-transition-pending="true"
+        className="relative flex w-full flex-col items-start gap-2 md:flex-row"
+      >
         <div className="relative flex w-full flex-col items-start justify-center gap-2 md:min-w-px md:flex-[1_0_0]">
           <Card variant="Default" aspectClass="aspect-[160/90]" title="" year="" />
           <Card variant="Default" aspectClass="aspect-[160/90]" title="" year="" />
@@ -404,7 +410,11 @@ function MediaMasonry({ folder }: { folder: string }) {
 
   if (!items) {
     return (
-      <div ref={containerRef} className="relative w-full">
+      <div
+        ref={containerRef}
+        data-transition-pending="true"
+        className="relative w-full"
+      >
         <div className="w-full columns-2 gap-2 md:columns-3">
           {SKELETON_ASPECTS.map((aspectClass, index) => (
             <div key={index} className="break-inside-avoid pb-2">
@@ -717,6 +727,7 @@ export function Navigation({
   syncUrl?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(initialOpen);
+  const [animatePanelOpen, setAnimatePanelOpen] = useState(!initialOpen);
   const [isSmall, setIsSmall] = useState(false);
   const [activeTab, setActiveTab] = useState<NavTab>(initialTab);
   const [mobileView, setMobileView] = useState<"menu" | "tab">(initialOpen ? "tab" : "menu");
@@ -822,6 +833,7 @@ export function Navigation({
     ref,
     () => ({
       openTab: (tab: NavTab) => {
+        setAnimatePanelOpen(true);
         setIsOpen(true);
         setActiveTab(tab);
         setMobileView("tab");
@@ -872,6 +884,9 @@ export function Navigation({
 
   const handleToggleOpen = () => {
     const next = !isOpen;
+    if (next) {
+      setAnimatePanelOpen(true);
+    }
     setIsOpen(next);
     if (next) {
       setMobileView("menu");
@@ -980,7 +995,11 @@ export function Navigation({
         <div aria-hidden="true" className="h-9 w-9 shrink-0" />
 
         {isOpen && (
-          <div className="nav-fade-in relative flex min-h-0 w-full flex-1 flex-col items-start gap-5 md:grid md:grid-cols-8 md:grid-rows-[minmax(0,1fr)] md:items-stretch md:gap-3">
+          <div
+            className={`${
+              animatePanelOpen ? "nav-fade-in " : ""
+            }relative flex min-h-0 w-full flex-1 flex-col items-start gap-5 md:grid md:grid-cols-8 md:grid-rows-[minmax(0,1fr)] md:items-stretch md:gap-3`}
+          >
             <div
               className={`${
                 mobileView === "menu" ? "flex" : "hidden"
