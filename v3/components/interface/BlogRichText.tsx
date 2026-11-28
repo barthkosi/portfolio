@@ -1,4 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { TransitionLink } from "@/components/interface/PageTransition";
 
 export function BlogBold({ children }: { children: ReactNode }) {
   return <strong className="font-bold text-content-primary">{children}</strong>;
@@ -11,16 +12,34 @@ export function BlogItalic({ children }: { children: ReactNode }) {
 export function BlogLink({
   children,
   className,
+  href,
+  target,
   ...props
 }: AnchorHTMLAttributes<HTMLAnchorElement> & { children: ReactNode }) {
+  const linkClassName =
+    className ??
+    "underline decoration-solid [text-underline-position:from-font] transition-colors hover:text-content-brand";
+
+  if (
+    href &&
+    href.startsWith("/") &&
+    !href.startsWith("//") &&
+    (!target || target === "_self")
+  ) {
+    return (
+      <TransitionLink
+        href={href}
+        target={target}
+        className={linkClassName}
+        {...props}
+      >
+        {children}
+      </TransitionLink>
+    );
+  }
+
   return (
-    <a
-      className={
-        className ??
-        "underline decoration-solid [text-underline-position:from-font] transition-colors hover:text-content-brand"
-      }
-      {...props}
-    >
+    <a href={href} target={target} className={linkClassName} {...props}>
       {children}
     </a>
   );
