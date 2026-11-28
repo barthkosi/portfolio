@@ -9,6 +9,81 @@ export type MediaItem = {
 
 export const MEDIA_CDN_BASE = "https://cdn.barthkosi.com";
 
+const TRANSFORMABLE_IMAGE_EXT_RE = /\.(png|jpe?g|webp|avif)$/i;
+const DEFAULT_IMAGE_QUALITY = 80;
+
+export function isTransformableMediaUrl(src: string): boolean {
+  if (!src.startsWith(`${MEDIA_CDN_BASE}/`)) return false;
+  if (src.startsWith(`${MEDIA_CDN_BASE}/cdn-cgi/image/`)) return false;
+  const pathname = src.slice(MEDIA_CDN_BASE.length).split(/[?#]/, 1)[0] ?? "";
+  return TRANSFORMABLE_IMAGE_EXT_RE.test(pathname);
+}
+
+export function buildTransformedImageUrl(
+  src: string,
+  width: number,
+  quality: number = DEFAULT_IMAGE_QUALITY,
+): string {
+  if (!isTransformableMediaUrl(src)) return src;
+  const normalizedWidth = Math.max(1, Math.round(width));
+  const path = src.slice(MEDIA_CDN_BASE.length + 1);
+  return `${MEDIA_CDN_BASE}/cdn-cgi/image/width=${normalizedWidth},quality=${quality},format=auto,fit=scale-down,onerror=redirect/${path}`;
+}
+
+export function getOptimizedImageProps({
+  src,
+  widths,
+  sizes,
+  maxWidth,
+  quality = DEFAULT_IMAGE_QUALITY,
+}: {
+  src: string;
+  widths: readonly number[];
+  sizes?: string;
+  maxWidth?: number | null;
+  quality?: number;
+}): {
+  src: string;
+  srcSet?: string;
+  sizes?: string;
+} {
+  if (!isTransformableMediaUrl(src) || widths.length === 0) {
+    return { src };
+  }
+
+  const limit =
+    typeof maxWidth === "number" && maxWidth > 0 ? Math.round(maxWidth) : null;
+  const resolvedWidths = Array.from(
+    new Set(
+      widths
+        .map((w) => (limit ? Math.min(Math.round(w), limit) : Math.round(w)))
+        .filter((w) => w > 0),
+    ),
+  ).sort((a, b) => a - b);
+
+  if (resolvedWidths.length === 0) {
+    return { src };
+  }
+
+  const fallbackSrc = buildTransformedImageUrl(
+    src,
+    resolvedWidths[resolvedWidths.length - 1],
+    quality,
+  );
+
+  if (resolvedWidths.length === 1) {
+    return { src: fallbackSrc };
+  }
+
+  return {
+    src: fallbackSrc,
+    srcSet: resolvedWidths
+      .map((w) => `${buildTransformedImageUrl(src, w, quality)} ${w}w`)
+      .join(", "),
+    sizes,
+  };
+}
+
 export function normalizeFolderPrefix(folder: string | null): string | null {
   if (!folder) return "";
   const trimmed = folder.trim().replace(/^\/+|\/+$/g, "");
