@@ -20,8 +20,12 @@ import {
   type PostDocument,
   type RichTextSpan,
 } from "@/lib/content-types";
+import { getOptimizedImageProps } from "@/lib/media";
 
 const VIDEO_EXT_RE = /\.(mp4|webm|mov)(\?.*)?$/i;
+const COVER_IMAGE_WIDTHS = [640, 1080, 1600] as const;
+const COVER_IMAGE_SIZES =
+  "(min-width: 1024px) 960px, (min-width: 768px) calc(100vw - 64px), calc(100vw - 32px)";
 
 function renderTextWithLineBreaks(text: string): ReactNode {
   if (!text.includes("\n")) return text;
@@ -72,6 +76,7 @@ function renderBlock(
   index: number,
   blocks: ContentBlock[],
   isShowcase: boolean,
+  hasCover: boolean,
 ): ReactNode {
   if (block.type === "heading") {
     return (
@@ -128,6 +133,7 @@ function renderBlock(
         hasMediaBefore={hasMediaBefore}
         hasMediaAfter={hasMediaAfter}
         isShowcase={isShowcase}
+        priority={!hasCover && index === 0}
       />
     );
   }
@@ -173,6 +179,16 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
     VIDEO_EXT_RE.test(post.meta.coverImage ?? "");
   const isShowcase = post.meta.layout === "showcase";
 
+  const coverImgProps =
+    hasCover && !coverIsVideo && post.meta.coverImage
+      ? getOptimizedImageProps({
+          src: post.meta.coverImage,
+          widths: COVER_IMAGE_WIDTHS,
+          sizes: COVER_IMAGE_SIZES,
+          maxWidth: post.meta.coverWidth,
+        })
+      : null;
+
   return (
     <div className="relative flex min-h-full w-full flex-col items-center bg-background-primary px-4 pt-[120px] pb-[calc(1rem+env(safe-area-inset-bottom,0px))] md:px-8 md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
       <Navigation />
@@ -211,11 +227,18 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
                   className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[16px] object-cover"
                 />
               ) : (
-                <img
-                  src={post.meta.coverImage}
-                  alt={post.meta.title}
-                  className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[16px] object-cover"
-                />
+                coverImgProps && (
+                  <img
+                    {...coverImgProps}
+                    alt={post.meta.title}
+                    width={post.meta.coverWidth ?? undefined}
+                    height={post.meta.coverHeight ?? undefined}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                    className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[16px] object-cover"
+                  />
+                )
               )}
             </figure>
           )}
@@ -227,7 +250,7 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
           }`}
         >
           {post.blocks.map((block, index) =>
-            renderBlock(block, index, post.blocks, isShowcase),
+            renderBlock(block, index, post.blocks, isShowcase, hasCover),
           )}
         </article>
       </main>
