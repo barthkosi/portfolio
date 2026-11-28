@@ -260,7 +260,7 @@ function ContentCategoryView({
 
   if (!isDesktop) {
     return (
-      <div className="relative flex w-full flex-col items-start gap-2">
+      <div className="relative flex w-full flex-col items-start gap-4">
         {items.map(renderCard)}
       </div>
     );
@@ -798,6 +798,13 @@ export function Navigation({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [isOpen, activeTab, mobileView]);
+
   useImperativeHandle(
     ref,
     () => ({
@@ -806,9 +813,6 @@ export function Navigation({
         setActiveTab(tab);
         setMobileView("tab");
         setHasScrolledContent(false);
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTop = 0;
-        }
         replacePath(tabToPath(tab));
       },
     }),
@@ -863,9 +867,6 @@ export function Navigation({
     setActiveTab(tab);
     setMobileView("tab");
     setHasScrolledContent(false);
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = 0;
-    }
     replacePath(tabToPath(tab));
   };
 
@@ -949,6 +950,9 @@ export function Navigation({
             <button
               type="button"
               onClick={() => {
+                if (scrollContainerRef.current) {
+                  scrollContainerRef.current.scrollTop = 0;
+                }
                 setMobileView("menu");
                 setHasScrolledContent(false);
               }}
@@ -964,6 +968,7 @@ export function Navigation({
                 <div className="pointer-events-none absolute top-0 right-0 left-0 z-10 h-8 bg-gradient-to-b from-background-secondary to-background-secondary/0" />
               )}
               <div
+                key={activeTab}
                 ref={scrollContainerRef}
                 onScroll={(e) => setHasScrolledContent(e.currentTarget.scrollTop > 0)}
                 className="nav-scrollbar h-full w-full touch-pan-y overflow-y-auto overscroll-y-contain pb-2"
