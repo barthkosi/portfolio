@@ -260,7 +260,7 @@ function ContentCategoryView({
 
   if (!isDesktop) {
     return (
-      <div className="relative flex w-full flex-col items-start gap-2">
+      <div className="relative flex w-full flex-col items-start gap-4">
         {items.map(renderCard)}
       </div>
     );
