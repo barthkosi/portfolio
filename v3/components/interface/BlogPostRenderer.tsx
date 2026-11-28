@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from "react";
+import { preconnect, preload } from "react-dom";
 import { BlogCodeBlock } from "@/components/interface/BlogCodeBlock";
 import { BlogListBlock } from "@/components/interface/BlogListBlock";
 import { BlogMediaBlock } from "@/components/interface/BlogMediaBlock";
@@ -20,7 +21,7 @@ import {
   type PostDocument,
   type RichTextSpan,
 } from "@/lib/content-types";
-import { getOptimizedImageProps } from "@/lib/media";
+import { getOptimizedImageProps, MEDIA_CDN_BASE } from "@/lib/media";
 
 const VIDEO_EXT_RE = /\.(mp4|webm|mov)(\?.*)?$/i;
 const COVER_IMAGE_WIDTHS = [640, 1080, 1600] as const;
@@ -172,6 +173,19 @@ function renderBlock(
 }
 
 export function BlogPostRenderer({ post }: { post: PostDocument }) {
+  preload("/pt-init.js?v=1", { as: "script", fetchPriority: "high" });
+  preconnect(MEDIA_CDN_BASE);
+  if (post.meta.coverImage) {
+    try {
+      const origin = new URL(post.meta.coverImage).origin;
+      if (origin && origin !== MEDIA_CDN_BASE) {
+        preconnect(origin);
+      }
+    } catch {
+      // Relative cover image URL needs no cross-origin preconnect.
+    }
+  }
+
   const formattedDate = formatPostDate(post.meta.date);
   const hasCover = Boolean(post.meta.coverImage);
   const coverIsVideo =
@@ -215,7 +229,7 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
             )}
           </div>
           {hasCover && post.meta.coverImage && (
-            <figure className="relative aspect-[240/135] w-full shrink-0 overflow-clip rounded-[16px]">
+            <figure className="relative aspect-[240/135] w-full shrink-0 overflow-clip rounded-[16px] bg-background-tertiary">
               {coverIsVideo ? (
                 <video
                   src={post.meta.coverImage}
@@ -254,6 +268,7 @@ export function BlogPostRenderer({ post }: { post: PostDocument }) {
           )}
         </article>
       </main>
+      <script src="/pt-init.js?v=1" async fetchPriority="high" />
     </div>
   );
 }

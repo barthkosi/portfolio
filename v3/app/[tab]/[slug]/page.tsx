@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { BlogPostRenderer } from "@/components/interface/BlogPostRenderer";
 import { getPostBySlug } from "@/lib/content-store";
-import { isContentCategory } from "@/lib/content-types";
+import { type ContentCategory, isContentCategory } from "@/lib/content-types";
 import { SITE_NAME, SITE_OG_IMAGE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 const VIDEO_EXT_RE = /\.(mp4|webm|mov)(\?.*)?$/i;
+
+const getCachedPost = cache((category: ContentCategory, slug: string) =>
+  getPostBySlug(category, slug),
+);
 
 export async function generateMetadata({
   params,
@@ -20,7 +25,7 @@ export async function generateMetadata({
     return {};
   }
 
-  const post = await getPostBySlug(category, slug);
+  const post = await getCachedPost(category, slug);
   if (!post || post.meta.locked) {
     return {};
   }
@@ -86,7 +91,7 @@ export default async function ContentPostPage({
     redirect("/");
   }
 
-  const post = await getPostBySlug(category, slug);
+  const post = await getCachedPost(category, slug);
   if (!post || post.meta.locked) {
     redirect("/");
   }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import {
   type MouseEvent,
   type Ref,
@@ -726,9 +727,11 @@ export function Navigation({
   initialOpen?: boolean;
   syncUrl?: boolean;
 }) {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [animatePanelOpen, setAnimatePanelOpen] = useState(!initialOpen);
   const [isSmall, setIsSmall] = useState(false);
+  const prefetchedHomeRef = useRef(false);
   const [activeTab, setActiveTab] = useState<NavTab>(initialTab);
   const [mobileView, setMobileView] = useState<"menu" | "tab">(initialOpen ? "tab" : "menu");
   const [copied, setCopied] = useState(false);
@@ -971,8 +974,21 @@ export function Navigation({
 
         <TransitionLink
           href="/"
+          prefetch={false}
           aria-label="Barth Home"
           onClick={handleLogoClick}
+          onPointerEnter={() => {
+            if (!syncUrl && !prefetchedHomeRef.current) {
+              prefetchedHomeRef.current = true;
+              router.prefetch("/");
+            }
+          }}
+          onFocus={() => {
+            if (!syncUrl && !prefetchedHomeRef.current) {
+              prefetchedHomeRef.current = true;
+              router.prefetch("/");
+            }
+          }}
           onCovered={() => setIsOpen(false)}
           className="pointer-events-auto absolute top-[5px] left-[-32px] z-10 flex size-[71.36px] cursor-pointer items-center justify-center outline-none"
         >

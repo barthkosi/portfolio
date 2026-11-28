@@ -16,6 +16,19 @@ import {
   useTransition,
 } from "react";
 
+type InitialTransitionBootstrap = {
+  state: "running" | "done";
+  done: Promise<void>;
+  cancel: () => void;
+};
+
+declare global {
+  interface Window {
+    __ptBootstrap?: InitialTransitionBootstrap;
+    __ptProviderClaimedInitial?: boolean;
+  }
+}
+
 type TransitionPhase = "idle" | "loading" | "sweeping";
 
 type NavigateOptions = {
@@ -67,10 +80,14 @@ const FIELD_SCALE = 0.5;
 const TRAIL_SCALE = 0.25;
 const BLUR_SIGMAS: [number, number, number] = [3, 8, 18];
 const SWEEP_DURATION_MS = 850;
-const IDLE_MS = 2200;
-const CONTENT_WAIT_TIMEOUT_MS = 2500;
+const IDLE_MS = 950;
+const CONTENT_WAIT_TIMEOUT_MS = 2000;
+const FONT_WAIT_TIMEOUT_MS = 1000;
 const IMAGE_WAIT_TIMEOUT_MS = 2500;
 const VIDEO_WAIT_TIMEOUT_MS = 1500;
+const INITIAL_FONT_WAIT_TIMEOUT_MS = 300;
+const INITIAL_IMAGE_WAIT_TIMEOUT_MS = 500;
+const INITIAL_VIDEO_WAIT_TIMEOUT_MS = 300;
 const ROUTE_TIMEOUT_MS = 15000;
 const PENDING_CONTENT_SELECTOR = '[data-transition-pending="true"]';
 
@@ -288,9 +305,36 @@ function deleteTarget(gl: WebGLRenderingContext, target: Target | null) {
 }
 
 function toRgb(color: string): [number, number, number] {
+  const trimmed = color.trim();
+  const hexMatch = trimmed.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if (hexMatch) {
+    const hex = hexMatch[1];
+    if (hex.length === 3) {
+      return [
+        Number.parseInt(hex[0] + hex[0], 16) / 255,
+        Number.parseInt(hex[1] + hex[1], 16) / 255,
+        Number.parseInt(hex[2] + hex[2], 16) / 255,
+      ];
+    }
+    return [
+      Number.parseInt(hex.slice(0, 2), 16) / 255,
+      Number.parseInt(hex.slice(2, 4), 16) / 255,
+      Number.parseInt(hex.slice(4, 6), 16) / 255,
+    ];
+  }
+  const rgbMatch = trimmed.match(
+    /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)/i,
+  );
+  if (rgbMatch) {
+    return [
+      Number.parseFloat(rgbMatch[1]) / 255,
+      Number.parseFloat(rgbMatch[2]) / 255,
+      Number.parseFloat(rgbMatch[3]) / 255,
+    ];
+  }
   const context = document.createElement("canvas").getContext("2d");
   if (!context) return [0.039, 0.039, 0.039];
-  context.fillStyle = color;
+  context.fillStyle = trimmed;
   context.fillRect(0, 0, 1, 1);
   const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
   return [r / 255, g / 255, b / 255];
@@ -942,9 +986,22 @@ function waitForPendingContent(root: HTMLElement): Promise<void> {
   });
 }
 
-async function waitForPageAssets(root: HTMLElement): Promise<void> {
+async function waitForPageAssets(
+  root: HTMLElement,
+  { initialLoad = false }: { initialLoad?: boolean } = {},
+): Promise<void> {
+  const fontTimeoutMs = initialLoad
+    ? INITIAL_FONT_WAIT_TIMEOUT_MS
+    : FONT_WAIT_TIMEOUT_MS;
+  const imageTimeoutMs = initialLoad
+    ? INITIAL_IMAGE_WAIT_TIMEOUT_MS
+    : IMAGE_WAIT_TIMEOUT_MS;
+  const videoTimeoutMs = initialLoad
+    ? INITIAL_VIDEO_WAIT_TIMEOUT_MS
+    : VIDEO_WAIT_TIMEOUT_MS;
+
   const fontWait = document.fonts?.ready
-    ? waitWithTimeout(document.fonts.ready, 1000)
+    ? waitWithTimeout(document.fonts.ready, fontTimeoutMs)
     : Promise.resolve();
 
   await waitForPendingContent(root);
@@ -1019,14 +1076,18 @@ async function waitForPageAssets(root: HTMLElement): Promise<void> {
   await Promise.all([
     fontWait,
     imageWaits.length > 0
-      ? waitWithTimeout(Promise.all(imageWaits), IMAGE_WAIT_TIMEOUT_MS)
+      ? waitWithTimeout(Promise.all(imageWaits), imageTimeoutMs)
       : Promise.resolve(),
     videoWaits.length > 0
-      ? waitWithTimeout(Promise.all(videoWaits), VIDEO_WAIT_TIMEOUT_MS)
+      ? waitWithTimeout(Promise.all(videoWaits), videoTimeoutMs)
       : Promise.resolve(),
   ]);
 
   await new Promise<void>((resolve) => {
+    if (initialLoad) {
+      requestAnimationFrame(() => resolve());
+      return;
+    }
     requestAnimationFrame(() => {
       requestAnimationFrame(() => resolve());
     });
@@ -1136,6 +1197,7 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
     if (host) {
       host.style.display = "none";
       host.style.backgroundColor = "";
+      host.style.pointerEvents = "";
       setElementMask(host, "");
       host.replaceChildren();
     }
@@ -1436,7 +1498,7 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
       }
     }, ROUTE_TIMEOUT_MS);
 
-    waitForPageAssets(appScroll)
+    waitForPageAssets(appScroll, { initialLoad: true })
       .catch(() => {})
       .then(() => {
         if (runId !== runIdRef.current || phaseRef.current !== "loading") {
@@ -1449,6 +1511,11 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
         shouldPlayInitialRevealRef.current = false;
         startSweep({ revealOnly: true });
       });
+  });
+
+  const finalizeBootstrapHandoff = useEffectEvent(() => {
+    shouldPlayInitialRevealRef.current = false;
+    cleanupTransition();
   });
 
   useEffect(() => {
@@ -1477,91 +1544,125 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      beginInitialReveal();
-      return;
-    }
+    let active = true;
+    let teardownEngine: (() => void) | null = null;
 
-    const gl = canvas.getContext("webgl", {
-      alpha: true,
-      premultipliedAlpha: true,
-      antialias: false,
-      depth: false,
-      stencil: false,
-    });
-    if (!gl) {
-      beginInitialReveal();
-      return;
-    }
+    const mountEngine = (alreadyHandledInitial: boolean) => {
+      if (!active) return;
 
-    const blurProgram = compileProgram(gl, BLUR_SHADER);
-    const trailProgram = compileProgram(gl, TRAIL_SHADER);
-    const compositeProgram = compileProgram(gl, COMPOSITE_SHADER);
-    if (!blurProgram || !trailProgram || !compositeProgram) {
-      if (blurProgram) gl.deleteProgram(blurProgram);
-      if (trailProgram) gl.deleteProgram(trailProgram);
-      if (compositeProgram) gl.deleteProgram(compositeProgram);
-      beginInitialReveal();
-      return;
-    }
+      const finishInitial = () => {
+        if (alreadyHandledInitial) {
+          finalizeBootstrapHandoff();
+        } else {
+          beginInitialReveal();
+        }
+      };
 
-    const quad = gl.createBuffer();
-    if (!quad) {
-      gl.deleteProgram(blurProgram);
-      gl.deleteProgram(trailProgram);
-      gl.deleteProgram(compositeProgram);
-      beginInitialReveal();
-      return;
-    }
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        finishInitial();
+        return;
+      }
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-      gl.STATIC_DRAW,
-    );
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      const gl = canvas.getContext("webgl", {
+        alpha: true,
+        premultipliedAlpha: true,
+        antialias: false,
+        depth: false,
+        stencil: false,
+      });
+      if (!gl) {
+        finishInitial();
+        return;
+      }
 
-    engineRef.current = {
-      gl,
-      blurProgram,
-      trailProgram,
-      compositeProgram,
-      quad,
-      width: 0,
-      height: 0,
-      pixelWidth: 0,
-      pixelHeight: 0,
-      fieldWidth: 0,
-      fieldHeight: 0,
-      fieldScale: FIELD_SCALE,
-      trailWidth: 0,
-      trailHeight: 0,
-      oldField: null,
-      newField: null,
-      trails: null,
-      background: getBackgroundRgb(),
-    };
+      const blurProgram = compileProgram(gl, BLUR_SHADER);
+      const trailProgram = compileProgram(gl, TRAIL_SHADER);
+      const compositeProgram = compileProgram(gl, COMPOSITE_SHADER);
+      if (!blurProgram || !trailProgram || !compositeProgram) {
+        if (blurProgram) gl.deleteProgram(blurProgram);
+        if (trailProgram) gl.deleteProgram(trailProgram);
+        if (compositeProgram) gl.deleteProgram(compositeProgram);
+        finishInitial();
+        return;
+      }
 
-    window.addEventListener("popstate", onPopState);
-    beginInitialReveal();
-
-    return () => {
-      window.removeEventListener("popstate", onPopState);
-      cleanupTransition();
-      const engine = engineRef.current;
-      if (engine) {
-        deleteTarget(gl, engine.oldField);
-        deleteTarget(gl, engine.newField);
-        engine.trails?.forEach((target) => deleteTarget(gl, target));
-        gl.deleteBuffer(quad);
+      const quad = gl.createBuffer();
+      if (!quad) {
         gl.deleteProgram(blurProgram);
         gl.deleteProgram(trailProgram);
         gl.deleteProgram(compositeProgram);
-        engineRef.current = null;
+        finishInitial();
+        return;
       }
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+        gl.STATIC_DRAW,
+      );
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+
+      engineRef.current = {
+        gl,
+        blurProgram,
+        trailProgram,
+        compositeProgram,
+        quad,
+        width: 0,
+        height: 0,
+        pixelWidth: 0,
+        pixelHeight: 0,
+        fieldWidth: 0,
+        fieldHeight: 0,
+        fieldScale: FIELD_SCALE,
+        trailWidth: 0,
+        trailHeight: 0,
+        oldField: null,
+        newField: null,
+        trails: null,
+        background: getBackgroundRgb(),
+      };
+
+      window.addEventListener("popstate", onPopState);
+      teardownEngine = () => {
+        window.removeEventListener("popstate", onPopState);
+        cleanupTransition();
+        const engine = engineRef.current;
+        if (engine) {
+          deleteTarget(gl, engine.oldField);
+          deleteTarget(gl, engine.newField);
+          engine.trails?.forEach((target) => deleteTarget(gl, target));
+          gl.deleteBuffer(quad);
+          gl.deleteProgram(blurProgram);
+          gl.deleteProgram(trailProgram);
+          gl.deleteProgram(compositeProgram);
+          engineRef.current = null;
+        }
+      };
+
+      finishInitial();
+    };
+
+    const bootstrap = window.__ptBootstrap;
+    if (bootstrap) {
+      if (bootstrap.state === "done") {
+        mountEngine(true);
+      } else {
+        bootstrap.done.then(() => {
+          mountEngine(true);
+        });
+      }
+    } else {
+      window.__ptProviderClaimedInitial = true;
+      mountEngine(false);
+    }
+
+    return () => {
+      active = false;
+      teardownEngine?.();
     };
   }, [cleanupTransition]);
 
@@ -1606,6 +1707,7 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
       };
       host.style.display = "block";
       host.style.backgroundColor = "var(--background-primary)";
+      host.style.pointerEvents = "";
       setElementMask(host, "");
       host.replaceChildren(frozen);
       frozen.__restoreScroll?.();
@@ -1641,16 +1743,20 @@ export function PageTransitionProvider({ children }: { children: ReactNode }) {
     >
       {children}
       <div
+        id="page-transition-cover"
         ref={snapshotHostRef}
         aria-hidden="true"
         inert
+        suppressHydrationWarning
         className={`fixed inset-0 z-[90] translate-z-0 overflow-hidden ${
           initialCoverActive ? "bg-background-primary motion-reduce:hidden " : ""
         }${isLoading ? "pointer-events-auto" : "pointer-events-none"}`}
       />
       <canvas
+        id="page-transition-canvas"
         ref={canvasRef}
         aria-hidden="true"
+        suppressHydrationWarning
         className="pointer-events-none fixed inset-0 z-[100] block size-full"
       />
     </PageTransitionContext.Provider>
